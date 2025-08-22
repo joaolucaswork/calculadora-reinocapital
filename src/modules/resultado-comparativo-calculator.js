@@ -95,8 +95,8 @@
     checkDOMElements() {
       // Busca elementos mas não falha se não encontrar
       const elements = {
-        tradicional: document.querySelector('[data-resultado="tradicional-valor"]'),
-        reino: document.querySelector('[data-resultado="reino-valor"]'),
+        tradicional: document.querySelector('[data-resultado="tradicional"]'),
+        reino: document.querySelector('[data-resultado="reino"]'),
         economia: document.querySelector('[data-resultado="economia-valor"]'),
         economiaPercent: document.querySelector('[data-resultado="economia-percentual"]'),
       };
@@ -147,22 +147,59 @@
     }
 
     calculateAndUpdate() {
-      if (!this.hasValidData()) return;
+      try {
+        if (!this.hasValidData()) return;
 
-      const patrimony = this.cache.lastPatrimony;
+        // Calcula valores Reino e Tradicional
+        const reinoValues = this.calculateReinoValue();
+        const traditionalValues = this.calculateTradicionalValue();
 
-      const tradicionalResult = this.calculateTradicionalValue();
-      const reinoValue = this.calculateReinoValue(patrimony);
+        // Atualiza elementos DOM
+        this.updateDOMElements(reinoValues, traditionalValues);
 
-      this.updateTradicionalDisplay(tradicionalResult.total);
-      this.updateReinoDisplay(reinoValue);
-      this.calculateEconomia();
+        // Atualiza cache
+        this.cache.lastReinoValue = reinoValues.annual;
+        this.cache.lastTradicionalValue = traditionalValues.total;
 
-      this.cache.lastTradicionalValue = tradicionalResult.total;
-      this.cache.lastReinoValue = reinoValue;
+        // Dispatch event para outros sistemas
+        this.dispatchCalculationUpdate(
+          traditionalValues,
+          reinoValues.annual,
+          reinoValues.patrimony
+        );
+      } catch (error) {
+        console.error('❌ [ResultadoComparativo] Error in calculation:', error);
+      }
+    }
 
-      // Dispatch event para outros sistemas
-      this.dispatchCalculationUpdate(tradicionalResult, reinoValue, patrimony);
+    updateDOMElements(reinoValues, traditionalValues) {
+      // Atualiza valor Reino (data-resultado="reino")
+      const reinoElement = document.querySelector('[data-resultado="reino"]');
+      if (reinoElement) {
+        const formattedValue = this.formatCurrencyForDisplay(reinoValues.annual);
+        reinoElement.textContent = formattedValue;
+      }
+
+      // Atualiza valor Tradicional (data-resultado="tradicional")
+      const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
+      if (tradicionalElement) {
+        const formattedValue = this.formatCurrencyForDisplay(traditionalValues.total);
+        tradicionalElement.textContent = formattedValue;
+      }
+
+      // Atualiza valor do patrimônio total usando o sistema existente (data-patrimonio-total="true")
+      const patrimonioTotalElement = document.querySelector('[data-patrimonio-total="true"]');
+      if (patrimonioTotalElement) {
+        const formattedPatrimony = this.formatCurrency(reinoValues.patrimony);
+        patrimonioTotalElement.textContent = formattedPatrimony;
+      }
+
+      // Calcula e atualiza economia
+      const savings = traditionalValues.total - reinoValues.annual;
+      const savingsPercent =
+        traditionalValues.total > 0 ? (savings / traditionalValues.total) * 100 : 0;
+
+      this.updateEconomiaDisplay(savings, savingsPercent);
     }
 
     hasValidData() {
@@ -263,65 +300,74 @@
       };
     }
 
-    calculateReinoValue(patrimony) {
+    calculateReinoValue() {
+      const patrimony = this.getMainPatrimony();
+
       if (window.calcularCustoReino) {
-        const resultado = window.calcularCustoReino(patrimony);
-        return resultado.custoAnual || 0;
-      }
+        const reinoInfo = window.calcularCustoReino(patrimony);
 
-      if (patrimony < 1000000) {
-        return 9588;
-      }
-      if (patrimony < 3000000) {
-        return patrimony * 0.01;
-      }
-      if (patrimony < 5000000) {
-        return patrimony * 0.009;
-      }
-      if (patrimony < 10000000) {
-        return patrimony * 0.008;
-      }
-      if (patrimony < 20000000) {
-        return patrimony * 0.007;
-      }
-      if (patrimony < 50000000) {
-        return patrimony * 0.006;
-      }
-      return patrimony * 0.005;
-    }
-
-    updateTradicionalDisplay(value) {
-      if (this.elements.tradicional) {
-        this.elements.tradicional.textContent = this.formatCurrency(value);
-      }
-    }
-
-    updateReinoDisplay(value) {
-      if (this.elements.reino) {
-        this.elements.reino.textContent = this.formatCurrency(value);
-      }
-    }
-
-    calculateEconomia() {
-      const economia = this.cache.lastTradicionalValue - this.cache.lastReinoValue;
-      const economiaPercent =
-        this.cache.lastTradicionalValue > 0
-          ? (economia / this.cache.lastTradicionalValue) * 100
-          : 0;
-
-      this.updateEconomiaDisplay(economia, economiaPercent);
-
-      document.dispatchEvent(
-        new CustomEvent('economiaCalculated', {
-          detail: {
-            economia,
-            economiaPercent,
-            tradicional: this.cache.lastTradicionalValue,
-            reino: this.cache.lastReinoValue,
-            reinoMaisVantajoso: economia > 0,
+        return {
+          patrimony,
+          taxaAnual: reinoInfo.taxaAnual,
+          annual: reinoInfo.custoAnual,
+          monthly: reinoInfo.custoMensal,
+          faixa: reinoInfo.faixa,
+          tipo: reinoInfo.tipo,
+          formatted: {
+            annual: this.formatCurrency(reinoInfo.custoAnual),
+            monthly: this.formatCurrency(reinoInfo.custoMensal),
+            patrimony: this.formatCurrency(patrimony),
           },
-        })
-      );
+        };
+      }
+
+      // Fallback para cálculo manual se função não estiver disponível
+      let custoAnual = 0;
+      if (patrimony < 1000000) {
+        custoAnual = 799; // Valor fixo corrigido
+      } else if (patrimony < 3000000) {
+        custoAnual = patrimony * 0.01;
+      } else if (patrimony < 5000000) {
+        custoAnual = patrimony * 0.009;
+      } else if (patrimony < 10000000) {
+        custoAnual = patrimony * 0.008;
+      } else if (patrimony < 20000000) {
+        custoAnual = patrimony * 0.007;
+      } else if (patrimony < 50000000) {
+        custoAnual = patrimony * 0.006;
+      } else {
+        custoAnual = patrimony * 0.005;
+      }
+
+      return {
+        patrimony,
+        taxaAnual: patrimony < 1000000 ? null : (custoAnual / patrimony) * 100,
+        annual: custoAnual,
+        monthly: custoAnual / 12,
+        faixa: patrimony < 1000000 ? '< 1M' : `${(patrimony / 1000000).toFixed(1)}M`,
+        tipo: patrimony < 1000000 ? 'fixo' : 'percentual',
+        formatted: {
+          annual: this.formatCurrency(custoAnual),
+          monthly: this.formatCurrency(custoAnual / 12),
+          patrimony: this.formatCurrency(patrimony),
+        },
+      };
+    }
+
+    getMainPatrimony() {
+      if (this.patrimonySystem) {
+        return this.patrimonySystem.getMainValue() || 0;
+      }
+
+      // Fallback: busca diretamente no DOM
+      const mainInput =
+        document.querySelector('[is-main="true"] .currency-input.individual') ||
+        document.querySelector('[input-settings="receive"][is-main="true"]');
+      if (mainInput) {
+        return this.parseCurrencyValue(mainInput.value);
+      }
+
+      return this.cache.lastPatrimony || 0;
     }
 
     updateEconomiaDisplay(economia, economiaPercent) {
@@ -402,6 +448,13 @@
       }).format(value);
     }
 
+    formatCurrencyForDisplay(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+    }
+
     setsEqual(a, b) {
       return a.size === b.size && [...a].every((x) => b.has(x));
     }
@@ -433,8 +486,17 @@
       this.cache.lastTradicionalValue = 0;
       this.cache.lastReinoValue = 0;
 
-      this.updateTradicionalDisplay(0);
-      this.updateReinoDisplay(0);
+      // Atualizar elementos DOM diretamente
+      const reinoElement = document.querySelector('[data-resultado="reino"]');
+      if (reinoElement) {
+        reinoElement.textContent = this.formatCurrencyForDisplay(0);
+      }
+
+      const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
+      if (tradicionalElement) {
+        tradicionalElement.textContent = this.formatCurrencyForDisplay(0);
+      }
+
       this.updateEconomiaDisplay(0, 0);
     }
   }
