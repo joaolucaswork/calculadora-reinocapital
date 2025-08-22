@@ -1,3 +1,10 @@
 import finsweetConfigs from '@finsweet/eslint-config';
 
-export default [...finsweetConfigs];
+export default [
+  ...finsweetConfigs,
+  {
+    rules: {
+      'no-undef': 'off',
+    },
+  },
+];

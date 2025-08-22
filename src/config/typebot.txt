@@ -1,0 +1,194 @@
+/**
+ * Typebot Configuration - Corrected for Webflow
+ * Configure your Typebot credentials and settings here
+ */
+
+window.REINO_TYPEBOT_CONFIG = {
+  // Your Typebot public ID - CORRECTED
+  PUBLIC_ID: 'relatorio-reino',
+
+  // API Base URL
+  API_HOST: 'https://typebot.io/api/v1',
+
+  // Debug mode
+  DEBUG: true,
+
+  // Authorization token (if needed for private bots)
+  AUTH_TOKEN: null,
+
+  // Webhook configuration
+  WEBHOOK_CONFIG: {
+    enabled: true,
+    url: null, // Will be set dynamically if needed
+    blockId: null
+  },
+
+  // Typebot Embed Configuration
+  EMBED_CONFIG: {
+    // Container where the typebot will be embedded
+    containerId: 'typebot-embed-container',
+
+    // Use official Typebot popup
+    usePopup: true,
+
+    // CDN URL for Typebot JS library
+    cdnUrl: 'https://cdn.jsdelivr.net/npm/@typebot.io/js@0/dist/web.js',
+
+    // Typebot theme customization
+    theme: {
+      button: {
+        backgroundColor: '#a2801a',
+        iconColor: '#FFFFFF',
+        customIconSrc: null,
+        size: 'medium',
+        dragAndDrop: false,
+        position: 'right'
+      },
+      chatWindow: {
+        backgroundColor: '#FFFFFF',
+        maxWidth: '400px',
+        maxHeight: '600px'
+      }
+    },
+
+    // Initial variables that can be passed to Typebot
+    prefilledVariables: {
+      // These will be filled dynamically
+      nome: '',
+      email: '',
+      telefone: '',
+      patrimonio: '',
+      ativos_selecionados: '',
+      economia_anual: '',
+      source: 'webflow_calculator'
+    },
+
+    // Popup configuration
+    popup: {
+      autoShowDelay: null, // Don't auto-show
+      theme: {
+        button: {
+          backgroundColor: '#a2801a',
+          iconColor: '#fff',
+          placement: 'right',
+          size: 'medium'
+        }
+      }
+    }
+  },
+
+  // Flow configuration
+  FLOW_CONFIG: {
+    // Expected completion indicators
+    completionKeywords: [
+      'obrigado',
+      'agradecemos',
+      'conversa finalizada',
+      'até breve',
+      'foi um prazer',
+      'completed',
+      'finished'
+    ],
+
+    // Maximum wait time for completion (ms)
+    completionTimeout: 30000,
+
+    // Poll interval for completion check (ms)
+    completionPollInterval: 2000,
+
+    // Variables to track
+    trackVariables: [
+      'nome',
+      'email',
+      'telefone',
+      'interesse',
+      'melhor_contato'
+    ]
+  }
+};
+
+// TypebotClient class for handling API interactions
+class TypebotClient {
+  constructor(config) {
+    this.config = config;
+    this.sessionId = null;
+    this.resultId = null;
+    this.isActive = false;
+  }
+
+  generateSessionId() {
+    return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+  }
+
+  async startSession(prefilledVariables = {}) {
+    this.sessionId = this.generateSessionId();
+    this.isActive = true;
+
+    const payload = {
+      sessionId: this.sessionId,
+      prefilledVariables: {
+        ...this.config.EMBED_CONFIG.prefilledVariables,
+        ...prefilledVariables
+      }
+    };
+
+    if (this.config.DEBUG) {
+      console.log('🤖 Starting Typebot session:', payload);
+    }
+
+    return payload;
+  }
+
+  async sendMessage(message) {
+    if (!this.sessionId) {
+      throw new Error('No active session. Call startSession() first.');
+    }
+
+    const payload = {
+      sessionId: this.sessionId,
+      message: message
+    };
+
+    if (this.config.DEBUG) {
+      console.log('🤖 Sending message to Typebot:', payload);
+    }
+
+    return payload;
+  }
+
+  async endSession() {
+    this.isActive = false;
+    this.sessionId = null;
+    this.resultId = null;
+
+    if (this.config.DEBUG) {
+      console.log('🤖 Typebot session ended');
+    }
+  }
+
+  isSessionActive() {
+    return this.isActive && this.sessionId !== null;
+  }
+
+  getSessionInfo() {
+    return {
+      sessionId: this.sessionId,
+      resultId: this.resultId,
+      isActive: this.isActive
+    };
+  }
+
+  reset() {
+    this.sessionId = null;
+    this.resultId = null;
+    this.isActive = false;
+  }
+}
+
+// Export configuration and client
+window.TYPEBOT_CONFIG = window.REINO_TYPEBOT_CONFIG; // Compatibility
+window.TypebotClient = TypebotClient;
+
+if (window.REINO_TYPEBOT_CONFIG.DEBUG) {
+  console.log('✅ Typebot configuration loaded with ID:', window.REINO_TYPEBOT_CONFIG.PUBLIC_ID);
+}
