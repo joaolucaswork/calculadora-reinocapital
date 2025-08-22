@@ -135,8 +135,8 @@
     onTradicionalValueChange(value) {
       if (this.cache.lastTradicionalValue !== value) {
         this.cache.lastTradicionalValue = value;
-        this.updateTradicionalDisplay(value);
-        this.calculateEconomia();
+        // Força recálculo completo quando valor tradicional muda
+        this.calculateAndUpdate();
       }
     }
 

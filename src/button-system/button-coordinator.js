@@ -24,13 +24,8 @@
       // Aguarda sub-módulos estarem disponíveis
       await this.waitForSubModules();
 
-      // Use existing global instance instead of creating new one
-      if (window.ReinoNavigationButtons) {
-        this.navigationButtons = window.ReinoNavigationButtons;
-        if (this.navigationButtons.init) {
-          this.navigationButtons.init(stepNavigationSystem);
-        }
-      }
+      // NAVIGATION BUTTONS: Não inicializa aqui, deixa o navigation-buttons.js standalone
+      // Os botões next/prev são gerenciados pelo navigation-buttons.js
 
       if (window.ReinoFormSubmission) {
         this.formSubmission = new window.ReinoFormSubmission();
@@ -52,7 +47,7 @@
       this.setupDebugMode();
 
       this.isInitialized = true;
-      this.log('✅ Button Coordinator initialized');
+      this.log('✅ Button Coordinator initialized (send buttons only)');
     }
 
     setupTypebotIntegration() {
@@ -268,13 +263,8 @@
     }
   }
 
-  // Auto-initialize DISABLED - Using standalone navigation-buttons.js instead
-  //
-  // IMPORTANTE: ButtonCoordinator desabilitado para evitar conflitos.
-  // O navigation-buttons.js agora funciona standalone.
-  //
-  // Para reativar o ButtonCoordinator, descomente o código abaixo:
-  /*
+  // Auto-initialize for SEND buttons only
+  // Navigation buttons (next/prev) are handled by standalone navigation-buttons.js
   function initializeButtonCoordinator() {
     if (
       window.ReinoStepNavigationProgressSystem &&
@@ -284,7 +274,7 @@
         const coordinator = new ButtonCoordinator();
         window.ReinoButtonCoordinator = coordinator;
         coordinator.init(window.ReinoStepNavigationProgressSystem);
-        console.log('✅ ButtonCoordinator initialized successfully');
+        console.log('✅ ButtonCoordinator initialized (send buttons only)');
       }
     } else {
       setTimeout(initializeButtonCoordinator, 200);
@@ -294,10 +284,9 @@
   // Initialize based on document state
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(initializeButtonCoordinator, 500);
+      setTimeout(initializeButtonCoordinator, 600); // Delay maior para não conflitar com navigation-buttons
     });
   } else {
-    setTimeout(initializeButtonCoordinator, 500);
+    setTimeout(initializeButtonCoordinator, 600);
   }
-  */
 })();

@@ -276,20 +276,85 @@ class ReinoTypebotIntegrationSystem {
     return 'Calculando...';
   }
 
-  async handleTypebotCompletion() {
+  async handleTypebotCompletion(typebotData = {}) {
     try {
+      console.log('🤖 [TypebotIntegration] handleTypebotCompletion called with data:', typebotData);
+
       if (!this.currentFormData) {
         console.warn('⚠️ No form data available for completion');
         return;
       }
 
-      // Apply nome to DOM elements
-      this.applyNomeToElements(this.currentFormData.nome);
+      // Extract nome and email from typebot data (matching old module behavior)
+      let nome = null;
+      let email = null;
+
+      // Log complete typebot data structure for debugging
+      console.log(
+        '🔍 [TypebotIntegration] Complete typebotData structure:',
+        JSON.stringify(typebotData, null, 2)
+      );
+
+      // Method 1: Direct properties
+      if (typebotData.nome && !this.isEncryptedValue(typebotData.nome)) {
+        nome = typebotData.nome;
+      }
+      if (typebotData.email && !this.isEncryptedValue(typebotData.email)) {
+        email = typebotData.email;
+      }
+
+      // Method 2: Check for alternative property names
+      if (!nome) {
+        nome = typebotData.name || typebotData.nome_usuario || typebotData.userName || null;
+        if (nome && this.isEncryptedValue(nome)) nome = null;
+      }
+      if (!email) {
+        email = typebotData.e_mail || typebotData.userEmail || typebotData.email_usuario || null;
+        if (email && this.isEncryptedValue(email)) email = null;
+      }
+
+      // Method 3: Check variables property
+      if (typebotData.variables) {
+        if (
+          !nome &&
+          typebotData.variables.nome &&
+          !this.isEncryptedValue(typebotData.variables.nome)
+        ) {
+          nome = typebotData.variables.nome;
+        }
+        if (
+          !email &&
+          typebotData.variables.email &&
+          !this.isEncryptedValue(typebotData.variables.email)
+        ) {
+          email = typebotData.variables.email;
+        }
+      }
+
+      console.log('📝 [TypebotIntegration] Extracted user info from Typebot:', { nome, email });
+
+      // Apply nome to DOM elements if extracted from Typebot
+      if (nome) {
+        this.applyNomeToElements(nome);
+      } else {
+        // Fallback to form data nome if no nome from Typebot
+        console.log('⚠️ No nome from Typebot, using form data nome:', this.currentFormData.nome);
+        this.applyNomeToElements(this.currentFormData.nome);
+      }
+
+      // Merge typebot data with original form data
+      const enhancedFormData = {
+        ...this.currentFormData,
+        nome: nome || this.currentFormData.nome,
+        email: email || this.currentFormData.email,
+        typebotData: typebotData,
+        completedAt: new Date().toISOString(),
+      };
 
       // Trigger completion callbacks
       for (const callback of this.completionCallbacks) {
         try {
-          await callback(this.currentFormData);
+          await callback(enhancedFormData);
         } catch (callbackError) {
           console.error('❌ Completion callback error:', callbackError);
         }
@@ -299,11 +364,15 @@ class ReinoTypebotIntegrationSystem {
       document.dispatchEvent(
         new CustomEvent('typebotCompleted', {
           detail: {
-            formData: this.currentFormData,
+            formData: enhancedFormData,
+            typebotData: typebotData,
+            userInfo: { nome, email },
             timestamp: new Date().toISOString(),
           },
         })
       );
+
+      console.log('✅ [TypebotIntegration] handleTypebotCompletion completed successfully');
     } catch (error) {
       console.error('❌ Error handling Typebot completion:', error);
       await this.handleTypebotError(error);
@@ -314,18 +383,64 @@ class ReinoTypebotIntegrationSystem {
     if (!nome) return;
 
     try {
-      // Apply to elements with [apply-nome] attribute
-      const nomeElements = document.querySelectorAll('[apply-nome], .nome-usuario, [data-nome]');
-      nomeElements.forEach((element) => {
-        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-          element.value = nome;
-        } else {
-          element.textContent = nome;
-        }
+      // Find all elements with nome-definido="typebot" (matching old module behavior)
+      const elements = document.querySelectorAll('[nome-definido="typebot"]');
+
+      if (elements.length === 0) {
+        console.log('🔍 [TypebotIntegration] No elements found with nome-definido="typebot"');
+        return;
+      }
+
+      console.log(
+        `🎯 [TypebotIntegration] Found ${elements.length} elements with nome-definido="typebot"`
+      );
+
+      elements.forEach((element, index) => {
+        // Apply the name to the element's text content
+        element.textContent = nome;
+        console.log(`✅ [TypebotIntegration] Applied nome "${nome}" to element ${index + 1}`);
       });
+
+      // Dispatch event to notify other systems
+      document.dispatchEvent(
+        new CustomEvent('typebotNomeApplied', {
+          detail: {
+            nome: nome,
+            elementsUpdated: elements.length,
+          },
+        })
+      );
     } catch (error) {
-      console.error('❌ Error applying nome to elements:', error);
+      console.error('❌ [TypebotIntegration] Failed to apply nome to elements:', error);
     }
+  }
+
+  /**
+   * Helper function to detect encrypted/placeholder values from Typebot
+   */
+  isEncryptedValue(value) {
+    if (!value || typeof value !== 'string') return false;
+
+    // Check for typical encrypted patterns
+    const encryptedPatterns = [
+      'XBCHzvp1qAbdX',
+      'VFChNVSCXQ2rXv4DrJ8Ah',
+      'giiLFGw5xXBCHzvp1qAbdX',
+      'v3VFChNVSCXQ2rXv4DrJ8Ah',
+    ];
+
+    // Check if value matches any known encrypted patterns
+    if (encryptedPatterns.some((pattern) => value.includes(pattern))) {
+      return true;
+    }
+
+    // Check for suspicious characteristics of encrypted values
+    if (value.length > 15 && !/\s/.test(value) && !/[@.]/.test(value)) {
+      // Long string without spaces, dots, or @ signs - likely encrypted
+      return true;
+    }
+
+    return false;
   }
 
   setupCompletionListener() {

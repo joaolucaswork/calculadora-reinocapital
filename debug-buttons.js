@@ -30,8 +30,10 @@ function debugButtonSystems() {
   console.log('\n🔘 Botões no DOM:');
   const nextButtons = document.querySelectorAll('[element-function="next"]');
   const prevButtons = document.querySelectorAll('.step-btn.prev-btn');
+  const sendButtons = document.querySelectorAll('[element-function="send"]');
   console.log('Next buttons encontrados:', nextButtons.length);
   console.log('Prev buttons encontrados:', prevButtons.length);
+  console.log('Send buttons encontrados:', sendButtons.length);
 
   // 4. Verificar estado dos botões
   console.log('\n⚡ Estado dos Botões:');
@@ -56,6 +58,10 @@ function debugButtonSystems() {
   if (nextButtons.length > 0) {
     console.log('Clicando no primeiro botão Next...');
     nextButtons[0].click();
+  }
+
+  if (sendButtons.length > 0) {
+    console.log('Send buttons disponíveis para teste');
   }
 
   // 6. Verificar inicialização do ButtonCoordinator
@@ -103,6 +109,7 @@ function testButtons() {
 
   const nextButtons = document.querySelectorAll('[element-function="next"]');
   const prevButtons = document.querySelectorAll('.step-btn.prev-btn');
+  const sendButtons = document.querySelectorAll('[element-function="send"]');
 
   console.log('Simulando clique no botão Next...');
   if (nextButtons.length > 0) {
@@ -117,6 +124,19 @@ function testButtons() {
   }, 1000);
 }
 
+// Função para testar botão send
+function testSendButton() {
+  console.log('📤 Testando botão Send...');
+  const sendButtons = document.querySelectorAll('[element-function="send"]');
+
+  if (sendButtons.length > 0) {
+    console.log('Clicando no botão Send...');
+    sendButtons[0].click();
+  } else {
+    console.log('❌ Nenhum botão Send encontrado');
+  }
+}
+
 // Executar debug automaticamente
 console.log('🚀 Executando debug dos botões...');
 setTimeout(() => {
@@ -127,8 +147,10 @@ setTimeout(() => {
 window.debugButtonSystems = debugButtonSystems;
 window.forceReinitializeButtons = forceReinitializeButtons;
 window.testButtons = testButtons;
+window.testSendButton = testSendButton;
 
 console.log('\n📝 Funções disponíveis no console:');
 console.log('- debugButtonSystems() - Executa debug completo');
 console.log('- forceReinitializeButtons() - Força reinicialização');
-console.log('- testButtons() - Testa botões manualmente');
+console.log('- testButtons() - Testa botões next/prev manualmente');
+console.log('- testSendButton() - Testa botão send manualmente');
