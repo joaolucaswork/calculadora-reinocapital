@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class ProductSystem {
@@ -18,11 +18,8 @@
 
     init() {
       if (this.isInitialized) {
-        console.warn('🔄 Product System já inicializado');
         return;
       }
-
-      console.warn('🚀 Iniciando Product System');
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
@@ -38,10 +35,8 @@
     waitForMotion() {
       if (window.Motion) {
         this.Motion = window.Motion;
-        console.warn('✅ Motion.js encontrado, inicializando sistema de produtos');
         this.initProductSystem();
       } else {
-        console.warn('⏳ Aguardando Motion.js...');
         setTimeout(() => this.waitForMotion(), 50);
       }
     }
@@ -428,16 +423,13 @@
 
       // Inicializa todos os items
       const items = document.querySelectorAll('.patrimonio_interactive_item');
-      console.warn('🎯 Items encontrados:', items.length);
-      
+
       items.forEach((item, index) => {
         this.items.push(new ProductItem(item, index, this));
       });
 
       // Adiciona estilos para feedback visual durante arraste
       this.addDragStyles();
-      
-      console.warn('✅ Product System inicializado com sucesso');
     }
 
     addDragStyles() {
@@ -461,11 +453,11 @@
     }
 
     resetAllItems() {
-      this.items.forEach(item => {
+      this.items.forEach((item) => {
         if (item.state.active && !item.state.pinned) {
           item.deactivate(this.Motion.animate, {
             duration: { fast: 0.3 },
-            animation: { move: 15 }
+            animation: { move: 15 },
           });
         }
       });
@@ -494,5 +486,4 @@
       window.ReinoProductSystem.init();
     }, 200);
   }
-
 })();

@@ -3,7 +3,7 @@
  * Properly captures send button clicks and integrates with Typebot
  */
 
-(function() {
+(function () {
   'use strict';
 
   class ButtonCoordinator {
@@ -24,9 +24,9 @@
       // Aguarda sub-módulos estarem disponíveis
       await this.waitForSubModules();
 
-      // Initialize all sub-modules - CORREÇÃO: INSTANCIAR EM VEZ DE ATRIBUIR
+      // Use existing global instance instead of creating new one
       if (window.ReinoNavigationButtons) {
-        this.navigationButtons = new window.ReinoNavigationButtons();
+        this.navigationButtons = window.ReinoNavigationButtons;
         if (this.navigationButtons.init) {
           this.navigationButtons.init(stepNavigationSystem);
         }
@@ -60,29 +60,39 @@
       this.removeExistingListeners();
 
       // Add listener with high priority (capture phase)
-      document.addEventListener('click', (e) => {
-        const sendButton = e.target.closest('[element-function="send"]');
-        if (sendButton) {
-          e.preventDefault();
-          e.stopPropagation();
-          this.log('🔥 Send button click captured');
-          this.handleSendButtonClick(sendButton);
-        }
-      }, true); // Use capture phase for higher priority
-
-      // Also add listener for button text specifically
-      document.addEventListener('click', (e) => {
-        if (e.target.textContent?.includes('Receber relatório') ||
-            e.target.textContent?.includes('Enviar')) {
-          const sendButton = e.target.closest('.button-hero') || e.target.closest('button');
+      document.addEventListener(
+        'click',
+        (e) => {
+          const sendButton = e.target.closest('[element-function="send"]');
           if (sendButton) {
             e.preventDefault();
             e.stopPropagation();
-            this.log('🔥 Send button captured by text match');
+            this.log('🔥 Send button click captured');
             this.handleSendButtonClick(sendButton);
           }
-        }
-      }, true);
+        },
+        true
+      ); // Use capture phase for higher priority
+
+      // Also add listener for button text specifically
+      document.addEventListener(
+        'click',
+        (e) => {
+          if (
+            e.target.textContent?.includes('Receber relatório') ||
+            e.target.textContent?.includes('Enviar')
+          ) {
+            const sendButton = e.target.closest('.button-hero') || e.target.closest('button');
+            if (sendButton) {
+              e.preventDefault();
+              e.stopPropagation();
+              this.log('🔥 Send button captured by text match');
+              this.handleSendButtonClick(sendButton);
+            }
+          }
+        },
+        true
+      );
 
       this.log('✅ Typebot integration listeners added');
     }
@@ -90,7 +100,7 @@
     removeExistingListeners() {
       // Clone and replace send buttons to remove existing listeners
       const sendButtons = document.querySelectorAll('[element-function="send"]');
-      sendButtons.forEach(button => {
+      sendButtons.forEach((button) => {
         const newButton = button.cloneNode(true);
         button.parentNode.replaceChild(newButton, button);
       });
@@ -130,7 +140,6 @@
             buttonDiv.textContent = originalText;
           }
         }, 5000);
-
       } catch (error) {
         console.error('❌ Error handling send button:', error);
         const buttonDiv = button.querySelector('div') || button;
@@ -144,12 +153,15 @@
       // Get patrimonio value
       const patrimonioInput = document.querySelector('#currency');
       if (patrimonioInput && patrimonioInput.value) {
-        const cleaned = patrimonioInput.value.toString().replace(/[^\d,]/g, '').replace(',', '.');
+        const cleaned = patrimonioInput.value
+          .toString()
+          .replace(/[^\d,]/g, '')
+          .replace(',', '.');
         const value = parseFloat(cleaned) || 0;
         data.patrimonio = new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL',
-          minimumFractionDigits: 0
+          minimumFractionDigits: 0,
         }).format(value);
       } else {
         data.patrimonio = 'R$ 0';
@@ -158,7 +170,7 @@
       // Get selected assets
       const selectedAssets = [];
       if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
-        window.ReinoAssetSelectionFilter.selectedAssets.forEach(asset => {
+        window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
           selectedAssets.push(asset);
         });
       }
@@ -166,7 +178,7 @@
       // Fallback: check sliders with values > 0
       if (selectedAssets.length === 0) {
         const sliders = document.querySelectorAll('range-slider');
-        sliders.forEach(slider => {
+        sliders.forEach((slider) => {
           if (parseFloat(slider.value) > 0) {
             const item = slider.closest('.patrimonio_interactive_item');
             const product = item?.getAttribute('ativo-product');
@@ -187,7 +199,7 @@
             data.economia_anual = new Intl.NumberFormat('pt-BR', {
               style: 'currency',
               currency: 'BRL',
-              minimumFractionDigits: 0
+              minimumFractionDigits: 0,
             }).format(comparison.economia);
           }
         } catch (error) {
@@ -215,13 +227,15 @@
       let attempts = 0;
 
       while (attempts < maxAttempts) {
-        if (window.ReinoNavigationButtons &&
-            window.ReinoFormSubmission &&
-            window.ReinoExternalIntegrations) {
+        if (
+          window.ReinoNavigationButtons &&
+          window.ReinoFormSubmission &&
+          window.ReinoExternalIntegrations
+        ) {
           break;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }
 
@@ -242,7 +256,7 @@
             if (sendButton) {
               this.handleSendButtonClick(sendButton);
             }
-          }
+          },
         };
       }
     }
@@ -254,37 +268,36 @@
     }
   }
 
-  // Auto-initialize when DOM is ready
-  document.addEventListener('DOMContentLoaded', () => {
-    // Wait for step navigation system to be available
-    const initializeButtonCoordinator = () => {
-      if (window.ReinoStepNavigationProgressSystem) {
+  // Auto-initialize DISABLED - Using standalone navigation-buttons.js instead
+  //
+  // IMPORTANTE: ButtonCoordinator desabilitado para evitar conflitos.
+  // O navigation-buttons.js agora funciona standalone.
+  //
+  // Para reativar o ButtonCoordinator, descomente o código abaixo:
+  /*
+  function initializeButtonCoordinator() {
+    if (
+      window.ReinoStepNavigationProgressSystem &&
+      window.ReinoStepNavigationProgressSystem.isInitialized
+    ) {
+      if (!window.ReinoButtonCoordinator) {
         const coordinator = new ButtonCoordinator();
         window.ReinoButtonCoordinator = coordinator;
         coordinator.init(window.ReinoStepNavigationProgressSystem);
-      } else {
-        setTimeout(initializeButtonCoordinator, 100);
+        console.log('✅ ButtonCoordinator initialized successfully');
       }
-    };
-
-    initializeButtonCoordinator();
-  });
-
-  // Also initialize if DOM already loaded
-  if (document.readyState === 'loading') {
-    // Already set up above
-  } else {
-    const initializeButtonCoordinator = () => {
-      if (window.ReinoStepNavigationProgressSystem) {
-        const coordinator = new ButtonCoordinator();
-        window.ReinoButtonCoordinator = coordinator;
-        coordinator.init(window.ReinoStepNavigationProgressSystem);
-      } else {
-        setTimeout(initializeButtonCoordinator, 100);
-      }
-    };
-
-    initializeButtonCoordinator();
+    } else {
+      setTimeout(initializeButtonCoordinator, 200);
+    }
   }
 
+  // Initialize based on document state
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initializeButtonCoordinator, 500);
+    });
+  } else {
+    setTimeout(initializeButtonCoordinator, 500);
+  }
+  */
 })();

@@ -5,7 +5,7 @@
  */
 
 (function () {
-  "use strict";
+  'use strict';
 
   class AssetSelectionFilterSystem {
     constructor() {
@@ -21,14 +21,11 @@
 
     init() {
       if (this.isInitialized) {
-        console.warn("🔄 Asset Selection Filter já inicializado");
         return;
       }
 
-      console.warn("🚀 Iniciando Asset Selection Filter System");
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
           this.initializeSystem();
         });
       } else {
@@ -39,21 +36,13 @@
     }
 
     initializeSystem() {
-      console.warn("🔍 Buscando seções...");
-      this.section2 = document.querySelector("._2-section-calc-ativos");
-      this.section3 = document.querySelector(
-        "._3-section-patrimonio-alocation"
-      );
-
-      console.warn("📍 Section 2:", !!this.section2);
-      console.warn("📍 Section 3:", !!this.section3);
+      this.section2 = document.querySelector('._2-section-calc-ativos');
+      this.section3 = document.querySelector('._3-section-patrimonio-alocation');
 
       if (!this.section2 || !this.section3) {
-        console.error("❌ Seções não encontradas!");
         return;
       }
 
-      console.warn("✅ Configurando asset selection...");
       this.setupAssetSelection();
       this.setupCounter();
       this.setupClearButton();
@@ -62,7 +51,7 @@
 
       setTimeout(() => {
         document.dispatchEvent(
-          new CustomEvent("assetSelectionSystemReady", {
+          new CustomEvent('assetSelectionSystemReady', {
             detail: {
               selectedCount: this.selectedAssets.size,
               selectedAssets: Array.from(this.selectedAssets),
@@ -74,87 +63,60 @@
     }
 
     setupAssetSelection() {
-      const dropdownAssets = this.section2.querySelectorAll(
-        ".ativo-item-subcategory"
-      );
-      const individualAssets = this.section2.querySelectorAll(
-        ".ativos_item:not(.dropdown)"
-      );
+      const dropdownAssets = this.section2.querySelectorAll('.ativo-item-subcategory');
+      const individualAssets = this.section2.querySelectorAll('.ativos_item:not(.dropdown)');
 
-      console.warn("🎯 Assets encontrados:", {
-        dropdown: dropdownAssets.length,
-        individual: individualAssets.length,
-      });
-
-      dropdownAssets.forEach((asset) =>
-        this.makeAssetSelectable(asset, "dropdown")
-      );
-      individualAssets.forEach((asset) =>
-        this.makeAssetSelectable(asset, "individual")
-      );
+      dropdownAssets.forEach((asset) => this.makeAssetSelectable(asset, 'dropdown'));
+      individualAssets.forEach((asset) => this.makeAssetSelectable(asset, 'individual'));
     }
 
     makeAssetSelectable(assetElement, type) {
-      const category = assetElement.getAttribute("ativo-category");
-      const product = assetElement.getAttribute("ativo-product");
+      const category = assetElement.getAttribute('ativo-category');
+      const product = assetElement.getAttribute('ativo-product');
 
       if (!category || !product) {
-        console.warn("⚠️ Asset sem categoria/produto:", assetElement);
         return;
       }
-
-      console.warn("🔧 Criando checkbox para:", category, "-", product);
 
       const normalizedCategory = this.normalizeString(category);
       const normalizedProduct = this.normalizeString(product);
 
-      const checkboxContainer = document.createElement("div");
-      checkboxContainer.className = "asset-checkbox-container";
+      const checkboxContainer = document.createElement('div');
+      checkboxContainer.className = 'asset-checkbox-container';
 
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.className = "asset-checkbox";
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'asset-checkbox';
       checkbox.id = `asset-${normalizedCategory}-${normalizedProduct}`
-        .replace(/\s+/g, "-")
+        .replace(/\s+/g, '-')
         .toLowerCase();
 
-      const label = document.createElement("label");
+      const label = document.createElement('label');
       label.htmlFor = checkbox.id;
-      label.className = "asset-checkbox-label";
+      label.className = 'asset-checkbox-label';
 
       checkboxContainer.appendChild(checkbox);
       checkboxContainer.appendChild(label);
 
-      if (type === "dropdown") {
+      if (type === 'dropdown') {
         assetElement.insertBefore(checkboxContainer, assetElement.firstChild);
-        console.warn("✅ Checkbox inserido em dropdown:", category, product);
       } else {
-        const iconElement = assetElement.querySelector(".icon-dragabble");
+        const iconElement = assetElement.querySelector('.icon-dragabble');
         if (iconElement) {
-          iconElement.parentNode.insertBefore(
-            checkboxContainer,
-            iconElement.nextSibling
-          );
-          console.warn("✅ Checkbox inserido após ícone:", category, product);
+          iconElement.parentNode.insertBefore(checkboxContainer, iconElement.nextSibling);
         } else {
           assetElement.insertBefore(checkboxContainer, assetElement.firstChild);
-          console.warn("✅ Checkbox inserido no início:", category, product);
         }
       }
 
-      checkbox.addEventListener("change", (e) => {
-        this.handleAssetSelection(
-          e.target.checked,
-          category,
-          product,
-          assetElement
-        );
+      checkbox.addEventListener('change', (e) => {
+        this.handleAssetSelection(e.target.checked, category, product, assetElement);
       });
 
-      assetElement.addEventListener("click", (e) => {
-        if (!e.target.matches(".asset-checkbox, .asset-checkbox-label")) {
+      assetElement.addEventListener('click', (e) => {
+        if (!e.target.matches('.asset-checkbox, .asset-checkbox-label')) {
           checkbox.checked = !checkbox.checked;
-          checkbox.dispatchEvent(new Event("change"));
+          checkbox.dispatchEvent(new Event('change'));
         }
       });
 
@@ -173,17 +135,15 @@
     }
 
     handleAssetSelection(isSelected, category, product, assetElement) {
-      const normalizedKey = `${this.normalizeString(
-        category
-      )}|${this.normalizeString(product)}`;
+      const normalizedKey = `${this.normalizeString(category)}|${this.normalizeString(product)}`;
 
       if (isSelected) {
         this.selectedAssets.add(normalizedKey);
-        assetElement.classList.add("selected-asset");
+        assetElement.classList.add('selected-asset');
         this.resetAssetValues(category, product);
       } else {
         this.selectedAssets.delete(normalizedKey);
-        assetElement.classList.remove("selected-asset");
+        assetElement.classList.remove('selected-asset');
         this.resetAssetValues(category, product);
       }
 
@@ -191,7 +151,7 @@
       this.filterSection3();
 
       document.dispatchEvent(
-        new CustomEvent("assetSelectionChanged", {
+        new CustomEvent('assetSelectionChanged', {
           detail: {
             selectedCount: this.selectedAssets.size,
             selectedAssets: Array.from(this.selectedAssets),
@@ -201,11 +161,11 @@
     }
 
     setupSystemListeners() {
-      document.addEventListener("patrimonySyncReset", () => {
+      document.addEventListener('patrimonySyncReset', () => {
         this.selectedAssets.clear();
         this.section2Assets.forEach((asset) => {
           asset.checkbox.checked = false;
-          asset.element.classList.remove("selected-asset");
+          asset.element.classList.remove('selected-asset');
         });
         this.updateCounter();
         this.filterSection3();
@@ -213,7 +173,7 @@
     }
 
     setupCounter() {
-      this.counterElement = this.section2.querySelector(".counter_ativos");
+      this.counterElement = this.section2.querySelector('.counter_ativos');
       if (this.counterElement) {
         this.updateCounter();
       }
@@ -226,9 +186,9 @@
     }
 
     setupClearButton() {
-      const clearButton = this.section2.querySelector(".ativos_clean-button");
+      const clearButton = this.section2.querySelector('.ativos_clean-button');
       if (clearButton) {
-        clearButton.addEventListener("click", (e) => {
+        clearButton.addEventListener('click', (e) => {
           e.preventDefault();
           this.clearAllSelections();
         });
@@ -242,33 +202,29 @@
         );
 
         if (patrimonioItem) {
-          const input = patrimonioItem.querySelector(
-            '[input-settings="receive"]'
-          );
+          const input = patrimonioItem.querySelector('[input-settings="receive"]');
           if (input) {
-            input.value = "R$ 0,00";
+            input.value = 'R$ 0,00';
 
             input.dispatchEvent(
-              new CustomEvent("currencyChange", {
+              new CustomEvent('currencyChange', {
                 detail: { value: 0 },
                 bubbles: true,
               })
             );
 
-            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event('input', { bubbles: true }));
           }
 
-          const slider = patrimonioItem.querySelector("range-slider");
+          const slider = patrimonioItem.querySelector('range-slider');
           if (slider) {
             slider.value = 0;
-            slider.dispatchEvent(new Event("input", { bubbles: true }));
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
           }
 
-          const percentageDisplay = patrimonioItem.querySelector(
-            ".porcentagem-calculadora"
-          );
+          const percentageDisplay = patrimonioItem.querySelector('.porcentagem-calculadora');
           if (percentageDisplay) {
-            percentageDisplay.textContent = "0%";
+            percentageDisplay.textContent = '0%';
           }
         }
       } catch (error) {}
@@ -279,7 +235,7 @@
 
       this.section2Assets.forEach((asset) => {
         asset.checkbox.checked = false;
-        asset.element.classList.remove("selected-asset");
+        asset.element.classList.remove('selected-asset');
         this.resetAssetValues(asset.category, asset.product);
       });
 
@@ -289,21 +245,19 @@
 
     initialFilterSetup() {
       const section3Assets = this.section3.querySelectorAll(
-        ".ativos-grafico-item, .patrimonio_interactive_item"
+        '.ativos-grafico-item, .patrimonio_interactive_item'
       );
 
       section3Assets.forEach((asset) => {
-        const category = asset.getAttribute("ativo-category");
-        const product = asset.getAttribute("ativo-product");
+        const category = asset.getAttribute('ativo-category');
+        const product = asset.getAttribute('ativo-product');
 
         if (category && product) {
           this.section3Assets.push({
             element: asset,
             category: category,
             product: product,
-            normalizedKey: `${this.normalizeString(
-              category
-            )}|${this.normalizeString(product)}`,
+            normalizedKey: `${this.normalizeString(category)}|${this.normalizeString(product)}`,
             key: `${category}|${product}`,
           });
         }
@@ -317,18 +271,18 @@
         const isSelected = this.selectedAssets.has(asset.normalizedKey);
 
         if (isSelected) {
-          asset.element.style.display = "";
-          asset.element.classList.remove("asset-filtered-out");
-          asset.element.classList.add("asset-filtered-in");
+          asset.element.style.display = '';
+          asset.element.classList.remove('asset-filtered-out');
+          asset.element.classList.add('asset-filtered-in');
         } else {
-          asset.element.style.display = "none";
-          asset.element.classList.add("asset-filtered-out");
-          asset.element.classList.remove("asset-filtered-in");
+          asset.element.style.display = 'none';
+          asset.element.classList.add('asset-filtered-out');
+          asset.element.classList.remove('asset-filtered-in');
         }
       });
 
       document.dispatchEvent(
-        new CustomEvent("assetFilterChanged", {
+        new CustomEvent('assetFilterChanged', {
           detail: {
             selectedAssets: Array.from(this.selectedAssets),
             selectedCount: this.selectedAssets.size,
@@ -342,9 +296,7 @@
     }
 
     isAssetSelected(category, product) {
-      const normalizedKey = `${this.normalizeString(
-        category
-      )}|${this.normalizeString(product)}`;
+      const normalizedKey = `${this.normalizeString(category)}|${this.normalizeString(product)}`;
       return this.selectedAssets.has(normalizedKey);
     }
 
@@ -354,7 +306,7 @@
       );
       if (asset && !asset.checkbox.checked) {
         asset.checkbox.checked = true;
-        asset.checkbox.dispatchEvent(new Event("change"));
+        asset.checkbox.dispatchEvent(new Event('change'));
       }
     }
 
@@ -364,7 +316,7 @@
       );
       if (asset && asset.checkbox.checked) {
         asset.checkbox.checked = false;
-        asset.checkbox.dispatchEvent(new Event("change"));
+        asset.checkbox.dispatchEvent(new Event('change'));
       }
     }
 
@@ -373,7 +325,7 @@
         this.clearAllSelections();
 
         document.dispatchEvent(
-          new CustomEvent("assetSelectionSystemReset", {
+          new CustomEvent('assetSelectionSystemReset', {
             detail: {
               timestamp: Date.now(),
             },
@@ -387,8 +339,8 @@
   window.ReinoAssetSelectionFilter = new AssetSelectionFilterSystem();
 
   // Auto-inicialização com delay para garantir que o DOM esteja pronto
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         window.ReinoAssetSelectionFilter.init();
       }, 100);

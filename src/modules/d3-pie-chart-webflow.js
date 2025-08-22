@@ -17,7 +17,7 @@ class ReinoD3PieChartWebflowSystem {
       radius: 150,
       colors: [
         '#FF6B6B',
-        '#4ECDC4', 
+        '#4ECDC4',
         '#45B7D1',
         '#96CEB4',
         '#FFEAA7',
@@ -25,10 +25,10 @@ class ReinoD3PieChartWebflowSystem {
         '#98D8C8',
         '#F7DC6F',
         '#BB8FCE',
-        '#85C1E9'
+        '#85C1E9',
       ],
       animationDuration: 750,
-      hoverScale: 1.05
+      hoverScale: 1.05,
     };
   }
 
@@ -46,8 +46,6 @@ class ReinoD3PieChartWebflowSystem {
       this.initializeContainer();
       this.setupEventListeners();
       this.isInitialized = true;
-      
-      console.log('✅ D3 Pie Chart initialized');
     } catch (error) {
       console.error('❌ D3 Pie Chart initialization failed:', error);
     }
@@ -58,7 +56,7 @@ class ReinoD3PieChartWebflowSystem {
     const maxAttempts = 50;
 
     while (!window.d3 && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       attempts++;
     }
 
@@ -71,7 +69,6 @@ class ReinoD3PieChartWebflowSystem {
     this.chartContainer = document.querySelector('.main-area-content');
 
     if (!this.chartContainer) {
-      console.warn('⚠️ .main-area-content container not found');
       return;
     }
 
@@ -147,48 +144,51 @@ class ReinoD3PieChartWebflowSystem {
     const { width, height, radius } = this.config;
 
     // Create SVG
-    this.svg = d3.select(this.chartContainer)
+    this.svg = d3
+      .select(this.chartContainer)
       .append('svg')
       .attr('width', width)
       .attr('height', height)
       .style('font-family', 'Arial, sans-serif');
 
-    const g = this.svg.append('g')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
+    const g = this.svg.append('g').attr('transform', `translate(${width / 2}, ${height / 2})`);
 
     // Create pie layout
-    const pie = d3.pie()
-      .value(d => d.value)
+    const pie = d3
+      .pie()
+      .value((d) => d.value)
       .sort(null);
 
     // Create arc generator
-    const arc = d3.arc()
-      .innerRadius(0)
-      .outerRadius(radius);
+    const arc = d3.arc().innerRadius(0).outerRadius(radius);
 
-    const hoverArc = d3.arc()
+    const hoverArc = d3
+      .arc()
       .innerRadius(0)
       .outerRadius(radius * this.config.hoverScale);
 
     // Create color scale
-    const color = d3.scaleOrdinal()
-      .domain(processedData.map(d => d.name))
+    const color = d3
+      .scaleOrdinal()
+      .domain(processedData.map((d) => d.name))
       .range(this.config.colors);
 
     // Create tooltip
     this.createTooltip();
 
     // Create slices
-    const slices = g.selectAll('.slice')
+    const slices = g
+      .selectAll('.slice')
       .data(pie(processedData))
       .enter()
       .append('g')
       .attr('class', 'slice');
 
     // Add paths
-    slices.append('path')
+    slices
+      .append('path')
       .attr('d', arc)
-      .attr('fill', d => color(d.data.name))
+      .attr('fill', (d) => color(d.data.name))
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
@@ -209,15 +209,16 @@ class ReinoD3PieChartWebflowSystem {
       });
 
     // Add labels
-    slices.append('text')
-      .attr('transform', d => `translate(${arc.centroid(d)})`)
+    slices
+      .append('text')
+      .attr('transform', (d) => `translate(${arc.centroid(d)})`)
       .attr('dy', '.35em')
       .style('text-anchor', 'middle')
       .style('font-size', '12px')
       .style('font-weight', 'bold')
       .style('fill', '#fff')
       .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.5)')
-      .text(d => d.data.percentage > 5 ? `${d.data.percentage}%` : '')
+      .text((d) => (d.data.percentage > 5 ? `${d.data.percentage}%` : ''))
       .style('opacity', 0)
       .transition()
       .delay(this.config.animationDuration / 2)
@@ -234,7 +235,7 @@ class ReinoD3PieChartWebflowSystem {
     if (!this.chartContainer) return;
 
     this.clear();
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.style.cssText = `
       display: flex;
@@ -259,51 +260,53 @@ class ReinoD3PieChartWebflowSystem {
   processData(data) {
     if (!Array.isArray(data)) return [];
 
-    const validData = data.filter(item => 
-      item && 
-      typeof item.name === 'string' && 
-      typeof item.value === 'number' && 
-      item.value > 0
+    const validData = data.filter(
+      (item) =>
+        item && typeof item.name === 'string' && typeof item.value === 'number' && item.value > 0
     );
 
     if (validData.length === 0) return [];
 
     const total = validData.reduce((sum, item) => sum + item.value, 0);
-    
-    return validData.map(item => ({
+
+    return validData.map((item) => ({
       ...item,
-      percentage: Math.round((item.value / total) * 100)
+      percentage: Math.round((item.value / total) * 100),
     }));
   }
 
   createLegend(data, color) {
     if (!this.svg || !data.length) return;
 
-    const legend = this.svg.append('g')
+    const legend = this.svg
+      .append('g')
       .attr('class', 'legend')
       .attr('transform', `translate(${this.config.width - 150}, 20)`);
 
-    const legendItems = legend.selectAll('.legend-item')
+    const legendItems = legend
+      .selectAll('.legend-item')
       .data(data)
       .enter()
       .append('g')
       .attr('class', 'legend-item')
       .attr('transform', (d, i) => `translate(0, ${i * 25})`);
 
-    legendItems.append('rect')
+    legendItems
+      .append('rect')
       .attr('width', 18)
       .attr('height', 18)
-      .attr('fill', d => color(d.name))
+      .attr('fill', (d) => color(d.name))
       .attr('stroke', '#fff')
       .attr('stroke-width', 1);
 
-    legendItems.append('text')
+    legendItems
+      .append('text')
       .attr('x', 25)
       .attr('y', 9)
       .attr('dy', '.35em')
       .style('font-size', '12px')
       .style('fill', '#333')
-      .text(d => `${d.name} (${d.percentage}%)`);
+      .text((d) => `${d.name} (${d.percentage}%)`);
   }
 
   createTooltip() {
@@ -311,7 +314,8 @@ class ReinoD3PieChartWebflowSystem {
       this.tooltip.remove();
     }
 
-    this.tooltip = d3.select('body')
+    this.tooltip = d3
+      .select('body')
       .append('div')
       .attr('class', 'pie-chart-tooltip')
       .style('position', 'absolute')
@@ -338,19 +342,21 @@ class ReinoD3PieChartWebflowSystem {
       const formatValue = (value) => {
         return new Intl.NumberFormat('pt-BR', {
           style: 'currency',
-          currency: 'BRL'
+          currency: 'BRL',
         }).format(value);
       };
 
       this.tooltip
         .style('visibility', 'visible')
-        .html(`
+        .html(
+          `
           <strong>${d.data.name}</strong><br/>
           Valor: ${formatValue(d.data.value)}<br/>
           Percentual: ${d.data.percentage}%
-        `)
-        .style('left', (event.pageX + 10) + 'px')
-        .style('top', (event.pageY - 10) + 'px');
+        `
+        )
+        .style('left', event.pageX + 10 + 'px')
+        .style('top', event.pageY - 10 + 'px');
     }
   }
 
@@ -369,12 +375,12 @@ class ReinoD3PieChartWebflowSystem {
   }
 
   onSliceClick(event, d) {
-    console.log('Pie slice clicked:', d.data);
-    
     // Dispatch custom event
-    document.dispatchEvent(new CustomEvent('pieSliceClicked', {
-      detail: { data: d.data }
-    }));
+    document.dispatchEvent(
+      new CustomEvent('pieSliceClicked', {
+        detail: { data: d.data },
+      })
+    );
   }
 
   updateChart() {
@@ -399,9 +405,15 @@ class ReinoD3PieChartWebflowSystem {
     let data = null;
 
     // Try multiple methods to get data
-    if (window.ReinoSimpleResultadoSync && typeof window.ReinoSimpleResultadoSync.getResultadoData === 'function') {
+    if (
+      window.ReinoSimpleResultadoSync &&
+      typeof window.ReinoSimpleResultadoSync.getResultadoData === 'function'
+    ) {
       data = window.ReinoSimpleResultadoSync.getResultadoData();
-    } else if (window.resultadoSync && typeof window.resultadoSync.getResultadoData === 'function') {
+    } else if (
+      window.resultadoSync &&
+      typeof window.resultadoSync.getResultadoData === 'function'
+    ) {
       data = window.resultadoSync.getResultadoData();
     }
 
@@ -424,7 +436,7 @@ class ReinoD3PieChartWebflowSystem {
       hasSvg: !!this.svg,
       hasData: !!this.currentData,
       hasTooltip: !!this.tooltip,
-      config: this.config
+      config: this.config,
     };
   }
 
@@ -463,6 +475,8 @@ window.ReinoPieChart = {
     }
   },
   getStatus: () => {
-    return window.ReinoD3PieChartWebflowSystem ? window.ReinoD3PieChartWebflowSystem.getStatus() : null;
-  }
+    return window.ReinoD3PieChartWebflowSystem
+      ? window.ReinoD3PieChartWebflowSystem.getStatus()
+      : null;
+  },
 };

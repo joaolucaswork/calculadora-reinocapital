@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class StepNavigationProgressSystem {
@@ -107,7 +107,6 @@
         setTimeout(() => {
           this.notifyStateChange();
         }, 50);
-
       } catch (error) {
         console.error('❌ Erro ao inicializar StepNavigationProgressSystem:', error);
         throw error;
@@ -147,18 +146,19 @@
     }
 
     setupEventListeners() {
-      // Setup listeners for navigation buttons
-      document.addEventListener('click', (event) => {
-        if (event.target.matches('[element-function="next"]')) {
-          event.preventDefault();
-          this.nextStep();
-        }
+      // Navigation button listeners DESABILITADOS para evitar conflito
+      // O ButtonCoordinator + NavigationButtons já gerencia os cliques
+      // document.addEventListener('click', (event) => {
+      //   if (event.target.matches('[element-function="next"]')) {
+      //     event.preventDefault();
+      //     this.nextStep();
+      //   }
 
-        if (event.target.closest('.step-btn.prev-btn')) {
-          event.preventDefault();
-          this.previousStep();
-        }
-      });
+      //   if (event.target.closest('.step-btn.prev-btn')) {
+      //     event.preventDefault();
+      //     this.previousStep();
+      //   }
+      // });
 
       this.setupRealtimeValidation();
     }
@@ -409,7 +409,9 @@
     shouldKeepOriginalDisabled(item) {
       // Adicione aqui lógica se houver itens que devem permanecer disabled por padrão
       // Por exemplo, itens com uma classe especial ou atributo
-      return item.dataset.alwaysDisabled === 'true' || item.classList.contains('permanent-disabled');
+      return (
+        item.dataset.alwaysDisabled === 'true' || item.classList.contains('permanent-disabled')
+      );
     }
 
     /**
@@ -458,7 +460,7 @@
         currentStep: this.currentStep,
         hasFirstSection: this.hasProgressBarClass('first-section'),
         hasAlocaSection: this.hasProgressBarClass('aloca-section'),
-        classes: this.progressBar ? Array.from(this.progressBar.classList) : []
+        classes: this.progressBar ? Array.from(this.progressBar.classList) : [],
       };
     }
 
@@ -479,17 +481,21 @@
         currentStep: currentStep || this.currentStep,
         canProceed: this.canProceedToNext(),
         stepName: this.steps[this.currentStep]?.name,
-        progressBarState: this.getProgressBarState()
+        progressBarState: this.getProgressBarState(),
       };
 
       // Dispatch eventos customizados
-      document.dispatchEvent(new CustomEvent('stepChanged', {
-        detail: eventData
-      }));
+      document.dispatchEvent(
+        new CustomEvent('stepChanged', {
+          detail: eventData,
+        })
+      );
 
-      document.dispatchEvent(new CustomEvent('progressBarStateChanged', {
-        detail: this.getProgressBarState()
-      }));
+      document.dispatchEvent(
+        new CustomEvent('progressBarStateChanged', {
+          detail: this.getProgressBarState(),
+        })
+      );
     }
 
     /**
@@ -656,14 +662,16 @@
      */
     notifyWebflowButtonSystem() {
       // Dispara evento para que o button system possa se atualizar
-      document.dispatchEvent(new CustomEvent('stepValidationChanged', {
-        detail: {
-          currentStep: this.currentStep,
-          canProceed: this.canProceedToNext(),
-          isFirstStep: this.currentStep === 0,
-          isLastStep: this.currentStep === this.steps.length - 1
-        }
-      }));
+      document.dispatchEvent(
+        new CustomEvent('stepValidationChanged', {
+          detail: {
+            currentStep: this.currentStep,
+            canProceed: this.canProceedToNext(),
+            isFirstStep: this.currentStep === 0,
+            isLastStep: this.currentStep === this.steps.length - 1,
+          },
+        })
+      );
     }
 
     canProceedToNext() {
@@ -709,7 +717,7 @@
 
     validateAllocationStep() {
       const allocationInputs = document.querySelectorAll('[input-settings="receive"]');
-      
+
       for (const input of allocationInputs) {
         const value = this.parseInputValue(input.value);
         if (value > 0) {
@@ -728,7 +736,9 @@
       // Gerencia foco entre steps
       const currentSection = this.sectionCache.get(this.steps[stepIndex].id);
       if (currentSection) {
-        const focusableElement = currentSection.querySelector('input, button, [tabindex]:not([tabindex="-1"])');
+        const focusableElement = currentSection.querySelector(
+          'input, button, [tabindex]:not([tabindex="-1"])'
+        );
         if (focusableElement) {
           setTimeout(() => focusableElement.focus(), 100);
         }
@@ -789,11 +799,11 @@
     calculateTotalAllocation() {
       const inputs = document.querySelectorAll('[input-settings="receive"]');
       let total = 0;
-      
-      inputs.forEach(input => {
+
+      inputs.forEach((input) => {
         total += this.parseInputValue(input.value);
       });
-      
+
       return total;
     }
 
@@ -815,7 +825,7 @@
       const inputs = section.querySelectorAll('input, select, textarea');
       const data = {};
 
-      inputs.forEach(input => {
+      inputs.forEach((input) => {
         if (input.name || input.id) {
           data[input.name || input.id] = input.value;
         }
@@ -825,29 +835,31 @@
         stepIndex,
         stepName: step.name,
         timestamp: Date.now(),
-        data
+        data,
       };
     }
 
     async submitForm() {
       const formData = this.collectAllFormData();
-      
+
       // Dispara evento de submissão
-      document.dispatchEvent(new CustomEvent('formSubmission', {
-        detail: formData
-      }));
+      document.dispatchEvent(
+        new CustomEvent('formSubmission', {
+          detail: formData,
+        })
+      );
     }
 
     collectAllFormData() {
       const allData = {};
-      
+
       this.steps.forEach((step, index) => {
         const stepData = this.collectStepData(index);
         if (stepData) {
           allData[step.name] = stepData;
         }
       });
-      
+
       return allData;
     }
 
@@ -914,5 +926,4 @@
   } else {
     window.ReinoStepNavigationProgressSystem.init();
   }
-
 })();

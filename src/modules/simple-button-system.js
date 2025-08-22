@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class SimpleButtonSystem {
@@ -91,7 +91,7 @@
     updateNextButtons(enabled) {
       document.querySelectorAll('[element-function="next"]').forEach((button) => {
         button.disabled = !enabled;
-        
+
         if (enabled) {
           button.classList.remove('disabled');
           button.style.opacity = '';
@@ -107,7 +107,7 @@
     updatePrevButtons(enabled) {
       document.querySelectorAll('.step-btn.prev-btn').forEach((button) => {
         button.disabled = !enabled;
-        
+
         if (enabled) {
           button.classList.remove('disabled');
           button.style.opacity = '';
@@ -121,21 +121,25 @@
     }
 
     enableAllButtons() {
-      document.querySelectorAll('[element-function="next"], .step-btn.prev-btn').forEach((button) => {
-        button.disabled = false;
-        button.classList.remove('disabled');
-        button.style.opacity = '';
-        button.style.pointerEvents = '';
-      });
+      document
+        .querySelectorAll('[element-function="next"], .step-btn.prev-btn')
+        .forEach((button) => {
+          button.disabled = false;
+          button.classList.remove('disabled');
+          button.style.opacity = '';
+          button.style.pointerEvents = '';
+        });
     }
 
     disableAllButtons() {
-      document.querySelectorAll('[element-function="next"], .step-btn.prev-btn').forEach((button) => {
-        button.disabled = true;
-        button.classList.add('disabled');
-        button.style.opacity = '0.5';
-        button.style.pointerEvents = 'none';
-      });
+      document
+        .querySelectorAll('[element-function="next"], .step-btn.prev-btn')
+        .forEach((button) => {
+          button.disabled = true;
+          button.classList.add('disabled');
+          button.style.opacity = '0.5';
+          button.style.pointerEvents = 'none';
+        });
     }
 
     refreshButtons() {
@@ -146,16 +150,16 @@
     getButtonState() {
       const nextButtons = document.querySelectorAll('[element-function="next"]');
       const prevButtons = document.querySelectorAll('.step-btn.prev-btn');
-      
+
       return {
         next: {
           count: nextButtons.length,
-          enabled: Array.from(nextButtons).some(btn => !btn.disabled)
+          enabled: Array.from(nextButtons).some((btn) => !btn.disabled),
         },
         prev: {
           count: prevButtons.length,
-          enabled: Array.from(prevButtons).some(btn => !btn.disabled)
-        }
+          enabled: Array.from(prevButtons).some((btn) => !btn.disabled),
+        },
       };
     }
   }
@@ -163,11 +167,17 @@
   // Cria instância global
   window.ReinoSimpleButtonSystem = new SimpleButtonSystem();
 
-  // Auto-inicialização com delay para aguardar outros sistemas
-  setTimeout(() => {
-    if (window.ReinoStepNavigationProgressSystem) {
-      window.ReinoSimpleButtonSystem.init(window.ReinoStepNavigationProgressSystem);
-    }
-  }, 500);
-
+  // Auto-inicialização DESABILITADA para evitar conflito com navigation-buttons.js
+  // O ButtonCoordinator já gerencia a navegação através do navigation-buttons.js
+  //
+  // IMPORTANTE: Este sistema está desabilitado para evitar conflitos.
+  // Use apenas o navigation-buttons.js através do ButtonCoordinator.
+  //
+  // Para debug, descomente a linha abaixo temporariamente:
+  // setTimeout(() => {
+  //   if (window.ReinoStepNavigationProgressSystem && !window.ReinoButtonCoordinator) {
+  //     console.log('⚠️ Fallback: Inicializando SimpleButtonSystem');
+  //     window.ReinoSimpleButtonSystem.init(window.ReinoStepNavigationProgressSystem);
+  //   }
+  // }, 1000);
 })();

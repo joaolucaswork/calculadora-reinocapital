@@ -1,9 +1,10 @@
 /**
- * Navigation Buttons Module - Webflow Version
+ * Navigation Buttons Module - Fixed Webflow Version
  * Handles next/prev button functionality only
+ * Based on old_modules but standalone compatible
  */
 
-window.ReinoNavigationButtons = (function() {
+window.ReinoNavigationButtons = (function () {
   'use strict';
 
   function NavigationButtons() {
@@ -12,12 +13,12 @@ window.ReinoNavigationButtons = (function() {
 
     // Simple debounced update
     var self = this;
-    this.updateButtons = this.debounce(function() {
+    this.updateButtons = this.debounce(function () {
       return self._updateAllButtons();
     }, 100);
   }
 
-  NavigationButtons.prototype.init = function(stepNavigationSystem) {
+  NavigationButtons.prototype.init = function (stepNavigationSystem) {
     this.stepNavigationSystem = stepNavigationSystem;
 
     this.setupButtons();
@@ -27,26 +28,26 @@ window.ReinoNavigationButtons = (function() {
     this.log('✅ Navigation buttons initialized');
   };
 
-  NavigationButtons.prototype.setupButtons = function() {
+  NavigationButtons.prototype.setupButtons = function () {
     var self = this;
 
     // Setup next buttons
-    document.querySelectorAll('[element-function="next"]').forEach(function(button) {
+    document.querySelectorAll('[element-function="next"]').forEach(function (button) {
       self.setupNextButton(button);
     });
 
     // Setup prev buttons
-    document.querySelectorAll('.step-btn.prev-btn').forEach(function(button) {
+    document.querySelectorAll('.step-btn.prev-btn').forEach(function (button) {
       self.setupPrevButton(button);
     });
   };
 
-  NavigationButtons.prototype.setupNextButton = function(button) {
+  NavigationButtons.prototype.setupNextButton = function (button) {
     var self = this;
     var newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
 
-    newButton.addEventListener('click', function(e) {
+    newButton.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
 
@@ -57,66 +58,70 @@ window.ReinoNavigationButtons = (function() {
     });
   };
 
-  NavigationButtons.prototype.setupPrevButton = function(button) {
+  NavigationButtons.prototype.setupPrevButton = function (button) {
     var self = this;
     var newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
 
-    newButton.addEventListener('click', function(e) {
+    newButton.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
 
-      if (newButton.disabled) return;
+      self.log('🔘 Prev button clicked, disabled:', newButton.disabled);
 
-      self.log('Prev button clicked');
+      if (newButton.disabled) {
+        self.log('❌ Prev button is disabled, ignoring click');
+        return;
+      }
+
       self.handlePrev();
     });
+
+    self.log('✅ Prev button event listener added');
   };
 
-  NavigationButtons.prototype.handleNext = function() {
+  NavigationButtons.prototype.handleNext = function () {
     if (this.stepNavigationSystem && this.stepNavigationSystem.nextStep) {
       if (this.stepNavigationSystem.canProceedToNext()) {
         this.stepNavigationSystem.nextStep();
-      } else {
-        if (this.stepNavigationSystem.showValidationError) {
-          this.stepNavigationSystem.showValidationError();
-        }
+      } else if (this.stepNavigationSystem.showValidationError) {
+        this.stepNavigationSystem.showValidationError();
       }
     }
   };
 
-  NavigationButtons.prototype.handlePrev = function() {
+  NavigationButtons.prototype.handlePrev = function () {
     if (this.stepNavigationSystem && this.stepNavigationSystem.previousStep) {
       this.stepNavigationSystem.previousStep();
     }
   };
 
-  NavigationButtons.prototype.setupListeners = function() {
+  NavigationButtons.prototype.setupListeners = function () {
     var self = this;
 
     // Listen for validation changes
-    document.addEventListener('stepValidationChanged', function() {
+    document.addEventListener('stepValidationChanged', function () {
       self.updateButtons();
     });
 
     // Listen for input changes
-    document.addEventListener('input', function(e) {
+    document.addEventListener('input', function (e) {
       if (e.target.matches('#currency, .currency-input[is-main="true"], [data-allocation]')) {
         self.updateButtons();
       }
     });
 
     // Listen for asset selection changes
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       if (e.target.closest('.ativos_item')) {
-        setTimeout(function() {
+        setTimeout(function () {
           self.updateButtons();
         }, 50);
       }
     });
   };
 
-  NavigationButtons.prototype._updateAllButtons = function() {
+  NavigationButtons.prototype._updateAllButtons = function () {
     if (!this.stepNavigationSystem) {
       this.disableAllButtons();
       return;
@@ -126,51 +131,86 @@ window.ReinoNavigationButtons = (function() {
     this.updatePrevButtons();
   };
 
-  NavigationButtons.prototype.updateNextButtons = function() {
+  NavigationButtons.prototype.updateNextButtons = function () {
     var canProceed = this.stepNavigationSystem.canProceedToNext();
-    document.querySelectorAll('[element-function="next"]').forEach(function(button) {
+    document.querySelectorAll('[element-function="next"]').forEach(function (button) {
       button.disabled = !canProceed;
     });
   };
 
-  NavigationButtons.prototype.updatePrevButtons = function() {
+  NavigationButtons.prototype.updatePrevButtons = function () {
     var isFirstStep = this.stepNavigationSystem.currentStep === 0;
-    document.querySelectorAll('.step-btn.prev-btn').forEach(function(button) {
-      button.disabled = isFirstStep;
-    });
+    document
+      .querySelectorAll('.step-btn.prev-btn, .step-btn.prevbtn, [element-function="prev"]')
+      .forEach(function (button) {
+        button.disabled = isFirstStep;
+      });
   };
 
-  NavigationButtons.prototype.disableAllButtons = function() {
-    document.querySelectorAll('[element-function="next"], .step-btn.prev-btn').forEach(function(button) {
-      button.disabled = true;
-    });
+  NavigationButtons.prototype.disableAllButtons = function () {
+    document
+      .querySelectorAll(
+        '[element-function="next"], .step-btn.prev-btn, .step-btn.prevbtn, [element-function="prev"]'
+      )
+      .forEach(function (button) {
+        button.disabled = true;
+      });
   };
 
   // Public API
-  NavigationButtons.prototype.forceUpdate = function() {
+  NavigationButtons.prototype.forceUpdate = function () {
     this.updateButtons();
   };
 
-  NavigationButtons.prototype.debounce = function(func, wait) {
+  NavigationButtons.prototype.debounce = function (func, wait) {
     var timeout;
     var self = this;
-    return function() {
+    return function () {
       var args = arguments;
       clearTimeout(timeout);
-      timeout = setTimeout(function() {
+      timeout = setTimeout(function () {
         func.apply(self, args);
       }, wait);
     };
   };
 
-  NavigationButtons.prototype.log = function(message) {
+  NavigationButtons.prototype.log = function (message) {
     if (this.debugMode) {
       console.log('🔘 [NavigationButtons] ' + message);
     }
   };
 
   // Cria instância global
-  window.ReinoNavigationButtons = new NavigationButtons();
+  var instance = new NavigationButtons();
+  window.ReinoNavigationButtons = instance;
 
-  return NavigationButtons;
+  return instance;
+})();
+
+// Auto-initialize standalone
+(function () {
+  'use strict';
+
+  function initializeNavigationButtons() {
+    if (
+      window.ReinoStepNavigationProgressSystem &&
+      window.ReinoStepNavigationProgressSystem.isInitialized
+    ) {
+      if (!window.ReinoNavigationButtons.stepNavigationSystem) {
+        window.ReinoNavigationButtons.init(window.ReinoStepNavigationProgressSystem);
+        console.log('✅ NavigationButtons initialized standalone');
+      }
+    } else {
+      setTimeout(initializeNavigationButtons, 200);
+    }
+  }
+
+  // Initialize based on document state
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initializeNavigationButtons, 300);
+    });
+  } else {
+    setTimeout(initializeNavigationButtons, 300);
+  }
 })();

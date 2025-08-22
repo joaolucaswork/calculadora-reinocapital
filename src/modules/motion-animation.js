@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class MotionAnimationSystem {
@@ -15,11 +15,9 @@
 
     init() {
       if (this.isInitialized) {
-        console.warn('🔄 Motion Animation System já inicializado');
         return;
       }
 
-      console.warn('🚀 Iniciando Motion Animation System');
       this.waitForMotion();
       this.isInitialized = true;
     }
@@ -27,10 +25,8 @@
     waitForMotion() {
       if (window.Motion) {
         this.Motion = window.Motion;
-        console.warn('✅ Motion.js encontrado, inicializando efeitos');
         this.initMotionEffects();
       } else {
-        console.warn('⏳ Aguardando Motion.js...');
         setTimeout(() => this.waitForMotion(), 50);
       }
     }
@@ -42,20 +38,13 @@
       const input = document.querySelector('input[is-main="true"]');
       const interactiveArrow = document.getElementById('interative-arrow');
 
-      console.warn('📍 Elementos encontrados:', {
-        input: !!input,
-        arrow: !!interactiveArrow
-      });
-
       if (!input || !interactiveArrow) {
-        console.error('❌ Elementos essenciais não encontrados!');
         return;
       }
 
       // Busca o container pai que contém tanto o input quanto os botões
       const mainContainer = input.closest('.money_content_right-wrapper');
       if (!mainContainer) {
-        console.error('❌ Container principal não encontrado!');
         return;
       }
 
@@ -63,13 +52,7 @@
       const increaseBtn = mainContainer.querySelector('[currency-control="increase"]');
       const decreaseBtn = mainContainer.querySelector('[currency-control="decrease"]');
 
-      console.warn('🎯 Botões encontrados:', {
-        increase: !!increaseBtn,
-        decrease: !!decreaseBtn
-      });
-
       if (!increaseBtn || !decreaseBtn) {
-        console.error('❌ Botões de controle não encontrados!');
         return;
       }
 
@@ -427,8 +410,6 @@
           }, 100);
         };
       });
-
-      console.warn('✅ Motion effects configurados com sucesso');
     }
   }
 
@@ -447,5 +428,4 @@
       window.ReinoMotionAnimationSystem.init();
     }, 300);
   }
-
 })();

@@ -19,8 +19,8 @@ class ReinoTypebotIntegrationSystem {
       DEBUG: true,
       EMBED_CONFIG: {
         cdnUrl: 'https://cdn.jsdelivr.net/npm/@typebot.io/js@0/dist/web.js',
-        containerId: 'typebot-embed-container'
-      }
+        containerId: 'typebot-embed-container',
+      },
     };
 
     // Use global config if available
@@ -42,10 +42,6 @@ class ReinoTypebotIntegrationSystem {
       this.setupEmbedContainer();
       this.setupGlobalAPI();
       this.isInitialized = true;
-
-      if (this.config.DEBUG) {
-        console.log('✅ Typebot Integration initialized with ID:', this.config.PUBLIC_ID);
-      }
     } catch (error) {
       console.error('❌ TypebotIntegrationSystem initialization failed:', error);
     }
@@ -56,15 +52,13 @@ class ReinoTypebotIntegrationSystem {
       // Check if already loaded globally
       if (window.Typebot) {
         this.typebotLibrary = window.Typebot;
-        if (this.config.DEBUG) {
-          console.log('✅ Using existing global Typebot library');
-        }
+
         return;
       }
 
       // Use official Typebot loading pattern
-      const typebotInitScript = document.createElement("script");
-      typebotInitScript.type = "module";
+      const typebotInitScript = document.createElement('script');
+      typebotInitScript.type = 'module';
       typebotInitScript.innerHTML = `
         import Typebot from '${this.config.EMBED_CONFIG.cdnUrl}'
         window.Typebot = Typebot;
@@ -76,15 +70,12 @@ class ReinoTypebotIntegrationSystem {
       let attempts = 0;
       const maxAttempts = 50;
       while (!window.Typebot && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }
 
       if (window.Typebot) {
         this.typebotLibrary = window.Typebot;
-        if (this.config.DEBUG) {
-          console.log('✅ Typebot library loaded via official method');
-        }
       } else {
         throw new Error('Typebot library failed to load after waiting');
       }
@@ -111,10 +102,6 @@ class ReinoTypebotIntegrationSystem {
           this.handleTypebotEnd();
         },
       });
-
-      if (this.config.DEBUG) {
-        console.log('✅ Typebot popup initialized with ID:', this.config.PUBLIC_ID);
-      }
     } catch (error) {
       console.error('❌ Failed to initialize Typebot popup:', error);
       throw error;
@@ -122,16 +109,10 @@ class ReinoTypebotIntegrationSystem {
   }
 
   handleTypebotMessage(message) {
-    if (this.config.DEBUG) {
-      console.log('🤖 Typebot message:', message);
-    }
+    // Message handling logic can be added here
   }
 
   handleTypebotEnd() {
-    if (this.config.DEBUG) {
-      console.log('🤖 Typebot conversation ended');
-    }
-
     this.isTypebotActive = false;
 
     setTimeout(() => {
@@ -162,16 +143,12 @@ class ReinoTypebotIntegrationSystem {
         patrimonio: formData.patrimonio || this.getPatrimonioValue(),
         ativos_selecionados: formData.ativos_selecionados || this.getSelectedAssets(),
         economia_anual: formData.economia_anual || this.getEconomiaValue(),
-        source: 'webflow_calculator'
+        source: 'webflow_calculator',
       };
-
-      if (this.config.DEBUG) {
-        console.log('🤖 Starting Typebot with data:', typebotVariables);
-      }
 
       // Open Typebot popup with prefilled variables
       this.typebotLibrary.open({
-        prefilledVariables: typebotVariables
+        prefilledVariables: typebotVariables,
       });
 
       return true;
@@ -190,17 +167,21 @@ class ReinoTypebotIntegrationSystem {
       telefone: '',
       patrimonio: this.getPatrimonioValue(),
       ativos_selecionados: this.getSelectedAssets(),
-      economia_anual: this.getEconomiaValue()
+      economia_anual: this.getEconomiaValue(),
     };
 
     // Try to get name from various inputs
-    const nameInputs = document.querySelectorAll('input[name*="nome"], input[placeholder*="nome"], #nome');
+    const nameInputs = document.querySelectorAll(
+      'input[name*="nome"], input[placeholder*="nome"], #nome'
+    );
     if (nameInputs.length > 0) {
       data.nome = nameInputs[0].value || '';
     }
 
     // Try to get email from various inputs
-    const emailInputs = document.querySelectorAll('input[type="email"], input[name*="email"], #email');
+    const emailInputs = document.querySelectorAll(
+      'input[type="email"], input[name*="email"], #email'
+    );
     if (emailInputs.length > 0) {
       data.email = emailInputs[0].value || '';
     }
@@ -211,12 +192,15 @@ class ReinoTypebotIntegrationSystem {
   getPatrimonioValue() {
     const patrimonioInput = document.querySelector('#currency');
     if (patrimonioInput && patrimonioInput.value) {
-      const cleaned = patrimonioInput.value.toString().replace(/[^\d,]/g, '').replace(',', '.');
+      const cleaned = patrimonioInput.value
+        .toString()
+        .replace(/[^\d,]/g, '')
+        .replace(',', '.');
       const value = parseFloat(cleaned) || 0;
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
-        minimumFractionDigits: 0
+        minimumFractionDigits: 0,
       }).format(value);
     }
     return 'R$ 0';
@@ -227,7 +211,7 @@ class ReinoTypebotIntegrationSystem {
 
     // Try to get from asset selection system
     if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
-      window.ReinoAssetSelectionFilter.selectedAssets.forEach(asset => {
+      window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
         selectedAssets.push(asset);
       });
     }
@@ -235,7 +219,7 @@ class ReinoTypebotIntegrationSystem {
     // Fallback: check for selected asset elements
     if (selectedAssets.length === 0) {
       const assetElements = document.querySelectorAll('.patrimonio_interactive_item');
-      assetElements.forEach(element => {
+      assetElements.forEach((element) => {
         const slider = element.querySelector('range-slider');
         if (slider && parseFloat(slider.value) > 0) {
           const product = element.getAttribute('ativo-product');
@@ -253,28 +237,36 @@ class ReinoTypebotIntegrationSystem {
     // Try to get from resultado calculator
     try {
       // Check if calculator exists and has cache
-      if (window.ReinoResultadoComparativoCalculator &&
-          window.ReinoResultadoComparativoCalculator.cache &&
-          window.ReinoResultadoComparativoCalculator.cache.economia) {
+      if (
+        window.ReinoResultadoComparativoCalculator &&
+        window.ReinoResultadoComparativoCalculator.cache &&
+        window.ReinoResultadoComparativoCalculator.cache.economia
+      ) {
         const economia = window.ReinoResultadoComparativoCalculator.cache.economia;
         return new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL',
-          minimumFractionDigits: 0
+          minimumFractionDigits: 0,
         }).format(economia);
       }
 
       // Fallback: try to calculate economia manually
       const patrimonioInput = document.querySelector('#currency');
       if (patrimonioInput && patrimonioInput.value) {
-        const patrimonio = parseFloat(patrimonioInput.value.toString().replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        const patrimonio =
+          parseFloat(
+            patrimonioInput.value
+              .toString()
+              .replace(/[^\d,]/g, '')
+              .replace(',', '.')
+          ) || 0;
         if (patrimonio > 0) {
           // Simple estimation: 2-3% economy
           const estimatedEconomy = patrimonio * 0.025;
           return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL',
-            minimumFractionDigits: 0
+            minimumFractionDigits: 0,
           }).format(estimatedEconomy);
         }
       }
@@ -304,17 +296,14 @@ class ReinoTypebotIntegrationSystem {
       }
 
       // Dispatch completion event
-      document.dispatchEvent(new CustomEvent('typebotCompleted', {
-        detail: {
-          formData: this.currentFormData,
-          timestamp: new Date().toISOString()
-        }
-      }));
-
-      if (this.config.DEBUG) {
-        console.log('✅ Typebot completion handled successfully');
-      }
-
+      document.dispatchEvent(
+        new CustomEvent('typebotCompleted', {
+          detail: {
+            formData: this.currentFormData,
+            timestamp: new Date().toISOString(),
+          },
+        })
+      );
     } catch (error) {
       console.error('❌ Error handling Typebot completion:', error);
       await this.handleTypebotError(error);
@@ -327,17 +316,13 @@ class ReinoTypebotIntegrationSystem {
     try {
       // Apply to elements with [apply-nome] attribute
       const nomeElements = document.querySelectorAll('[apply-nome], .nome-usuario, [data-nome]');
-      nomeElements.forEach(element => {
+      nomeElements.forEach((element) => {
         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
           element.value = nome;
         } else {
           element.textContent = nome;
         }
       });
-
-      if (this.config.DEBUG) {
-        console.log(`✅ Nome "${nome}" aplicado a ${nomeElements.length} elementos`);
-      }
     } catch (error) {
       console.error('❌ Error applying nome to elements:', error);
     }
@@ -361,7 +346,9 @@ class ReinoTypebotIntegrationSystem {
 
       try {
         // Navigate to section 5
-        const currentSection = document.querySelector('.step-section[style*="display: block"], .step-section:not([style*="display: none"])');
+        const currentSection = document.querySelector(
+          '.step-section[style*="display: block"], .step-section:not([style*="display: none"])'
+        );
         const targetSection = document.querySelector('[data-step="' + step + '"]');
 
         if (currentSection) {
@@ -369,7 +356,6 @@ class ReinoTypebotIntegrationSystem {
         }
         if (targetSection) {
           targetSection.style.display = 'block';
-          console.log('✅ Navegação para seção', step, 'concluída');
         }
 
         // Apply user data
@@ -381,7 +367,6 @@ class ReinoTypebotIntegrationSystem {
         setTimeout(() => {
           this.closeTypebot();
         }, 1000);
-
       } catch (error) {
         console.error('❌ Erro na navegação:', error);
       }
@@ -390,16 +375,16 @@ class ReinoTypebotIntegrationSystem {
     // Listen for postMessage from Typebot
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'typebot-completion') {
-        console.log('📨 PostMessage Typebot recebido:', event.data);
-
         // Dispatch navigation event
-        document.dispatchEvent(new CustomEvent('forceNavigateToResults', {
-          detail: {
-            step: 5,
-            source: 'postmessage',
-            data: event.data.data
-          }
-        }));
+        document.dispatchEvent(
+          new CustomEvent('forceNavigateToResults', {
+            detail: {
+              step: 5,
+              source: 'postmessage',
+              data: event.data.data,
+            },
+          })
+        );
       }
     });
   }
@@ -428,9 +413,11 @@ class ReinoTypebotIntegrationSystem {
     console.error('❌ Typebot error:', error);
 
     // Dispatch error event
-    document.dispatchEvent(new CustomEvent('typebotError', {
-      detail: { error, timestamp: new Date().toISOString() }
-    }));
+    document.dispatchEvent(
+      new CustomEvent('typebotError', {
+        detail: { error, timestamp: new Date().toISOString() },
+      })
+    );
 
     // Reset state
     this.isTypebotActive = false;
@@ -444,7 +431,7 @@ class ReinoTypebotIntegrationSystem {
       close: () => this.closeTypebot(),
       isActive: () => this.isTypebotActive,
       onCompletion: (callback) => this.onCompletion(callback),
-      getStatus: () => this.getStatus()
+      getStatus: () => this.getStatus(),
     };
   }
 
@@ -466,7 +453,7 @@ class ReinoTypebotIntegrationSystem {
       initialized: this.isInitialized,
       active: this.isTypebotActive,
       hasFormData: !!this.currentFormData,
-      publicId: this.config.PUBLIC_ID
+      publicId: this.config.PUBLIC_ID,
     };
   }
 
@@ -484,18 +471,16 @@ class ReinoTypebotIntegrationSystem {
       }
 
       // Force hide all typebot elements
-      const typebotElements = document.querySelectorAll('*[id*="typebot"], *[class*="typebot"], iframe[src*="typebot"]');
-      typebotElements.forEach(el => {
+      const typebotElements = document.querySelectorAll(
+        '*[id*="typebot"], *[class*="typebot"], iframe[src*="typebot"]'
+      );
+      typebotElements.forEach((el) => {
         el.style.display = 'none';
         el.style.visibility = 'hidden';
       });
 
       // Reset state
       this.isTypebotActive = false;
-
-      if (this.config.DEBUG) {
-        console.log('🤖 Typebot closed and all elements hidden');
-      }
     } catch (error) {
       console.error('❌ Error closing Typebot:', error);
     }
