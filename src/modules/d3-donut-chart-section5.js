@@ -457,75 +457,108 @@
     generateTooltipContent(d) {
       const formatValue = this.formatCurrency(d.data.value);
       const isTraditional = d.data.chartType === 'tradicional';
+      const categoryColor = this.categoryColors[d.data.name] || '#c0c0c0';
 
-      // Calcular custo total da categoria
-      let custoTotalCategoria = 0;
       let detailsHtml = '';
 
+      // Main content section with category info
+      let mainSection = `
+        <div style="display: flex; align-items: center; margin: 8px 0;">
+          <div style="width: 4px; height: 40px; background-color: ${categoryColor}; border-radius: 2px; margin-right: 12px;"></div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: #1f2937; margin-bottom: 2px;">${d.data.name}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #111827; line-height: 1;">${formatValue}</div>
+            <div style="font-size: 11px; color: #6b7280; margin-top: 2px;">Custo de Comissão</div>
+          </div>
+        </div>
+      `;
+
+      // Add percentage in highlighted box
+      mainSection += `
+        <div style="margin-top: 8px; padding: 8px; background-color: #f9fafb; border-radius: 6px;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 2px;">Percentual do Total</div>
+          <div style="font-weight: 600; color: #111827; font-size: 16px;">${d.data.percentage.toFixed(1)}%</div>
+        </div>
+      `;
+
+      // Build details section with enhanced product display
       if (d.data.details && d.data.details.length > 0) {
         detailsHtml =
-          '<div style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 8px;">';
+          '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;"><div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">Produtos desta categoria:</div>';
 
-        d.data.details.forEach((detail) => {
-          const detailValue = this.formatCurrency(detail.value);
+        d.data.details.forEach((detail, index) => {
+          if (index < 4) {
+            // Show up to 4 details with better formatting
+            const detailValue = this.formatCurrency(detail.value);
 
-          if (isTraditional) {
-            const custoAnual = this.formatCurrency(detail.cost || 0);
+            // Get commission info with both percentage and value
+            let commissionDisplay = '';
+            let commissionValue = '';
 
-            custoTotalCategoria += detail.cost || 0;
-
-            // Informações do rotation index
-            let rotationInfo = '';
-            if (detail.taxaInfo) {
-              const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
+            if (isTraditional && detail.taxaInfo) {
               const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
-              rotationInfo = `<br>Média Corretagem: ${mediaCorretagem}% | Índice de Giro: ${indiceGiro}`;
+              commissionDisplay = `${mediaCorretagem}% corretagem`;
+              if (detail.cost) {
+                commissionValue = this.formatCurrency(detail.cost);
+              }
+            } else if (isTraditional && detail.cost) {
+              const custoAnual = this.formatCurrency(detail.cost);
+              commissionDisplay = 'Custo tradicional';
+              commissionValue = custoAnual;
+            } else if (!isTraditional && detail.custoAnualReino) {
+              const custoReino = this.formatCurrency(detail.custoAnualReino);
+              commissionDisplay = 'Custo Reino';
+              commissionValue = custoReino;
+            } else {
+              commissionDisplay = 'Sem custo adicional';
+              commissionValue = '';
             }
 
             detailsHtml += `
-              <div style="font-size: 11px; margin: 4px 0; padding: 3px 0;">
-                <div style="font-weight: 600;">• ${detail.product}</div>
-                <div style="margin-left: 8px; color: #ccc;">
-                  Valor: ${detailValue}<br>
-                  Custo anual: ${custoAnual}${rotationInfo}
+              <div style="padding: 10px 0; ${index < 3 && index < d.data.details.length - 1 ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
+                    <div style="font-size: 12px; color: #6b7280;">${commissionDisplay}</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 13px; font-weight: 600; color: #111827;">${detailValue}</div>
+                  </div>
                 </div>
-              </div>
-            `;
-          } else {
-            const custoReinoDetail = this.formatCurrency(
-              detail.custoAnualReino || detail.cost || 0
-            );
-            custoTotalCategoria += detail.custoAnualReino || detail.cost || 0;
-
-            detailsHtml += `
-              <div style="font-size: 11px; margin: 4px 0; padding: 3px 0;">
-                <div style="font-weight: 600;">• ${detail.product}</div>
-                <div style="margin-left: 8px; color: #ccc;">
-                  Valor: ${detailValue}<br>
-                  Custo anual: ${custoReinoDetail}
-                </div>
+                ${
+                  commissionValue
+                    ? `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f3f4f6;">
+                    <span style="font-size: 11px; color: #6b7280;">Custo anual:</span>
+                    <span style="font-size: 12px; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
+                  </div>
+                `
+                    : ''
+                }
               </div>
             `;
           }
         });
+
+        if (d.data.details.length > 4) {
+          detailsHtml += `<div style="font-size: 12px; color: #9ca3af; margin-top: 8px; text-align: center; font-style: italic; padding: 6px; background-color: #f9fafb; border-radius: 6px;">+${d.data.details.length - 4} outros produtos nesta categoria</div>`;
+        }
+
         detailsHtml += '</div>';
       }
 
-      let custoInfo = '';
-      if (isTraditional) {
-        const custoTotalFormatado = this.formatCurrency(custoTotalCategoria);
-        custoInfo = `<div style="color: #ff9999; font-weight: 600; margin-top: 5px;">Custo de Comissão: ${custoTotalFormatado}/ano</div>`;
-      } else {
-        const custoTotalFormatado = this.formatCurrency(custoTotalCategoria);
-        custoInfo = `<div style="color: #90EE90; font-weight: 600; margin-top: 5px;">Reino: ${custoTotalFormatado}/ano</div>`;
-      }
-
       return `
-        <div style="font-weight: bold; margin-bottom: 5px;">${d.data.name}</div>
-        <div>Valor Total: ${formatValue}</div>
-        <div>Percentual: ${d.data.percentage.toFixed(1)}%</div>
-        ${custoInfo}
-        ${detailsHtml}
+        <div style="min-width: 200px;">
+          ${mainSection}
+
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+            <div style="font-size: 12px; color: #6b7280; line-height: 1.4;">
+              Baseado em <strong>${d.data.details ? d.data.details.length : 0} ativo${d.data.details && d.data.details.length !== 1 ? 's' : ''}</strong> desta categoria
+            </div>
+          </div>
+
+          ${detailsHtml}
+        </div>
       `;
     }
 

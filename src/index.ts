@@ -31,3 +31,5 @@ import './config/taxas-tradicional.js';
 // Import rotation index integration after configs
 import './modules/rotation-index-integration.js';
 import './modules/tippy-tooltip-module.js';
+// Import CSS files
+import './css/tippy-custom.css';

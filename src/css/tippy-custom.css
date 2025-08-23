@@ -1,0 +1,32 @@
+/**
+ * Tippy.js Custom Styles - HTML Customizado
+ * Estilos para tooltips com HTML customizado (sem tema)
+ */
+
+/* Estilo para tooltip padrão (sem tema) com HTML customizado */
+.tippy-box .tippy-content {
+  padding: 0 !important; /* Remove padding padrão pois usamos padding no HTML interno */
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+/* Garante que o tooltip tenha boa aparência */
+.tippy-box {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+  .tippy-box {
+    max-width: 260px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tippy-box {
+    max-width: 240px !important;
+  }
+}
