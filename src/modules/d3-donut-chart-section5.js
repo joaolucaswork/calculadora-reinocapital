@@ -494,10 +494,13 @@
             // Get commission info with both percentage and value
             let commissionDisplay = '';
             let commissionValue = '';
+            let giroInfo = '';
 
             if (isTraditional && detail.taxaInfo) {
               const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
+              const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
               commissionDisplay = `${mediaCorretagem}% corretagem`;
+              giroInfo = `Índice de Giro: ${indiceGiro}`;
               if (detail.cost) {
                 commissionValue = this.formatCurrency(detail.cost);
               }
@@ -520,6 +523,7 @@
                   <div style="flex: 1;">
                     <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
                     <div style="font-size: 12px; color: #6b7280;">${commissionDisplay}</div>
+                    ${giroInfo ? `<div style="font-size: 11px; color: #9ca3af; margin-top: 2px;">${giroInfo}</div>` : ''}
                   </div>
                   <div style="text-align: right;">
                     <div style="font-size: 13px; font-weight: 600; color: #111827;">${detailValue}</div>

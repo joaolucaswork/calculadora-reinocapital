@@ -115,13 +115,11 @@
     getIndiceGiroContent() {
       return `
         <div style="padding: 12px; line-height: 1.5;">
-          <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Índice de Giro</h4>
           <p style="margin: 0; font-size: 14px; color: #374151;">
             O índice de giro mostra quantas vezes por ano o patrimônio é movimentado por aportes e resgates.
             <br><br>
             Um valor alto indica maior rotatividade, enquanto um valor baixo aponta para mais estabilidade.
-            <br><br>
-            Ele é importante para entender o perfil da carteira e pode influenciar nos custos e na estratégia de investimento.
+            
           </p>
         </div>
       `;
