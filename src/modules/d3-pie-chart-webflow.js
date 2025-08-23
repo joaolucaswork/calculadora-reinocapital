@@ -1,8 +1,11 @@
 /**
  * D3.js Pie Chart Webflow System - Standalone for Webflow
  * Creates interactive pie charts in the main-area-content div using D3.js
+ *
+ * ⚠️ COMENTADO - Gráfico de pizza da seção 4 desabilitado
  */
 
+/* COMENTADO - Gráfico de pizza da seção 4
 class ReinoD3PieChartWebflowSystem {
   constructor() {
     this.isInitialized = false;
@@ -95,6 +98,7 @@ class ReinoD3PieChartWebflowSystem {
     }
   }
 
+  /* COMENTADO - Métodos do gráfico de pizza
   initializeContainer() {
     this.chartContainer = document.querySelector('.main-area-content');
 
@@ -484,3 +488,4 @@ window.ReinoPieChart = {
       : null;
   },
 };
+FIM DO COMENTÁRIO - Gráfico de pizza da seção 4 */

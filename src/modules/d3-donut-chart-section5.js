@@ -103,6 +103,11 @@
         this.handleAssetSelection();
       });
 
+      // Listener para mudanças no índice de giro
+      document.addEventListener('rotationIndexChanged', (e) => {
+        this.handleRotationIndexChange();
+      });
+
       // Limpar tooltips quando o usuário sair da seção
       document.addEventListener('click', (e) => {
         const section5 =
@@ -125,14 +130,9 @@
       const tradicionalChart = document.querySelector(
         '[chart-content="tradicional"][chart-type="donut"]'
       );
-      const reinoChart = document.querySelector('[chart-content="reino"][chart-type="donut"]');
 
       if (tradicionalChart) {
         this.createChart(tradicionalChart, 'tradicional');
-      }
-
-      if (reinoChart) {
-        this.createChart(reinoChart, 'reino');
       }
     }
 
@@ -188,6 +188,10 @@
     }
 
     handleResultadoSync() {
+      this.updateAllCharts();
+    }
+
+    handleRotationIndexChange() {
       this.updateAllCharts();
     }
 
@@ -302,20 +306,6 @@
     getCategoryDataFromResultSync(resultData, chartType) {
       const categoryTotals = new Map();
       const categoryDetails = new Map();
-      const isTraditional = window.shouldCalculateTraditionalRates
-        ? window.shouldCalculateTraditionalRates(chartType)
-        : chartType === 'tradicional';
-
-      // Obter patrimônio total
-      const patrimonioInput = document.querySelector('[is-main="true"] .currency-input.individual');
-      const patrimonioTotal = patrimonioInput
-        ? parseFloat(patrimonioInput.value.replace(/[^\d.,]/g, '').replace(',', '.')) || 0
-        : 0;
-
-      const reinoInfo =
-        !isTraditional && window.calcularCustoReino
-          ? window.calcularCustoReino(patrimonioTotal)
-          : null;
 
       Object.entries(resultData.patrimonio).forEach(([key, item]) => {
         if (item && item.valor > 0) {
@@ -323,31 +313,39 @@
           const product = item.product || key;
 
           let taxaInfo = null;
-          let custoTradicional = null;
-          let custoReinoProporcional = 0;
+          let custoCalculado = 0;
 
-          if (isTraditional) {
-            // Calcular taxa tradicional para este produto
-            if (window.getTaxaTradicional) {
-              taxaInfo = window.getTaxaTradicional(category, product);
-            }
-            if (window.calcularCustoTradicional) {
-              custoTradicional = window.calcularCustoTradicional(category, product, item.valor);
+          // Usar sistema de rotation index para cálculo de comissão
+          const rotationController = window.ReinoRotationIndexController;
+          if (rotationController) {
+            const productKey = `${category}:${product}`;
+            const rotationCalc = rotationController.getProductCalculation(productKey);
+
+            if (rotationCalc) {
+              custoCalculado = item.valor * rotationCalc.comissaoRate;
+
+              // Obter dados do produto para incluir média de corretagem
+              const productData = rotationController.getProductData(productKey);
+              const mediaCorretagemPercent = productData
+                ? (productData.mediaCorretagem * 100).toFixed(2)
+                : 'N/A';
+
+              taxaInfo = {
+                comissaoRate: rotationCalc.comissaoRate,
+                comissaoPercent: rotationCalc.comissaoPercent,
+                fatorEfetivo: rotationCalc.fatorEfetivo,
+                indiceGiro: rotationController.getCurrentIndex(),
+                mediaCorretagem: mediaCorretagemPercent,
+              };
+            } else {
+              custoCalculado = item.valor * 0.01;
             }
           } else {
-            // Calcular custo Reino proporcional ao valor do produto
-            const somaProdutos = Object.values(resultData.patrimonio).reduce(
-              (sum, item) => sum + (item?.valor || 0),
-              0
-            );
-            custoReinoProporcional =
-              reinoInfo && somaProdutos > 0
-                ? (item.valor / somaProdutos) * reinoInfo.custoAnual
-                : 0;
+            custoCalculado = item.valor * 0.01;
           }
 
-          const currentValue = categoryTotals.get(category) || 0;
-          categoryTotals.set(category, currentValue + item.valor);
+          const currentCost = categoryTotals.get(category) || 0;
+          categoryTotals.set(category, currentCost + custoCalculado);
 
           if (!categoryDetails.has(category)) {
             categoryDetails.set(category, []);
@@ -355,18 +353,10 @@
           categoryDetails.get(category).push({
             product: product,
             value: item.valor,
+            cost: custoCalculado,
             percentage: item.percentual || 0,
-            taxaTradicional: taxaInfo ? taxaInfo.media : 0,
-            custoAnualTradicional: custoTradicional ? custoTradicional.custoAnual : 0,
-            custoAnualReino: custoReinoProporcional,
-            taxaReino: reinoInfo ? reinoInfo.taxaAnual : 0,
-            tipoReino: reinoInfo ? reinoInfo.tipo : 'percentual',
-            valorFixoReino: reinoInfo ? reinoInfo.valorFixoAnual : null,
-            taxaRange:
-              taxaInfo && window.formatarPercentual
-                ? `${window.formatarPercentual(taxaInfo.min)} - ${window.formatarPercentual(taxaInfo.max)}`
-                : 'N/A',
-            isTraditional: isTraditional,
+            taxaInfo: taxaInfo,
+            chartType: 'tradicional',
           });
         }
       });
@@ -389,12 +379,6 @@
       const categoryTotals = new Map();
       const categoryDetails = new Map();
 
-      // Obter patrimônio total para cálculo do Reino
-      const patrimonioInput =
-        document.querySelector('[is-main="true"] .currency-input.individual') ||
-        document.querySelector('[input-settings="receive"][is-main="true"]');
-      const patrimonioTotal = patrimonioInput ? this.parseCurrencyValue(patrimonioInput.value) : 0;
-
       patrimonioItems.forEach((item) => {
         const category = item.getAttribute('ativo-category');
         const product = item.getAttribute('ativo-product');
@@ -408,26 +392,33 @@
         let cost = 0;
         let taxaInfo = null;
 
-        if (chartType === 'tradicional') {
-          // Usar função de cálculo tradicional
-          if (window.calcularCustoProduto) {
-            const resultado = window.calcularCustoProduto(value, category, product);
-            cost = resultado.custoMedio || 0;
+        // Usar sistema de rotation index para cálculo de comissão
+        const rotationController = window.ReinoRotationIndexController;
+        if (rotationController) {
+          const productKey = `${category}:${product}`;
+          const rotationCalc = rotationController.getProductCalculation(productKey);
+
+          if (rotationCalc) {
+            cost = value * rotationCalc.comissaoRate;
+
+            // Obter dados do produto para incluir média de corretagem
+            const productData = rotationController.getProductData(productKey);
+            const mediaCorretagemPercent = productData
+              ? (productData.mediaCorretagem * 100).toFixed(2)
+              : 'N/A';
+
             taxaInfo = {
-              min: resultado.taxaMinima,
-              max: resultado.taxaMaxima,
-              media: resultado.taxaMedia,
+              comissaoRate: rotationCalc.comissaoRate,
+              comissaoPercent: rotationCalc.comissaoPercent,
+              fatorEfetivo: rotationCalc.fatorEfetivo,
+              indiceGiro: rotationController.getCurrentIndex(),
+              mediaCorretagem: mediaCorretagemPercent,
             };
           } else {
-            // Fallback para taxa padrão
             cost = value * 0.01;
           }
-        } else if (chartType === 'reino') {
-          // Calcular custo Reino proporcional
-          if (window.calcularCustoReino && patrimonioTotal > 0) {
-            const reinoResult = window.calcularCustoReino(patrimonioTotal);
-            cost = (value / patrimonioTotal) * reinoResult.custoAnual;
-          }
+        } else {
+          cost = value * 0.01;
         }
 
         const currentValue = categoryTotals.get(category) || 0;
@@ -479,21 +470,24 @@
           const detailValue = this.formatCurrency(detail.value);
 
           if (isTraditional) {
-            const custoAnual = this.formatCurrency(
-              detail.custoAnualTradicional || detail.cost || 0
-            );
-            const taxa = window.formatarPercentual
-              ? window.formatarPercentual(detail.taxaTradicional || detail.taxaInfo?.media || 0)
-              : `${(detail.taxaTradicional || detail.taxaInfo?.media || 0).toFixed(2)}%`;
+            const custoAnual = this.formatCurrency(detail.cost || 0);
 
-            custoTotalCategoria += detail.custoAnualTradicional || detail.cost || 0;
+            custoTotalCategoria += detail.cost || 0;
+
+            // Informações do rotation index
+            let rotationInfo = '';
+            if (detail.taxaInfo) {
+              const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
+              const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
+              rotationInfo = `<br>Média Corretagem: ${mediaCorretagem}% | Índice de Giro: ${indiceGiro}`;
+            }
 
             detailsHtml += `
               <div style="font-size: 11px; margin: 4px 0; padding: 3px 0;">
                 <div style="font-weight: 600;">• ${detail.product}</div>
                 <div style="margin-left: 8px; color: #ccc;">
-                  Valor: ${detailValue} | Taxa: ${taxa}<br>
-                  Custo anual: ${custoAnual}
+                  Valor: ${detailValue}<br>
+                  Custo anual: ${custoAnual}${rotationInfo}
                 </div>
               </div>
             `;
@@ -520,7 +514,7 @@
       let custoInfo = '';
       if (isTraditional) {
         const custoTotalFormatado = this.formatCurrency(custoTotalCategoria);
-        custoInfo = `<div style="color: #ff9999; font-weight: 600; margin-top: 5px;">Custo Tradicional: ${custoTotalFormatado}/ano</div>`;
+        custoInfo = `<div style="color: #ff9999; font-weight: 600; margin-top: 5px;">Custo de Comissão: ${custoTotalFormatado}/ano</div>`;
       } else {
         const custoTotalFormatado = this.formatCurrency(custoTotalCategoria);
         custoInfo = `<div style="color: #90EE90; font-weight: 600; margin-top: 5px;">Reino: ${custoTotalFormatado}/ano</div>`;

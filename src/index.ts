@@ -3,7 +3,7 @@ import './modules/asset-selection-filter.js';
 import './modules/currency-control.js';
 import './modules/currency-formatting.js';
 import './modules/d3-donut-chart-section5.js';
-import './modules/d3-pie-chart-webflow.js';
+// import './modules/d3-pie-chart-webflow.js'; // COMENTADO - Gráfico de pizza da seção 4 desabilitado
 import './modules/event-coordinator.js';
 import './modules/motion-animation.js';
 import './modules/patrimony-sync.js';

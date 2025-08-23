@@ -125,135 +125,151 @@
     calculateProductCommission(product) {
       const { mediaCorretagem, prazoMedioAnos, fatorGiro, fixed } = product;
 
-      const fatorEfetivo = fixed ? 1 : fatorGiro * this.currentIndex;
-      const comissaoRate = (mediaCorretagem / prazoMedioAnos) * fatorEfetivo;
+      const indiceGiro = fixed ? 1 : this.currentIndex;
+      const comissaoRate = (mediaCorretagem / prazoMedioAnos) * fatorGiro * indiceGiro;
 
       return {
         comissaoRate: comissaoRate,
         comissaoPercent: comissaoRate * 100,
-        fatorEfetivo: fatorEfetivo,
+        fatorEfetivo: fatorGiro * indiceGiro,
       };
     }
 
     initializeProductData() {
       return {
         'Renda Fixa:CDB': {
-          mediaCorretagem: 0.0002,
+          mediaCorretagem: 0.02,
           prazoMedioAnos: 3.0,
           fatorGiro: 1.2,
           fixed: false,
         },
         'Renda Fixa:CRI': {
-          mediaCorretagem: 0.000425,
+          mediaCorretagem: 0.0425,
           prazoMedioAnos: 8.0,
           fatorGiro: 3.0,
           fixed: false,
         },
         'Renda Fixa:Títulos Públicos': {
-          mediaCorretagem: 0.00037500000000000006,
+          mediaCorretagem: 0.0375,
           prazoMedioAnos: 10.0,
           fatorGiro: 3.0,
           fixed: false,
         },
         'Fundo de Investimento:Ações': {
-          mediaCorretagem: 0.00017500000000000003,
+          mediaCorretagem: 0.0175,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: true,
         },
         'Fundo de Investimento:Liquidez': {
-          mediaCorretagem: 3.5000000000000004e-5,
+          mediaCorretagem: 0.0035,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: true,
         },
         'Fundo de Investimento:Renda Fixa': {
-          mediaCorretagem: 7.5e-5,
+          mediaCorretagem: 0.0075,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: true,
         },
         'Fundo de Investimento:Multimercado': {
-          mediaCorretagem: 0.00017500000000000003,
+          mediaCorretagem: 0.0175,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: true,
         },
         'Fundo de Investimento:Imobiliários': {
-          mediaCorretagem: 0.0002,
+          mediaCorretagem: 0.02,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: true,
         },
         'Fundo de Investimento:Private Equity': {
-          mediaCorretagem: 0.0002,
+          mediaCorretagem: 0.02,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: true,
         },
         'Renda Variável:Ações': {
-          mediaCorretagem: 5e-5,
+          mediaCorretagem: 0.005,
           prazoMedioAnos: 1.0,
           fatorGiro: 3.0,
           fixed: false,
         },
         'Renda Variável:Operação Estruturada': {
-          mediaCorretagem: 0.0005250000000000001,
+          mediaCorretagem: 0.0525,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: false,
         },
         'Renda Variável:Carteira Administrada': {
-          mediaCorretagem: 0.000325,
+          mediaCorretagem: 0.0325,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: false,
         },
         'Internacional:Investimentos': {
-          mediaCorretagem: 0.0002,
+          mediaCorretagem: 0.02,
           prazoMedioAnos: 5.0,
           fatorGiro: 1.0,
           fixed: false,
         },
         'Internacional:ETF': {
-          mediaCorretagem: 6.25e-5,
+          mediaCorretagem: 0.0063,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: false,
         },
+        'Previdência:Ações': {
+          mediaCorretagem: 0.0175,
+          prazoMedioAnos: 1.0,
+          fatorGiro: 1.0,
+          fixed: true,
+        },
+        'Previdência:Multimercado': {
+          mediaCorretagem: 0.0175,
+          prazoMedioAnos: 1.0,
+          fatorGiro: 1.0,
+          fixed: true,
+        },
+        'Previdência:Renda Fixa': {
+          mediaCorretagem: 0.0075,
+          prazoMedioAnos: 1.0,
+          fatorGiro: 1.0,
+          fixed: true,
+        },
         'Outros:COE': {
-          mediaCorretagem: 0.00055,
+          mediaCorretagem: 0.055,
           prazoMedioAnos: 5.0,
           fatorGiro: 1.2,
           fixed: false,
         },
         'Outros:Previdência': {
-          mediaCorretagem: 0.00017500000000000003,
+          mediaCorretagem: 0.0175,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: true,
         },
         'Outros:Poupança': {
-          mediaCorretagem: 2e-5,
+          mediaCorretagem: 0.002,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
-          fixed: false,
+          fixed: true,
         },
         'Outros:Operação compromissada': {
-          mediaCorretagem: 0.00065,
+          mediaCorretagem: 0.065,
           prazoMedioAnos: 1.0,
           fatorGiro: 0.33,
           fixed: false,
         },
         'Outros:Imóvel': {
-          mediaCorretagem: 0.0075,
-          prazoMedioAnos: 1.0,
+          mediaCorretagem: 0.75,
           fatorGiro: 1.0,
           fixed: false,
         },
         'Outros:Criptoativos': {
           mediaCorretagem: 0,
-          prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: false,
         },
@@ -276,6 +292,10 @@
     getProductCalculation(productKey) {
       const product = this.productData[productKey];
       return product ? this.calculateProductCommission(product) : null;
+    }
+
+    getProductData(productKey) {
+      return this.productData[productKey] || null;
     }
   }
 

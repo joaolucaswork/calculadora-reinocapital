@@ -4,7 +4,7 @@ import './asset-selection-filter.js';
 import './currency-control.js';
 import './currency-formatting.js';
 import './d3-donut-chart-section5.js';
-import './d3-pie-chart-webflow.js';
+// import './d3-pie-chart-webflow.js'; // COMENTADO - Gráfico de pizza da seção 4 desabilitado
 import './event-coordinator.js';
 import './motion-animation.js';
 import './patrimony-sync.js';

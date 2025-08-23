@@ -31,6 +31,11 @@
       Dólar: { min: 1.0, max: 2.0, media: 1.5, nome: 'Dólar' },
       ETF: { min: 1.0, max: 2.0, media: 1.5, nome: 'ETF' },
     },
+    Previdência: {
+      Ações: { min: 1.5, max: 2.0, media: 1.75, nome: 'Ações (FIA)' },
+      Multimercado: { min: 1.5, max: 2.0, media: 1.75, nome: 'Multimercado' },
+      'Renda Fixa': { min: 0.5, max: 1.0, media: 0.75, nome: 'Renda Fixa' },
+    },
     Outros: {
       Poupança: { min: 0.2, max: 0.2, media: 0.2, nome: 'Poupança' },
       Previdência: { min: 0.5, max: 1.5, media: 1.0, nome: 'Previdencia' },
@@ -69,6 +74,10 @@
     'Internacional:Ouro': 'Internacional.Ouro',
     'Internacional:Dólar': 'Internacional.Dólar',
     'Internacional:ETF': 'Internacional.ETF',
+
+    'Previdência:Ações': 'Previdência.Ações',
+    'Previdência:Multimercado': 'Previdência.Multimercado',
+    'Previdência:Renda Fixa': 'Previdência.Renda Fixa',
 
     'Outros:Poupança': 'Outros.Poupança',
     'Outros:Previdência': 'Outros.Previdência',
