@@ -21,4 +21,6 @@ import './simple-sync.js';
 // import './swiper-resultado.js'; // DESATIVADO - mantido para uso futuro
 import './typebot-integration.js';
 import './rotation-index-integration.js';
+import './tippy-tooltip-module.js';
+
 // Adicione outros módulos conforme necessário

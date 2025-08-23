@@ -12,7 +12,7 @@
       this.config = {
         minValue: 1,
         maxValue: 4,
-        defaultValue: 1,
+        defaultValue: 2,
         step: 1,
       };
 

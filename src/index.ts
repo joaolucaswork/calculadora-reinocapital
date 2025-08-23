@@ -30,3 +30,4 @@ import './config/supabase.js';
 import './config/taxas-tradicional.js';
 // Import rotation index integration after configs
 import './modules/rotation-index-integration.js';
+import './modules/tippy-tooltip-module.js';
