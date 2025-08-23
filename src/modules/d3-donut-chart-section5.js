@@ -19,6 +19,10 @@
         Internacional: '#bdaa6f',
         Outros: '#c0c0c0',
       };
+
+      // Initialize Simple Hover Module (will be set up in init method)
+      this.hoverModule = null;
+
       this.setupColorScale();
     }
 
@@ -27,6 +31,7 @@
 
       try {
         await this.loadD3();
+        this.initializeEnhancedHover();
         this.setupEventListeners();
         this.initializeCharts();
         this.isInitialized = true;
@@ -34,6 +39,33 @@
         document.dispatchEvent(new CustomEvent('donutChartSection5Ready'));
       } catch (error) {
         console.error('Failed to initialize D3DonutChartSection5System:', error);
+      }
+    }
+
+    initializeEnhancedHover() {
+      // Initialize Simple Hover Module if available
+      if (window.SimpleHoverModule) {
+        this.hoverModule = new window.SimpleHoverModule({
+          offset: { x: 15, y: -10 },
+          animationDuration: 150,
+          className: 'd3-donut-tooltip-section5',
+        });
+      } else {
+        console.warn('Simple Hover Module not available, using fallback');
+        // Create a comprehensive fallback
+        this.hoverModule = {
+          attachHoverEvents: (selection, options) => {
+            // Fallback to basic hover events
+            selection
+              .on('mouseenter', options.onHover)
+              .on('mouseleave', options.onOut)
+              .on('mousemove', options.onMove);
+          },
+          showTooltip: () => {},
+          hideTooltip: () => {},
+          destroy: () => {},
+          createTooltip: () => null,
+        };
       }
     }
 
@@ -69,6 +101,23 @@
 
       document.addEventListener('allocationChanged', (e) => {
         this.handleAssetSelection();
+      });
+
+      // Limpar tooltips quando o usuário sair da seção
+      document.addEventListener('click', (e) => {
+        const section5 =
+          document.querySelector('[data-section="5"]') ||
+          document.querySelector('.section-resultado') ||
+          document.querySelector('[chart-content]')?.closest('section');
+
+        if (section5 && !section5.contains(e.target)) {
+          this.cleanupTooltips();
+        }
+      });
+
+      // Limpar tooltips ao fazer scroll
+      document.addEventListener('scroll', () => {
+        this.cleanupTooltips();
       });
     }
 
@@ -172,8 +221,6 @@
         existingMessage.remove();
       }
 
-      this.createTooltip();
-
       const hoverArc = window.d3
         .arc()
         .innerRadius(chart.radius * 0.5)
@@ -198,11 +245,33 @@
 
       const arcUpdate = arcEnter.merge(arcs);
 
+      // Use Simple Hover Module instead of direct event handlers
+      this.hoverModule.attachHoverEvents(arcUpdate.select('path'), {
+        onHover: (event, d) => {
+          // Apply visual hover effect
+          window.d3.selectAll('.arc path').style('filter', 'brightness(1)');
+          window.d3
+            .select(event.target)
+            .transition()
+            .duration(150)
+            .attr('d', hoverArc)
+            .style('filter', 'brightness(1.1)');
+        },
+        onOut: (event, d) => {
+          // Remove visual hover effect
+          window.d3
+            .select(event.target)
+            .transition()
+            .duration(150)
+            .attr('d', arc)
+            .style('filter', 'brightness(1)');
+        },
+        tooltipContent: (d) => this.generateTooltipContent(d),
+        className: 'd3-donut-tooltip-section5',
+      });
+
       arcUpdate
         .select('path')
-        .on('mouseenter', (event, d) => this.onSliceHover(event, d, hoverArc))
-        .on('mouseleave', (event, d) => this.onSliceOut(event, d, arc))
-        .on('mousemove', (event, d) => this.onSliceMove(event, d))
         .transition()
         .duration(750)
         .attr('d', (d) => {
@@ -393,61 +462,8 @@
       return this.getCategoryData(type);
     }
 
-    createTooltip() {
-      window.d3.select('.d3-donut-tooltip').remove();
-
-      this.tooltip = window.d3
-        .select('body')
-        .append('div')
-        .attr('class', 'd3-donut-tooltip')
-        .style('position', 'absolute')
-        .style('background', 'rgba(0, 0, 0, 0.9)')
-        .style('color', '#fff')
-        .style('padding', '12px')
-        .style('border-radius', '8px')
-        .style('font-size', '13px')
-        .style('pointer-events', 'none')
-        .style('opacity', 0)
-        .style('z-index', '1000')
-        .style('box-shadow', '0 4px 12px rgba(0,0,0,0.3)')
-        .style('border', '1px solid rgba(255,255,255,0.1)');
-    }
-
-    onSliceHover(event, d, hoverArc) {
-      // Clear any existing hover states
-      window.d3.selectAll('.arc path').style('filter', 'brightness(1)');
-
-      // Apply hover to current slice
-      window.d3
-        .select(event.target)
-        .transition()
-        .duration(150)
-        .attr('d', hoverArc)
-        .style('filter', 'brightness(1.1)');
-
-      this.showTooltip(event, d);
-    }
-
-    onSliceOut(event, d, normalArc) {
-      window.d3
-        .select(event.target)
-        .transition()
-        .duration(150)
-        .attr('d', normalArc)
-        .style('filter', 'brightness(1)');
-
-      this.hideTooltip();
-    }
-
-    onSliceMove(event, d) {
-      if (this.tooltip && this.tooltip.style('opacity') > 0) {
-        this.tooltip.style('left', event.pageX + 15 + 'px').style('top', event.pageY - 10 + 'px');
-      }
-    }
-
-    showTooltip(event, d) {
-      if (!this.tooltip) return;
-
+    // Generate tooltip content for Simple Hover Module
+    generateTooltipContent(d) {
       const formatValue = this.formatCurrency(d.data.value);
       const isTraditional = d.data.chartType === 'tradicional';
 
@@ -510,25 +526,13 @@
         custoInfo = `<div style="color: #90EE90; font-weight: 600; margin-top: 5px;">Reino: ${custoTotalFormatado}/ano</div>`;
       }
 
-      this.tooltip
-        .style('opacity', 1)
-        .html(
-          `
-          <div style="font-weight: bold; margin-bottom: 5px;">${d.data.name}</div>
-          <div>Valor Total: ${formatValue}</div>
-          <div>Percentual: ${d.data.percentage.toFixed(1)}%</div>
-          ${custoInfo}
-          ${detailsHtml}
-        `
-        )
-        .style('left', event.pageX + 15 + 'px')
-        .style('top', event.pageY - 10 + 'px');
-    }
-
-    hideTooltip() {
-      if (this.tooltip) {
-        this.tooltip.transition().duration(150).style('opacity', 0);
-      }
+      return `
+        <div style="font-weight: bold; margin-bottom: 5px;">${d.data.name}</div>
+        <div>Valor Total: ${formatValue}</div>
+        <div>Percentual: ${d.data.percentage.toFixed(1)}%</div>
+        ${custoInfo}
+        ${detailsHtml}
+      `;
     }
 
     showNoDataMessage(chart) {
@@ -659,6 +663,19 @@
       this.charts.forEach((chart, type) => {
         this.destroyChart(type);
       });
+      this.cleanupTooltips();
+    }
+
+    cleanupTooltips() {
+      // Use Simple Hover Module cleanup
+      if (this.hoverModule && typeof this.hoverModule.destroy === 'function') {
+        this.hoverModule.destroy();
+      }
+
+      // Fallback cleanup for any remaining tooltips
+      if (window.d3) {
+        window.d3.selectAll('.d3-donut-tooltip-section5').remove();
+      }
     }
 
     refresh() {

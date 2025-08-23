@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class SectionVisibilitySystem {
@@ -37,6 +37,8 @@
         money: '._1-section-calc-money',
         ativos: '._2-section-calc-ativos',
         alocacao: '._3-section-patrimonio-alocation',
+        resultado: '._4-section-resultado',
+        resultado5: '._5-section-resultado',
         chart: '.section',
       };
 
@@ -99,13 +101,15 @@
       this.currentSection = sectionName;
       this.updateURL(sectionName);
 
-      document.dispatchEvent(new CustomEvent('sectionChanged', {
-        detail: { 
-          from: this.currentSection, 
-          to: sectionName,
-          animate 
-        }
-      }));
+      document.dispatchEvent(
+        new CustomEvent('sectionChanged', {
+          detail: {
+            from: this.currentSection,
+            to: sectionName,
+            animate,
+          },
+        })
+      );
 
       if (typeof this.onSectionShow === 'function') {
         this.onSectionShow(sectionName);
@@ -138,7 +142,7 @@
       if (animate && window.Motion) {
         section.element.style.opacity = '0';
         section.element.style.transform = 'scale(0.95)';
-        
+
         await window.Motion.animate(
           section.element,
           { opacity: 1, scale: 1 },
@@ -182,13 +186,13 @@
     }
 
     hideAllSections() {
-      Object.keys(this.sections).forEach(sectionName => {
+      Object.keys(this.sections).forEach((sectionName) => {
         this.hideSection(sectionName, false);
       });
     }
 
     showAllSections() {
-      Object.keys(this.sections).forEach(sectionName => {
+      Object.keys(this.sections).forEach((sectionName) => {
         this.displaySection(sectionName, false);
       });
     }
@@ -205,5 +209,4 @@
   } else {
     window.ReinoSectionVisibilitySystem.init();
   }
-
 })();

@@ -130,7 +130,6 @@ export class SectionVisibilitySystem {
     if (animate && window.Motion) {
       try {
         section.element.style.opacity = '0';
-        section.element.style.transform = 'translateY(20px)';
         await window.Motion.animate(
           section.element,
           { opacity: [0, 1], y: [20, 0] },

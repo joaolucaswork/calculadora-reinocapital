@@ -581,12 +581,10 @@ export class StepNavigationProgressSystem {
       if (index === stepIndex) {
         section.style.display = 'block';
         section.style.opacity = '1';
-        section.style.transform = 'translateY(0)';
         section.style.pointerEvents = 'auto';
       } else {
         section.style.display = 'none';
         section.style.opacity = '0';
-        section.style.transform = 'translateY(20px)';
         section.style.pointerEvents = 'none';
       }
     });

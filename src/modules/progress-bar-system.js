@@ -262,8 +262,16 @@
         // Seções 3, 4 e 5: adiciona aloca-section
         this.progressBar.classList.add('aloca-section');
 
+        // Force pointer-events: none for section 5 specifically
+        if (stepIndex === 5) {
+          this.progressBar.style.pointerEvents = 'none';
+        }
+
         if (this.config.enableLogging) {
           console.warn('🎯 Adicionada classe "aloca-section" à progress bar');
+          if (stepIndex === 5) {
+            console.warn('🎯 Forçado pointer-events: none para seção 5');
+          }
         }
       } else {
         // Seções 1 e 2: sem classe especial
@@ -554,12 +562,10 @@
         if (index === stepIndex) {
           section.style.display = 'block';
           section.style.opacity = '1';
-          section.style.transform = 'translateY(0)';
           section.style.pointerEvents = 'auto';
         } else {
           section.style.display = 'none';
           section.style.opacity = '0';
-          section.style.transform = 'translateY(20px)';
           section.style.pointerEvents = 'none';
         }
       });

@@ -9,7 +9,6 @@ class ReinoD3PieChartWebflowSystem {
     this.chartContainer = null;
     this.svg = null;
     this.currentData = null;
-    this.tooltip = null;
     this.config = {
       width: 400,
       height: 400,
@@ -30,6 +29,9 @@ class ReinoD3PieChartWebflowSystem {
       animationDuration: 750,
       hoverScale: 1.05,
     };
+
+    // Initialize Simple Hover Module (will be set up in init method)
+    this.hoverModule = null;
   }
 
   async init() {
@@ -43,6 +45,7 @@ class ReinoD3PieChartWebflowSystem {
       }
 
       await this.waitForD3();
+      this.initializeEnhancedHover();
       this.initializeContainer();
       this.setupEventListeners();
       this.isInitialized = true;
@@ -62,6 +65,33 @@ class ReinoD3PieChartWebflowSystem {
 
     if (!window.d3) {
       throw new Error('D3.js library not found');
+    }
+  }
+
+  initializeEnhancedHover() {
+    // Initialize Simple Hover Module if available
+    if (window.SimpleHoverModule) {
+      this.hoverModule = new window.SimpleHoverModule({
+        offset: { x: 15, y: -10 },
+        animationDuration: 200,
+        className: 'pie-chart-tooltip',
+      });
+    } else {
+      console.warn('Simple Hover Module not available, using fallback');
+      // Create a comprehensive fallback
+      this.hoverModule = {
+        attachHoverEvents: (selection, options) => {
+          // Fallback to basic hover events
+          selection
+            .on('mouseenter', options.onHover)
+            .on('mouseleave', options.onOut)
+            .on('mousemove', options.onMove);
+        },
+        showTooltip: () => {},
+        hideTooltip: () => {},
+        destroy: () => {},
+        createTooltip: () => null,
+      };
     }
   }
 
@@ -173,9 +203,6 @@ class ReinoD3PieChartWebflowSystem {
       .domain(processedData.map((d) => d.name))
       .range(this.config.colors);
 
-    // Create tooltip
-    this.createTooltip();
-
     // Create slices
     const slices = g
       .selectAll('.slice')
@@ -185,22 +212,43 @@ class ReinoD3PieChartWebflowSystem {
       .attr('class', 'slice');
 
     // Add paths
-    slices
+    const paths = slices
       .append('path')
       .attr('d', arc)
       .attr('fill', (d) => color(d.data.name))
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
-      .style('cursor', 'pointer')
-      .on('mouseover', (event, d) => {
-        this.onSliceHover(event, d, hoverArc, color);
-      })
-      .on('mouseout', (event, d) => {
-        this.onSliceOut(event, d, arc);
-      })
-      .on('click', (event, d) => {
-        this.onSliceClick(event, d);
-      })
+      .style('cursor', 'pointer');
+
+    // Use Simple Hover Module instead of direct event handlers
+    this.hoverModule.attachHoverEvents(paths, {
+      onHover: (event, d) => {
+        // Apply visual hover effect
+        d3.select(event.target)
+          .transition()
+          .duration(200)
+          .attr('d', hoverArc)
+          .style('filter', 'brightness(1.1)');
+      },
+      onOut: (event, d) => {
+        // Remove visual hover effect
+        d3.select(event.target)
+          .transition()
+          .duration(200)
+          .attr('d', arc)
+          .style('filter', 'brightness(1)');
+      },
+      tooltipContent: (d) => this.generateTooltipContent(d),
+      className: 'pie-chart-tooltip',
+    });
+
+    // Add click handler separately
+    paths.on('click', (event, d) => {
+      this.onSliceClick(event, d);
+    });
+
+    // Add animation
+    paths
       .transition()
       .duration(this.config.animationDuration)
       .attrTween('d', (d) => {
@@ -309,69 +357,20 @@ class ReinoD3PieChartWebflowSystem {
       .text((d) => `${d.name} (${d.percentage}%)`);
   }
 
-  createTooltip() {
-    if (this.tooltip) {
-      this.tooltip.remove();
-    }
+  // Generate tooltip content for Simple Hover Module
+  generateTooltipContent(d) {
+    const formatValue = (value) => {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(value);
+    };
 
-    this.tooltip = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'pie-chart-tooltip')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', 'rgba(0, 0, 0, 0.8)')
-      .style('color', 'white')
-      .style('padding', '8px 12px')
-      .style('border-radius', '4px')
-      .style('font-size', '12px')
-      .style('z-index', '1000')
-      .style('pointer-events', 'none');
-  }
-
-  onSliceHover(event, d, hoverArc, color) {
-    // Scale up the slice
-    d3.select(event.target)
-      .transition()
-      .duration(200)
-      .attr('d', hoverArc)
-      .style('filter', 'brightness(1.1)');
-
-    // Show tooltip
-    if (this.tooltip) {
-      const formatValue = (value) => {
-        return new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }).format(value);
-      };
-
-      this.tooltip
-        .style('visibility', 'visible')
-        .html(
-          `
-          <strong>${d.data.name}</strong><br/>
-          Valor: ${formatValue(d.data.value)}<br/>
-          Percentual: ${d.data.percentage}%
-        `
-        )
-        .style('left', event.pageX + 10 + 'px')
-        .style('top', event.pageY - 10 + 'px');
-    }
-  }
-
-  onSliceOut(event, d, arc) {
-    // Scale back to normal
-    d3.select(event.target)
-      .transition()
-      .duration(200)
-      .attr('d', arc)
-      .style('filter', 'brightness(1)');
-
-    // Hide tooltip
-    if (this.tooltip) {
-      this.tooltip.style('visibility', 'hidden');
-    }
+    return `
+      <strong>${d.data.name}</strong><br/>
+      Valor: ${formatValue(d.data.value)}<br/>
+      Percentual: ${d.data.percentage.toFixed(1)}%
+    `;
   }
 
   onSliceClick(event, d) {
@@ -394,9 +393,14 @@ class ReinoD3PieChartWebflowSystem {
     this.svg = null;
     this.currentData = null;
 
-    if (this.tooltip) {
-      this.tooltip.remove();
-      this.tooltip = null;
+    // Use Simple Hover Module cleanup
+    if (this.hoverModule && typeof this.hoverModule.destroy === 'function') {
+      this.hoverModule.destroy();
+    }
+
+    // Fallback cleanup for any remaining tooltips
+    if (window.d3) {
+      window.d3.selectAll('.pie-chart-tooltip').remove();
     }
   }
 

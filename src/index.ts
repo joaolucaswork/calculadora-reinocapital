@@ -11,10 +11,13 @@ import './modules/product-system.js';
 import './modules/progress-bar-system.js';
 import './modules/resultado-comparativo-calculator.js';
 import './modules/resultado-sync.js';
+import './modules/rotation-index-controller.js';
 import './modules/section-visibility.js';
+import './modules/settings-modal-controller.js';
 import './modules/simple-button-system.js';
+import './modules/simple-hover-module.js';
 import './modules/simple-sync.js';
-import './modules/swiper-resultado.js';
+// import './modules/swiper-resultado.js'; // DESATIVADO - mantido para uso futuro
 import './modules/typebot-integration.js';
 // Import button system modules
 import './button-system/button-coordinator.js';
@@ -25,3 +28,5 @@ import './button-system/navigation-buttons.js';
 import './config/honorarios-reino-config.js';
 import './config/supabase.js';
 import './config/taxas-tradicional.js';
+// Import rotation index integration after configs
+import './modules/rotation-index-integration.js';

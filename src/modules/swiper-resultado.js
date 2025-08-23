@@ -114,7 +114,8 @@ class ReinoSwiperResultado {
   setupResponsiveContainer() {
     const resultadoContainer = document.querySelector('.swiper.is-resultado');
     if (resultadoContainer) {
-      resultadoContainer.style.maxWidth = '768px';
+      resultadoContainer.style.maxWidth = '940px';
+      resultadoContainer.style.minWidth = '800px';
       resultadoContainer.style.margin = '0 auto';
       resultadoContainer.style.width = '100%';
       resultadoContainer.style.position = 'relative';
@@ -214,6 +215,8 @@ class ReinoSwiperResultado {
 }
 
 // Auto-initialize for standalone use (matching original pattern)
+// DESATIVADO - mantido para uso futuro
+/*
 if (typeof window !== 'undefined') {
   const initWhenReady = () => {
     if (typeof Swiper !== 'undefined') {
@@ -227,3 +230,4 @@ if (typeof window !== 'undefined') {
 
   initWhenReady();
 }
+*/
