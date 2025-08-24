@@ -1,24 +1,28 @@
 {
-  "name": "@finsweet/developer-starter",
-  "version": "0.0.0",
-  "description": "Developer starter template for Finsweet projects.",
-  "homepage": "https://github.com/finsweet/developer-starter#readme",
-  "license": "ISC",
-  "keywords": [],
+  "name": "reinocapital-calculadora",
+  "version": "1.0.0",
+  "description": "App de calculadora Reino Capital",
+  "homepage": "https://rc-calculadora.webflow.io/",
+  "license": "MIT",
+  "keywords": [
+    "calculator",
+    "javascript",
+    "cdn",
+    "reinocapital"
+  ],
   "author": {
-    "name": "Finsweet",
-    "url": "https://finsweet.com/"
+    "name": "Reino Capital"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/finsweet/developer-starter.git"
+    "url": "git+https://github.com/joaolucaswork/calculadora-reinocapital.git"
   },
   "bugs": {
-    "url": "https://github.com/finsweet/developer-starter/issues"
+    "url": "https://github.com/joaolucaswork/calculadora-reinocapital/issues"
   },
   "type": "module",
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "files": [
     "dist"
   ],
