@@ -26,23 +26,30 @@
         return null;
       }
 
+      // Use light theme for donut chart tooltips, dark for others
+      const isDonutTooltip = className.includes('d3-donut-tooltip');
+
       const tooltip = window.d3
         .select('body')
         .append('div')
         .attr('class', className)
         .style('position', 'fixed')
-        .style('background', 'rgba(0, 0, 0, 0.9)')
-        .style('color', '#fff')
-        .style('padding', '12px')
-        .style('border-radius', '8px')
+        .style('background', isDonutTooltip ? '#ffffff' : 'rgba(0, 0, 0, 0.9)')
+        .style('color', isDonutTooltip ? '#111827' : '#fff')
+        .style('padding', isDonutTooltip ? '16px' : '12px')
+        .style('border-radius', isDonutTooltip ? '12px' : '8px')
         .style('font-size', '14px')
+        .style('font-family', 'Satoshi Variable, Arial, sans-serif')
         .style('pointer-events', 'none')
         .style('opacity', 0)
         .style('visibility', 'hidden')
         .style('z-index', '10000')
-        .style('box-shadow', '0 4px 12px rgba(0,0,0,0.3)')
-        .style('border', '1px solid rgba(255,255,255,0.1)')
-        .style('max-width', '300px')
+        .style(
+          'box-shadow',
+          isDonutTooltip ? '0 10px 25px rgba(0,0,0,0.15)' : '0 4px 12px rgba(0,0,0,0.3)'
+        )
+        .style('border', isDonutTooltip ? '1px solid #e5e7eb' : '1px solid rgba(255,255,255,0.1)')
+        .style('max-width', isDonutTooltip ? '280px' : '300px')
         .style('word-wrap', 'break-word');
 
       return tooltip;
@@ -143,9 +150,7 @@
       x = Math.max(20, Math.min(x, viewport.width - tooltipWidth - 20));
       y = Math.max(20, Math.min(y, viewport.height - tooltipHeight - 20));
 
-      this.state.activeTooltip
-        .style('left', x + 'px')
-        .style('top', y + 'px');
+      this.state.activeTooltip.style('left', x + 'px').style('top', y + 'px');
     }
 
     onSliceHover(event, d, hoverArc, contentFunction) {
