@@ -33,3 +33,5 @@ import './modules/rotation-index-integration.js';
 import './modules/tippy-tooltip-module.js';
 // Import CSS files
 import './css/tippy-custom.css';
+import './css/simple-button.css';
+import './css/asset-selection-filter';

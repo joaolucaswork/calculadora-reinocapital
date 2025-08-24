@@ -1,0 +1,136 @@
+/* Asset Selection Filter Styles */
+
+.asset-checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.asset-checkbox {
+  appearance: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid #ccc;
+  border-radius: 0.25rem;
+  margin: 0;
+  margin-right: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  background: white;
+}
+
+.asset-checkbox:hover {
+  border-color: #000;
+}
+
+.asset-checkbox:checked {
+  background-color: #000;
+  border-color: #000;
+}
+
+.asset-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.asset-checkbox-label {
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Selected asset styling - removed background color */
+.selected-asset {
+}
+
+/* Dropdown items styling */
+.ativo-item-subcategory .asset-checkbox-container {
+  order: -1;
+  margin-left: 0;
+}
+
+/* Individual items styling */
+.ativos_item .asset-checkbox-container {
+  order: -1;
+  margin-left: 0;
+}
+
+.ativos_item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+/* Counter styling enhancement */
+.counter_ativos {
+  font-weight: bold;
+  color: #000;
+}
+
+/* Section 3 filtered states */
+.asset-filtered-out {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.asset-filtered-in {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.3s ease;
+}
+
+/* Clear button enhancement */
+.ativos_clean-button {
+  transition: all 0.2s ease;
+}
+
+.ativos_clean-button:hover {
+  transform: scale(1.05);
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .asset-checkbox {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .asset-checkbox:checked::after {
+    font-size: 0.7rem;
+  }
+
+  .asset-checkbox-container {
+    margin-right: 0.25rem;
+  }
+}
+
+/* Animation for selection - removed scaling */
+@keyframes selectAsset {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.selected-asset {
+  animation: selectAsset 0.3s ease;
+}
+
+/* End of file */

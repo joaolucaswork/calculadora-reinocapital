@@ -1,4 +1,4 @@
-<!DOCTYPE html><!--  This site was created in Webflow. https://webflow.com  --><!--  Last Published: Fri Aug 22 2025 18:37:44 GMT+0000 (Coordinated Universal Time)  -->
+<!DOCTYPE html><!--  This site was created in Webflow. https://webflow.com  --><!--  Last Published: Sun Aug 24 2025 09:29:08 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="688144ef794cddf39f7c43af" data-wf-site="688144ef794cddf39f7c4396">
 <head>
   <meta charset="utf-8">
@@ -26,21 +26,21 @@
   <link href="images/webclip.png" rel="apple-touch-icon">
   <script defer="" src="http://localhost:3000/index.js"></script>
   <!--  1 - Asset Selection CSS | 2 - Simple Button CSS | 3 - Swiper Resultado CSS  -->
-  <link rel="stylesheet" href="https://assets.slater.app/slater/16606/45195.css">
-  <link rel="stylesheet" href="https://assets.slater.app/slater/16606/45197.css">
-  <link rel="stylesheet" href="https://assets.slater.app/slater/16606/45196.css">
+  <!--   <link rel="stylesheet" href="https://assets.slater.app/slater/16606/45195.css">  -->
+  <!--  <link rel="stylesheet" href="https://assets.slater.app/slater/16606/45197.css">   -->
+  <!--  <link rel="stylesheet" href="https://assets.slater.app/slater/16606/45196.css">  -->
   <!--  <style>._4-section-resultado {display: block!important;opacity: 100%!important}</style>  -->
   <style>
       ._5-section-resultado {
-        display: block !important;
-        opacity: 100% !important;
         height: 100svh !important;
         pointer-events: auto !important;
+        display: block !important;
+        opacity: 100% !important;
       }
     </style>
   <style>
       .progress-bar.first-section {
-        display: flex;
+        display: none !important;
       }
     </style>
   <style>
@@ -54,7 +54,8 @@
     </style>
   <!--  LIB EXTERNA  -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/range-slider-element@2/dist/range-slider-element.css">
-  <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/themes/light.css">
+  <!--  <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css"/>  -->
 </head>
 <body>
   <div class="page-wrapper calc-variation">
@@ -355,13 +356,14 @@ a,
       <style>
           /* Estratégia otimizada para telas desktop (991px+) */
           .patrimonio_interactive_content-wrapper {
-            border-radius: 30px;
+            border-radius: 15px;
             container-type: inline-size;
           }
           .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item {
             border: none;
             border-radius: 0;
             position: relative;
+            padding: 15px;
           }
           /* Bordas usando pseudo-elementos para maior flexibilidade */
           .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item::before,
@@ -393,16 +395,16 @@ a,
             }
             /* Cantos arredondados para 3 colunas */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:first-child {
-              border-top-left-radius: 30px;
+              border-top-left-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-child(3) {
-              border-top-right-radius: 30px;
+              border-top-right-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-last-child(3) {
-              border-bottom-left-radius: 30px;
+              border-bottom-left-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:last-child {
-              border-bottom-right-radius: 30px;
+              border-bottom-right-radius: 15px;
             }
             /* Remove borda direita da última coluna (a cada 3 itens) */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-child(3n)::before {
@@ -421,16 +423,16 @@ a,
             }
             /* Cantos arredondados para 2 colunas */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:first-child {
-              border-top-left-radius: 30px;
+              border-top-left-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-child(2) {
-              border-top-right-radius: 30px;
+              border-top-right-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-last-child(2) {
-              border-bottom-left-radius: 30px;
+              border-bottom-left-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:last-child {
-              border-bottom-right-radius: 30px;
+              border-bottom-right-radius: 15px;
             }
             /* Remove borda direita da segunda coluna */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-child(2n)::before {
@@ -449,16 +451,16 @@ a,
             }
             /* Cantos arredondados para 2 colunas */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:first-child {
-              border-top-left-radius: 30px;
+              border-top-left-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-child(2) {
-              border-top-right-radius: 30px;
+              border-top-right-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-last-child(2) {
-              border-bottom-left-radius: 30px;
+              border-bottom-left-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:last-child {
-              border-bottom-right-radius: 30px;
+              border-bottom-right-radius: 15px;
             }
             /* Remove borda direita da segunda coluna */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:nth-child(2n)::before {
@@ -477,12 +479,12 @@ a,
             }
             /* Cantos arredondados para 1 coluna */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:first-child {
-              border-top-left-radius: 30px;
-              border-top-right-radius: 30px;
+              border-top-left-radius: 15px;
+              border-top-right-radius: 15px;
             }
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item:last-child {
-              border-bottom-left-radius: 30px;
-              border-bottom-right-radius: 30px;
+              border-bottom-left-radius: 15px;
+              border-bottom-right-radius: 15px;
             }
             /* Remove todas as bordas direitas no mobile */
             .patrimonio_interactive_content-wrapper>.patrimonio_interactive_item::before {
@@ -644,7 +646,7 @@ a,
                           </svg></div>
                       </div>
                       <nav class="dropdown-list left-alignment v2 w-dropdown-list">
-                        <a ativo-product="Ações FIA" ativo-category="Fundo de Investimento" href="#" class="ativo-item-subcategory w-button">Ações (FIA)</a>
+                        <a ativo-product="Ações" ativo-category="Fundo de Investimento" href="#" class="ativo-item-subcategory w-button">Ações (FIA)</a>
                         <a ativo-product="Liquidez" ativo-category="Fundo de Investimento" href="#" class="ativo-item-subcategory w-button">Liquidez (DI/D0/D1)</a>
                         <a ativo-product="Multimercado" ativo-category="Fundo de Investimento" href="#" class="ativo-item-subcategory w-button">Multimercado</a>
                         <a ativo-product="Imobiliários Cetipados" ativo-category="Fundo de Investimento" href="#" class="ativo-item-subcategory w-button">Imobiliários Cetipados (FII/FIAGRO)</a>
@@ -683,6 +685,7 @@ a,
                   </div>
                   <div ativo-product="COE" ativo-category="COE" class="ativos_item">
                     <div>COE</div>
+                    <div class="asset-checkbox-container"><label for="asset-coe-coe" class="asset-checkbox-label"></label></div>
                   </div>
                   <div class="ativos_item dropdown">
                     <div data-hover="false" data-delay="0" class="dropdown-subcategory w-dropdown">
@@ -946,7 +949,7 @@ a,
                         </svg></div>
                     </button>
                   </div>
-                  <div ativo-category="Fundo de Investimento" ativo-product="Ações FIA" class="patrimonio_interactive_item">
+                  <div ativo-category="Fundo de Investimento" ativo-product="Ações" class="patrimonio_interactive_item">
                     <div class="ativo_alocated_top-wrapper">
                       <div class="categoria-ativo">Fundo de Investimento</div>
                       <div>Ações (FIA)</div>
@@ -2310,7 +2313,6 @@ a,
                   </div>
                 </div>
               </div>
-              <div class="main-area-content"></div>
               <div class="resultados-float-wrapper">
                 <div class="header-and-patrimonio">
                   <div class="top-header-resultados">
@@ -2752,202 +2754,123 @@ a,
                 </div>
               </div>
             </div>
-            <div class="div-block-2">
-              <div class="resultado-main-content">
-                <div class="div-block-5">
-                  <div class="swiper is-button">
-                    <div class="swiper-wrapper is-button">
-                      <div class="swiper-slide is-button">
-                        <div>Modelo tradicional</div>
-                      </div>
-                      <div class="swiper-slide is-button">
-                        <div>Modelo Reino Capital</div>
-                      </div>
-                    </div>
-                  </div>
-                  <a settings-att="button" href="#" class="settings-wrapper w-inline-block">
-                    <div class="icon-1x1 w-embed"><svg width="32" height="32" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12.8003 2.99625C13.2224 2.99625 13.599 3.26128 13.7417 3.65852L14.2499 5.07411C14.3306 5.29672 14.4872 5.48375 14.6921 5.60233L16.1997 6.47269C16.4045 6.59082 16.6444 6.63264 16.877 6.59074L18.3576 6.32363C18.7734 6.24803 19.1918 6.44183 19.4031 6.80783L20.2034 8.18841C20.4152 8.55342 20.3752 9.01208 20.1034 9.33489L19.132 10.4834C18.979 10.664 18.895 10.8929 18.8949 11.1296V12.8704C18.895 13.107 18.979 13.336 19.132 13.5166L20.1034 14.6651C20.3752 14.9879 20.4152 15.4466 20.2034 15.8116L19.4031 17.1922C19.192 17.5578 18.7741 17.7515 18.3586 17.6764L16.878 17.4092C16.6454 17.3674 16.4055 17.4092 16.2007 17.5273L14.6931 18.3977C14.4882 18.5162 14.3316 18.7033 14.2509 18.9259L13.7427 20.3415C13.5999 20.7391 13.2228 21.0041 12.8003 21.0037H11.1997C10.7776 21.0037 10.4009 20.7387 10.2583 20.3415L9.75005 18.9259C9.66941 18.7036 9.51326 18.5166 9.30887 18.3977L7.80024 17.5273C7.59551 17.4092 7.35557 17.3674 7.12296 17.4092L5.64234 17.6764C5.22657 17.752 4.80814 17.5582 4.5969 17.1922L3.79657 15.8116C3.58477 15.4466 3.62479 14.9879 3.89661 14.6651L4.86802 13.5166C5.02101 13.336 5.10502 13.107 5.10512 12.8704V11.1296C5.10502 10.8929 5.02101 10.664 4.86802 10.4834L3.90662 9.33489C3.6348 9.01208 3.59477 8.55342 3.80657 8.18841L4.60691 6.80783C4.81801 6.44222 5.23591 6.24849 5.65134 6.32363L7.13196 6.59074C7.36458 6.63264 7.60451 6.59082 7.80924 6.47269L9.31787 5.60233C9.52227 5.48338 9.67841 5.29643 9.75905 5.07411L10.2673 3.65852C10.4088 3.26436 10.7809 3.00008 11.1997 2.99625H12.8003Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <circle cx="12" cy="12" r="2.75115" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
-                      </svg></div>
-                  </a>
-                  <div settings-att="modal" class="settings-modal">
-                    <div class="setting-item">
+            <div class="resultado-main-content">
+              <div class="top-resultado-header">
+                <a settings-att="button" href="#" class="settings-wrapper w-inline-block">
+                  <div class="icon-1x1 w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M12.8003 2.99625C13.2224 2.99625 13.599 3.26128 13.7417 3.65852L14.2499 5.07411C14.3306 5.29672 14.4872 5.48375 14.6921 5.60233L16.1997 6.47269C16.4045 6.59082 16.6444 6.63264 16.877 6.59074L18.3576 6.32363C18.7734 6.24803 19.1918 6.44183 19.4031 6.80783L20.2034 8.18841C20.4152 8.55342 20.3752 9.01208 20.1034 9.33489L19.132 10.4834C18.979 10.664 18.895 10.8929 18.8949 11.1296V12.8704C18.895 13.107 18.979 13.336 19.132 13.5166L20.1034 14.6651C20.3752 14.9879 20.4152 15.4466 20.2034 15.8116L19.4031 17.1922C19.192 17.5578 18.7741 17.7515 18.3586 17.6764L16.878 17.4092C16.6454 17.3674 16.4055 17.4092 16.2007 17.5273L14.6931 18.3977C14.4882 18.5162 14.3316 18.7033 14.2509 18.9259L13.7427 20.3415C13.5999 20.7391 13.2228 21.0041 12.8003 21.0037H11.1997C10.7776 21.0037 10.4009 20.7387 10.2583 20.3415L9.75005 18.9259C9.66941 18.7036 9.51326 18.5166 9.30887 18.3977L7.80024 17.5273C7.59551 17.4092 7.35557 17.3674 7.12296 17.4092L5.64234 17.6764C5.22657 17.752 4.80814 17.5582 4.5969 17.1922L3.79657 15.8116C3.58477 15.4466 3.62479 14.9879 3.89661 14.6651L4.86802 13.5166C5.02101 13.336 5.10502 13.107 5.10512 12.8704V11.1296C5.10502 10.8929 5.02101 10.664 4.86802 10.4834L3.90662 9.33489C3.6348 9.01208 3.59477 8.55342 3.80657 8.18841L4.60691 6.80783C4.81801 6.44222 5.23591 6.24849 5.65134 6.32363L7.13196 6.59074C7.36458 6.63264 7.60451 6.59082 7.80924 6.47269L9.31787 5.60233C9.52227 5.48338 9.67841 5.29643 9.75905 5.07411L10.2673 3.65852C10.4088 3.26436 10.7809 3.00008 11.1997 2.99625H12.8003Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <circle cx="12" cy="12" r="2.75115" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
+                    </svg></div>
+                </a>
+                <div settings-att="modal" class="settings-modal">
+                  <div class="setting-item">
+                    <div class="settings-help">
                       <div>Índice de giro</div>
-                      <div class="range_wrap">
-                        <div class="percent-wrapper"><range-slider min="0" max="1" value="0" step="0.01" class="indice-giro" id="indice-giro"></range-slider>
-                          <div>
-                            <p class="indice-de-giro">1</p>
-                          </div>
+                      <a href="#" class="ajuda-botao w-inline-block">
+                        <div class="icon-1x1 w-embed"><svg width="6" height="10" viewbox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.999161 3.00951C1.21153 2.09421 2.04518 1.45959 2.98399 1.49854C4.03469 1.44035 4.93543 2.24101 5.00083 3.29129C5.00083 4.63934 3.07364 5.08403 3.07364 5.98041" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M3.18436 8.39041C3.18429 8.45176 3.13451 8.50145 3.07316 8.50143C3.01181 8.5014 2.96208 8.45167 2.96205 8.39032C2.96202 8.32896 3.01171 8.27919 3.07307 8.27911C3.10259 8.27908 3.13092 8.29079 3.1518 8.31167C3.17268 8.33255 3.1844 8.36088 3.18436 8.39041" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg></div>
+                      </a>
+                    </div>
+                    <div class="range_wrap">
+                      <div class="percent-wrapper"><range-slider min="1" max="4" value="2" step="1" class="indice-giro" id="indice-giro"></range-slider>
+                        <div>
+                          <p class="indice-de-giro">2</p>
                         </div>
                       </div>
                     </div>
-                    <a href="#" class="setting-item w-inline-block">
-                      <div>Ver detalhes</div>
-                    </a>
-                    <a href="#" class="setting-item last w-inline-block">
-                      <div>Tipo de gráfico</div>
-                      <div class="div-block-7">
-                        <div class="div-block-6"><input type="radio" id="select" class="radio"><label for="select" class="label">
-                            <div class="text-block-4">Rosca</div>
-                          </label></div>
-                        <div class="div-block-6"><input type="radio" id="select" class="radio"><label for="select" class="label">
-                            <div class="text-block-4">Barra</div>
-                          </label></div>
-                      </div>
-                    </a>
                   </div>
+                  <a href="#" class="setting-item last w-inline-block">
+                    <div>Tipo de gráfico</div>
+                    <div class="div-block-7">
+                      <div class="div-block-6"><input type="radio" id="select" class="radio"><label for="select" class="label">
+                          <div class="text-block-4">Rosca</div>
+                        </label></div>
+                      <div class="div-block-6"><input type="radio" id="select" class="radio"><label for="select" class="label">
+                          <div class="text-block-4">Barra</div>
+                        </label></div>
+                    </div>
+                  </a>
                 </div>
-                <div class="swiper is-resultado">
-                  <div class="swiper-wrapper is-resultado">
-                    <div class="swiper-slide is-resultado tradicional">
-                      <div class="swiper-content-top-wrapper">
-                        <div class="swiper-text-top-wrapper">
-                          <div class="icon-1x1 w-embed"><svg width="48" height="48" viewbox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M42 34V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                              <path d="M30 26V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                              <path d="M18 16V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                              <path d="M6 6V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg></div>
-                          <div class="swiper-texto-paragrafo">
-                            <h2 class="heading-resultados">Modelo tradicional</h2>
-                            <p>Remuneração por produto</p>
-                          </div>
-                        </div>
-                        <div class="divisor v3"></div>
-                        <div class="resultado-taxa-trad">
-                          <div class="total-value-inner-wrapper">
-                            <div class="cifrao value v2 v3">R$</div>
-                            <div data-resultado="tradicional" class="resultado-valor-tradicional">347,80</div>
-                            <div class="text-style-muted price">/ Anual</div>
-                          </div>
-                          <div class="text-style-muted">Todos os produtos somados</div>
-                        </div>
-                        <a href="#" class="swiper-button-detalhes w-inline-block">
-                          <div class="icon-1x1 w-embed"><svg width="4" height="13" viewbox="0 0 4 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M2.144 3.752C1.36 3.752 0.736 3.128 0.736 2.344C0.736 1.56 1.36 0.952 2.144 0.952C2.912 0.952 3.536 1.56 3.536 2.344C3.536 3.128 2.912 3.752 2.144 3.752ZM0.928 13V5H3.392V13H0.928Z" fill="white"></path>
-                            </svg></div>
-                        </a>
-                      </div>
-                      <div class="swiper-tradicional-valor">
-                        <div class="resultado-taxa-tradicional ativo"></div>
-                        <div class="categorias-resultado-produto">
-                          <div class="grafico-resultado">
-                            <div chart-content="tradicional" chart-type="donut" class="donuts-resultado tradicional"><img src="images/sections.png" loading="lazy" alt=""></div>
-                          </div>
+              </div>
+              <div class="swiper is-resultado">
+                <div class="swiper-wrapper is-resultado">
+                  <div class="swiper-slide is-resultado tradicional">
+                    <div class="swiper-content-top-wrapper">
+                      <div class="swiper-text-top-wrapper">
+                        <div class="icon-1x1 w-embed"><svg width="48" height="48" viewbox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M42 34V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M30 26V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M18 16V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M6 6V42" stroke="#323232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg></div>
+                        <div class="swiper-texto-paragrafo">
+                          <h2 class="heading-resultados">Modelo tradicional</h2>
+                          <p>Remuneração por produto</p>
                         </div>
                       </div>
-                      <div class="caracteristicas-tradicional">
-                        <div class="lista-resultado">
-                          <a ativo-category="Renda Fixa" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball renda-fixa"></div>
-                            <div>Renda Fixa</div>
-                          </a>
-                          <a ativo-category="Fundo de Investimento" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball fundo-investimento"></div>
-                            <div>Fundo de Investimento</div>
-                          </a>
-                          <a ativo-category="Renda Variável" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball renda-variavel"></div>
-                            <div>Renda Variável</div>
-                          </a>
-                          <a ativo-category="Internacional" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball internacional"></div>
-                            <div>Internacional</div>
-                          </a>
-                          <a ativo-category="COE" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball coe"></div>
-                            <div>COE</div>
-                          </a>
-                          <a ativo-category="Previdência" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball previdencia"></div>
-                            <div>Previdência</div>
-                          </a>
-                          <a ativo-category="Outros" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball outro"></div>
-                            <div>Outro</div>
-                          </a>
+                      <div class="divisor v3"></div>
+                      <div class="resultado-taxa-trad">
+                        <div class="total-value-inner-wrapper">
+                          <div class="cifrao value v2 v3">R$</div>
+                          <div data-resultado="tradicional" class="resultado-valor-tradicional">347,80</div>
+                          <div class="text-style-muted price">/ Anual</div>
+                        </div>
+                        <div class="text-style-muted">Todos os produtos somados</div>
+                      </div>
+                      <a href="#" class="swiper-button-detalhes w-inline-block">
+                        <div class="icon-1x1 w-embed"><svg width="4" height="13" viewbox="0 0 4 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.144 3.752C1.36 3.752 0.736 3.128 0.736 2.344C0.736 1.56 1.36 0.952 2.144 0.952C2.912 0.952 3.536 1.56 3.536 2.344C3.536 3.128 2.912 3.752 2.144 3.752ZM0.928 13V5H3.392V13H0.928Z" fill="currentColor"></path>
+                          </svg></div>
+                      </a>
+                    </div>
+                    <div class="swiper-tradicional-valor">
+                      <div class="resultado-taxa-tradicional ativo"></div>
+                      <div class="categorias-resultado-produto">
+                        <div class="grafico-resultado">
+                          <div chart-content="tradicional" chart-type="donut" class="donuts-resultado tradicional"><img src="images/sections.png" loading="lazy" alt=""></div>
                         </div>
                       </div>
                     </div>
-                    <div class="swiper-slide is-resultado reino">
-                      <div class="swiper-content-top-wrapper">
-                        <div class="swiper-text-top-wrapper">
-                          <div class="icon-1x1 w-embed"><svg width="53" height="53" viewbox="0 0 53 53" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <g clip-path="url(#clip0_258_357)">
-                                <path d="M0 23.3431C4.15181 23.3431 8.12177 23.3481 12.0918 23.3398C12.9725 23.3382 12.9325 23.9291 12.9308 24.5371C12.9275 28.1252 12.9291 31.7134 12.9291 35.3033C12.9291 41.1722 12.9291 47.0426 12.9291 53.0018H0V23.3431Z" fill="#252525"></path>
-                                <path d="M0.0782471 9.15549V0.0015564H52.919C52.8956 0.537365 52.8523 1.07317 52.8523 1.61066C52.8474 10.3159 52.8489 19.0211 52.8489 27.7262V29.3823C48.8607 29.3823 45.0658 29.3454 41.2709 29.4056C40.1951 29.4242 39.9098 29.091 39.9231 28.0294C39.9798 23.3645 39.9216 18.6962 39.9715 14.0297C39.9832 12.9664 39.663 12.6382 38.597 12.65C33.5913 12.7002 28.5838 12.6701 23.5779 12.6751C23.2859 12.6751 22.9941 12.722 22.4386 12.7705C22.8306 13.2444 23.0474 13.5541 23.3093 13.817C32.6321 23.1769 41.9399 32.5503 51.3077 41.8632C52.4436 42.99 52.9908 44.0852 52.8873 45.7142C52.7372 48.1104 52.8489 50.5231 52.8489 52.998C49.8899 52.998 47.1225 53.0146 44.3569 52.9761C44.0165 52.9728 43.6013 52.7585 43.3526 52.509C34.4637 43.6013 25.5978 34.6733 16.7121 25.7622C11.1808 20.2149 5.62454 14.6911 0.0782471 9.15549Z" fill="#252525"></path>
-                              </g>
-                              <defs>
-                                <clippath id="clip0_258_357">
-                                  <rect width="53" height="53" fill="white"></rect>
-                                </clippath>
-                              </defs>
-                            </svg></div>
-                          <div class="swiper-texto-paragrafo">
-                            <h2 class="heading-resultados">Modelo Reino</h2>
-                            <p>Custo sob o patrimonio</p>
-                          </div>
-                        </div>
-                        <div class="divisor v3"></div>
-                        <div class="resultado-taxa-trad">
-                          <div class="total-value-inner-wrapper">
-                            <div class="cifrao value v2 v3">R$</div>
-                            <div data-resultado="reino" class="resultado-valor-tradicional">300,00</div>
-                            <div class="text-style-muted price">/ Anual</div>
-                          </div>
-                          <div class="text-style-muted">Condições especiais</div>
-                        </div>
-                        <a href="#" class="swiper-button-detalhes w-inline-block">
-                          <div class="icon-1x1 w-embed"><svg width="4" height="13" viewbox="0 0 4 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M2.144 3.752C1.36 3.752 0.736 3.128 0.736 2.344C0.736 1.56 1.36 0.952 2.144 0.952C2.912 0.952 3.536 1.56 3.536 2.344C3.536 3.128 2.912 3.752 2.144 3.752ZM0.928 13V5H3.392V13H0.928Z" fill="white"></path>
-                            </svg></div>
+                    <div class="caracteristicas-tradicional">
+                      <div class="lista-resultado">
+                        <a ativo-category="Renda Fixa" href="#" class="lista-resultado-item w-inline-block">
+                          <div class="color-ball renda-fixa"></div>
+                          <div>Renda Fixa</div>
                         </a>
-                      </div>
-                      <div class="swiper-tradicional-valor">
-                        <div class="resultado-taxa-tradicional ativo"></div>
-                        <div class="categorias-resultado-produto">
-                          <div class="grafico-resultado">
-                            <div chart-content="reino" chart-type="donut" class="donuts-resultado reino"><img src="images/sections.png" loading="lazy" alt=""></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="caracteristicas-tradicional">
-                        <div class="lista-resultado">
-                          <a ativo-category="Renda Fixa" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball renda-fixa"></div>
-                            <div>Renda Fixa</div>
-                          </a>
-                          <a ativo-category="Fundo de Investimento" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball fundo-investimento"></div>
-                            <div>Fundo de Investimento</div>
-                          </a>
-                          <a ativo-category="Renda Variável" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball renda-variavel"></div>
-                            <div>Renda Variável</div>
-                          </a>
-                          <a ativo-category="Internacional" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball internacional"></div>
-                            <div>Internacional</div>
-                          </a>
-                          <a ativo-category="COE" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball coe"></div>
-                            <div>COE</div>
-                          </a>
-                          <a ativo-category="Previdência" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball previdencia"></div>
-                            <div>Previdência</div>
-                          </a>
-                          <a ativo-category="Outros" href="#" class="lista-resultado-item w-inline-block">
-                            <div class="color-ball outro"></div>
-                            <div>Outro</div>
-                          </a>
-                        </div>
+                        <a ativo-category="Fundo de Investimento" href="#" class="lista-resultado-item w-inline-block">
+                          <div class="color-ball fundo-investimento"></div>
+                          <div>Fundo de Investimento</div>
+                        </a>
+                        <a ativo-category="Renda Variável" href="#" class="lista-resultado-item w-inline-block">
+                          <div class="color-ball renda-variavel"></div>
+                          <div>Renda Variável</div>
+                        </a>
+                        <a ativo-category="Internacional" href="#" class="lista-resultado-item w-inline-block">
+                          <div class="color-ball internacional"></div>
+                          <div>Internacional</div>
+                        </a>
+                        <a ativo-category="COE" href="#" class="lista-resultado-item w-inline-block">
+                          <div class="color-ball coe"></div>
+                          <div>COE</div>
+                        </a>
+                        <a ativo-category="Previdência" href="#" class="lista-resultado-item w-inline-block">
+                          <div class="color-ball previdencia"></div>
+                          <div>Previdência</div>
+                        </a>
+                        <a ativo-category="Outros" href="#" class="lista-resultado-item w-inline-block">
+                          <div class="color-ball outro"></div>
+                          <div>Outro</div>
+                        </a>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+            <div class="disclaimer-wrapper">
+              <p class="texto-disclaimer">Esta calculadora utiliza médias de mercado e estimativas para fins educacionais e comparativos. Os valores apresentados são baseados em faixas de taxas coletadas de diferentes instituições financeiras e podem variar significativamente na prática. <br></p>
             </div>
           </div>
         </div>
@@ -2972,8 +2895,10 @@ a,
       }
     </script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <!--  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>  -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="https://unpkg.com/tippy.js@6"></script>
   <!--  Scripts carregados (ordem recomendada):
 1. https://assets.slater.app/slater/16606/45194.js      [taxas-tradicional.js]
 2. https://assets.slater.app/slater/16606/45192.js      [honorarios-reino-config.js]
