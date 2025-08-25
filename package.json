@@ -1,13 +1,12 @@
 {
   "name": "reinocapital-calculadora",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "App de calculadora Reino Capital",
-  "homepage": "https://rc-calculadora.webflow.io/",
+  "homepage": "https://www.reinocapital.com.br/taxas-app",
   "license": "MIT",
   "keywords": [
     "calculator",
     "javascript",
-    "cdn",
     "reinocapital"
   ],
   "author": {

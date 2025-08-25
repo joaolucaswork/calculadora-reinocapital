@@ -118,7 +118,7 @@
   /**
    * Create debug dashboard (development only)
    */
-  export function createDebugDashboard() {
+  function createDebugDashboard() {
     if (
       !(
         window.location.hostname === 'localhost' ||
