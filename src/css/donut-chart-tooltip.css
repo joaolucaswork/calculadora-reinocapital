@@ -20,6 +20,7 @@
     0 4px 6px rgba(0, 0, 0, 0.05) !important;
   padding: 16px !important;
   max-width: 280px !important;
+  font-weight: 500 !important;
   font-size: 14px !important;
   line-height: 1.4 !important;
   backdrop-filter: blur(8px);

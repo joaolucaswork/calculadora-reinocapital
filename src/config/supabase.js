@@ -4,12 +4,13 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   // Supabase project configuration
   const SUPABASE_URL = 'https://dwpsyresppubuxbrwrkc.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3cHN5cmVzcHB1YnV4YnJ3cmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjcxNzgsImV4cCI6MjA2ODk0MzE3OH0.Z0sA04rkEBVGnQqmHy8UO7FCzYjCCsG7ENCBuY4Ijbc';
+  const SUPABASE_ANON_KEY =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3cHN5cmVzcHB1YnV4YnJ3cmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjcxNzgsImV4cCI6MjA2ODk0MzE3OH0.Z0sA04rkEBVGnQqmHy8UO7FCzYjCCsG7ENCBuY4Ijbc';
 
   // Aguarda Supabase carregar
   function waitForSupabase() {
@@ -29,10 +30,10 @@
   async function initSupabase() {
     try {
       await waitForSupabase();
-      
+
       // Create Supabase client
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      
+
       // Database table name
       const TABLE_NAME = 'calculator_submissions';
 
@@ -52,8 +53,13 @@
 
       // Helper function to validate environment
       function validateSupabaseConfig() {
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-          console.error('❌ Supabase not configured. Please update supabase config with your credentials.');
+        if (
+          SUPABASE_URL === 'YOUR_SUPABASE_URL' ||
+          SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY'
+        ) {
+          console.error(
+            '❌ Supabase not configured. Please update supabase config with your credentials.'
+          );
           return false;
         }
         return true;
@@ -66,9 +72,8 @@
             throw new Error('Supabase not configured');
           }
 
-          const { data: result, error } = await supabaseClient
-            .from(TABLE_NAME)
-            .insert([{
+          const { data: result, error } = await supabaseClient.from(TABLE_NAME).insert([
+            {
               patrimonio: data.patrimonio,
               ativos_escolhidos: data.ativosEscolhidos,
               alocacao: data.alocacao,
@@ -76,8 +81,9 @@
               session_id: data.sessionId || crypto.randomUUID(),
               total_alocado: data.totalAlocado,
               percentual_alocado: data.percentualAlocado,
-              patrimonio_restante: data.patrimonioRestante
-            }]);
+              patrimonio_restante: data.patrimonioRestante,
+            },
+          ]);
 
           if (error) {
             throw error;
@@ -121,23 +127,41 @@
         schema: DATA_SCHEMA,
         saveCalculatorData,
         getCalculatorHistory,
-        validateConfig: validateSupabaseConfig
+        validateConfig: validateSupabaseConfig,
       };
 
-      document.dispatchEvent(new CustomEvent('supabaseReady', {
-        detail: { configured: validateSupabaseConfig() }
-      }));
+      // Compatibilidade reversa para módulos antigos
+      window.SUPABASE_TABLE_NAME = TABLE_NAME;
+      window.supabaseClient = supabaseClient;
 
+      // Para form-submission.js que espera window.supabase
+      if (!window.supabase) {
+        window.supabase = {
+          createClient: () => supabaseClient,
+        };
+      }
+
+      document.dispatchEvent(
+        new CustomEvent('supabaseReady', {
+          detail: { configured: validateSupabaseConfig() },
+        })
+      );
     } catch (error) {
-      console.error('Erro ao inicializar Supabase:', error);
-      
+      console.error('❌ Erro ao inicializar Supabase:', error);
+
       // Fallback sem Supabase
       window.ReinoSupabase = {
         client: null,
+        tableName: 'calculator_submissions',
         saveCalculatorData: async () => ({ success: false, error: 'Supabase not available' }),
         getCalculatorHistory: async () => ({ success: false, error: 'Supabase not available' }),
-        validateConfig: () => false
+        validateConfig: () => false,
       };
+
+      // Compatibilidade reversa mesmo em erro
+      window.SUPABASE_TABLE_NAME = 'calculator_submissions';
+      window.supabaseClient = null;
+      window.supabase = null;
     }
   }
 
@@ -147,5 +171,4 @@
   } else {
     initSupabase();
   }
-
 })();

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>Lead.Alocacao__c</members>
+        <members>Lead.Session_ID__c</members>
+        <members>Lead.User_Agent__c</members>
+        <members>Lead.Page_URL__c</members>
+        <members>Lead.Typebot_Completed__c</members>
+        <members>Lead.Typebot_Data__c</members>
+        <members>Lead.Submission_Type__c</members>
+        <members>Lead.Data_Submissao__c</members>
+        <members>Lead.Typebot_Completed_At__c</members>
+        <members>Lead.Supabase_ID__c</members>
+        <name>CustomField</name>
+    </types>
+    <version>62.0</version>
+</Package>

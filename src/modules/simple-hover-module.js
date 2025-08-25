@@ -40,6 +40,7 @@
         .style('border-radius', isDonutTooltip ? '12px' : '8px')
         .style('font-size', '14px')
         .style('font-family', 'Satoshi Variable, Arial, sans-serif')
+        .style('font-weight', '500')
         .style('pointer-events', 'none')
         .style('opacity', 0)
         .style('visibility', 'hidden')

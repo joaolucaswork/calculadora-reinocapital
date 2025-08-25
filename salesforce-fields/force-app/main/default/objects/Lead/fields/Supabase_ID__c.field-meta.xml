@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Supabase_ID__c</fullName>
+    <label>Supabase ID</label>
+    <description>ID do registro correspondente no Supabase</description>
+    <type>Text</type>
+    <length>255</length>
+    <unique>true</unique>
+    <caseSensitive>false</caseSensitive>
+    <externalId>true</externalId>
+    <trackFeedHistory>false</trackFeedHistory>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Data_Submissao__c</fullName>
+    <label>Data Submissão</label>
+    <description>Data e hora da submissão da calculadora</description>
+    <type>DateTime</type>
+    <externalId>false</externalId>
+    <trackFeedHistory>false</trackFeedHistory>
+</CustomField>

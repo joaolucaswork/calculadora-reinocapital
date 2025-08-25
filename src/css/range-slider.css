@@ -1,0 +1,106 @@
+/* Range Slider Styles */
+
+range-slider {
+  --track-size: 0.5rem;
+  --thumb-size: 1.7rem;
+}
+
+range-slider:not([orientation='vertical']) {
+  inline-size: 100%;
+}
+
+range-slider [data-track] {
+  background: #f4f3f1;
+  border-radius: 100vw;
+}
+
+range-slider [data-track-fill] {
+  background: #000000;
+  border-radius: 100vw;
+}
+
+range-slider [data-thumb] {
+  background: #000000;
+  border: none;
+  border-radius: 100vw;
+  cursor: pointer;
+  transition: transform 200ms ease;
+  will-change: transform;
+}
+
+range-slider [data-thumb]:active {
+  box-shadow: none;
+  transform: scale(1.1);
+}
+
+range-slider [data-thumb]:focus {
+  outline: none;
+}
+
+/* Specific styles for indice-giro slider */
+range-slider.indice-giro {
+  --thumb-size: 1.7rem;
+}
+
+range-slider.indice-giro [data-thumb] {
+  background: #000000;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+range-slider.indice-giro [data-thumb]:hover {
+  transform: scale(1.05);
+}
+
+range-slider.indice-giro [data-thumb]:active {
+  transform: scale(1.1);
+}
+
+/* Tooltip styles for rotation slider */
+.tippy-box[data-theme~='light'] .rotation-slider-tooltip {
+  font-family:
+    'Satoshi Variable',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.15),
+    0 4px 6px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.rotation-slider-tooltip h4 {
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.rotation-slider-tooltip .formula-box {
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.rotation-slider-tooltip .example-box {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 8px 0;
+}
+
+.rotation-slider-tooltip .cost-positive {
+  color: #ef4444;
+}
+
+.rotation-slider-tooltip .cost-negative {
+  color: #10b981;
+}
