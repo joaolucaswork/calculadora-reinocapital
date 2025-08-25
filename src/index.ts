@@ -31,7 +31,10 @@ import './config/taxas-tradicional.js';
 // Import rotation index integration after configs
 import './modules/rotation-index-integration.js';
 import './modules/tippy-tooltip-module.js';
+import './modules/rotation-slider-tooltip.js';
+import './modules/rotation-slider-tooltip.js';
 // Import CSS files
 import './css/tippy-custom.css';
 import './css/simple-button.css';
-import './css/asset-selection-filter';
+import './css/asset-selection-filter.css';
+import './css/range-slider.css';

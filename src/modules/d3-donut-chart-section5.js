@@ -499,7 +499,7 @@
             if (isTraditional && detail.taxaInfo) {
               const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
               const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
-              commissionDisplay = `${mediaCorretagem}% corretagem`;
+              commissionDisplay = `${mediaCorretagem}% média de corretagem`;
               giroInfo = `Índice de Giro: ${indiceGiro}`;
               if (detail.cost) {
                 commissionValue = this.formatCurrency(detail.cost);
@@ -533,7 +533,7 @@
                   commissionValue
                     ? `
                   <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f3f4f6;">
-                    <span style="font-size: 11px; color: #6b7280;">Custo anual:</span>
+                    <span style="font-size: 11px; color: #6b7280;">Comissão média anual:</span>
                     <span style="font-size: 12px; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
                   </div>
                 `

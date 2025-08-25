@@ -115,11 +115,11 @@
     getIndiceGiroContent() {
       return `
         <div style="padding: 12px; line-height: 1.5;">
-          <p style="margin: 0; font-size: 14px; color: #374151;">
+          <p style="font-weight: 500; margin: 0; font-size: 14px; color: #374151;">
             O índice de giro mostra quantas vezes por ano o patrimônio é movimentado por aportes e resgates.
             <br><br>
             Um valor alto indica maior rotatividade, enquanto um valor baixo aponta para mais estabilidade.
-            
+
           </p>
         </div>
       `;

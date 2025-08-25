@@ -6,7 +6,6 @@
       this.isInitialized = false;
       this.slider = null;
       this.displayElement = null;
-      this.currentIndex = 1;
       this.debugMode = window.location.search.includes('debug=true');
 
       this.config = {
@@ -16,6 +15,7 @@
         step: 1,
       };
 
+      this.currentIndex = this.config.defaultValue;
       this.productData = this.initializeProductData();
     }
 
@@ -29,12 +29,18 @@
       }
     }
 
-    setup() {
+    async setup() {
       try {
         this.cacheElements();
+        await this.waitForSliderInitialization();
         this.setupSlider();
         this.setupEventListeners();
         this.updateDisplay();
+
+        setTimeout(() => {
+          this.forceVisualSync();
+        }, 300);
+
         this.isInitialized = true;
 
         if (this.debugMode) {
@@ -58,13 +64,51 @@
       }
     }
 
-    setupSlider() {
-      this.slider.setAttribute('min', this.config.minValue);
-      this.slider.setAttribute('max', this.config.maxValue);
-      this.slider.setAttribute('step', this.config.step);
-      this.slider.setAttribute('value', this.config.defaultValue);
+    async waitForSliderInitialization() {
+      return new Promise((resolve) => {
+        const checkSliderReady = () => {
+          if (this.slider && this.slider.querySelector('[data-thumb]')) {
+            setTimeout(resolve, 100);
+          } else {
+            setTimeout(checkSliderReady, 50);
+          }
+        };
+        checkSliderReady();
+      });
+    }
 
-      this.currentIndex = this.config.defaultValue;
+    setupSlider() {
+      const currentValue = parseInt(this.slider.getAttribute('value'), 10);
+      this.currentIndex = currentValue || this.config.defaultValue;
+
+      this.forceSliderUpdate();
+    }
+
+    forceSliderUpdate() {
+      if (!this.slider) return;
+
+      this.slider.value = this.currentIndex.toString();
+
+      const thumb = this.slider.querySelector('[data-thumb]');
+      if (thumb) {
+        const percent =
+          ((this.currentIndex - this.config.minValue) /
+            (this.config.maxValue - this.config.minValue)) *
+          100;
+        thumb.style.setProperty('inset-inline-start', `${percent}%`);
+        thumb.setAttribute('aria-valuenow', this.currentIndex);
+      }
+
+      const trackFill = this.slider.querySelector('[data-track-fill]');
+      if (trackFill) {
+        const percent =
+          ((this.currentIndex - this.config.minValue) /
+            (this.config.maxValue - this.config.minValue)) *
+          100;
+        trackFill.style.setProperty('inset-inline', `0 ${100 - percent}%`);
+      }
+
+      this.updateDisplay();
     }
 
     setupEventListeners() {
@@ -88,6 +132,10 @@
         this.currentIndex = newValue;
         this.updateDisplay();
         this.dispatchIndexChange();
+
+        if (window.rotationSliderTooltipInstance) {
+          window.rotationSliderTooltipInstance.updateTooltipContent();
+        }
 
         if (this.debugMode) {
           console.log(`🔄 Rotation index changed to: ${this.currentIndex}`);
@@ -283,10 +331,13 @@
     setIndex(newIndex) {
       if (newIndex >= this.config.minValue && newIndex <= this.config.maxValue) {
         this.currentIndex = newIndex;
-        this.slider.value = newIndex;
-        this.updateDisplay();
+        this.forceSliderUpdate();
         this.dispatchIndexChange();
       }
+    }
+
+    forceVisualSync() {
+      this.forceSliderUpdate();
     }
 
     getProductCalculation(productKey) {

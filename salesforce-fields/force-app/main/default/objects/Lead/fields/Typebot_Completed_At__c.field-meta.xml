@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Typebot_Completed_At__c</fullName>
+    <label>Typebot Completed At</label>
+    <description>Data e hora da conclusão do Typebot</description>
+    <type>DateTime</type>
+    <externalId>false</externalId>
+    <trackFeedHistory>false</trackFeedHistory>
+</CustomField>

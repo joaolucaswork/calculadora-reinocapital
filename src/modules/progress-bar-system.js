@@ -81,6 +81,7 @@
 
       try {
         await this.waitForDOM();
+
         await this.cacheSections();
         this.cacheElements();
         this.setupSections();
@@ -182,6 +183,14 @@
 
             if (this.config.enableLogging) {
               console.warn(`🎯 Clicked on section indicator ${sectionNumber}`);
+            }
+
+            // Check navigation restrictions
+            if (this.isNavigationBlocked(sectionNumber)) {
+              if (this.config.enableLogging) {
+                console.warn(`🚫 Navigation blocked to section ${sectionNumber}`);
+              }
+              return;
             }
 
             this.goToStepFromIndicator(sectionNumber);
@@ -289,6 +298,9 @@
       // Aplica disabled-item nas interactive-main-item após sair do step 0
       this.updateInteractiveMainItems(stepIndex);
 
+      // Atualiza restrições de navegação
+      this.updateNavigationRestrictions();
+
       // Notifica mudança de estado
       this.notifyStateChange(previousStep, stepIndex);
     }
@@ -357,23 +369,35 @@
      * @param {number} activeStepIndex - Índice do step ativo
      */
     updateSectionIndicatorPointers(activeStepIndex) {
-      const sectionIndicators = document.querySelectorAll('.section-indicator');
+      this.sectionIndicators.forEach((indicatorContainer) => {
+        const indicator = indicatorContainer.querySelector('.section-indicator');
+        if (!indicator) return;
 
-      sectionIndicators.forEach((indicator) => {
-        if (activeStepIndex > 0) {
-          // Quando sair da seção 0, todos os indicadores ganham a classe pointer
+        const sectionMainElement = indicatorContainer.querySelector('[section-main]');
+        if (!sectionMainElement) return;
+
+        const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
+
+        // Check if this specific section is blocked
+        const isBlocked = this.isNavigationBlocked(sectionNumber);
+
+        if (isBlocked) {
+          // Remove pointer for blocked sections
+          indicator.classList.remove('pointer');
+        } else if (activeStepIndex > 0) {
+          // When not on step 0 and not blocked, add pointer
           indicator.classList.add('pointer');
         } else {
-          // Na seção 0, remove a classe pointer de todos
+          // On step 0, remove pointer from all (navigation blocked)
           indicator.classList.remove('pointer');
         }
       });
 
       if (this.config.enableLogging) {
         if (activeStepIndex > 0) {
-          console.warn('🔗 Adicionada classe "pointer" a todos os section-indicator');
+          console.warn('🔗 Atualizada navegação dos section-indicator baseado em restrições');
         } else {
-          console.warn('🔗 Removida classe "pointer" de todos os section-indicator');
+          console.warn('🔗 Navegação bloqueada em todos os section-indicator (step 0)');
         }
       }
     }
@@ -607,6 +631,39 @@
       } else {
         this.showValidationError();
       }
+    }
+
+    isNavigationBlocked(sectionNumber) {
+      // Block access to step 4 (section-step="4") - always blocked
+      if (sectionNumber === 4) {
+        return true;
+      }
+
+      // Block all navigation when on step 0
+      if (this.currentStep === 0) {
+        return true;
+      }
+
+      return false;
+    }
+
+    updateNavigationRestrictions() {
+      this.sectionIndicators.forEach((indicatorContainer) => {
+        const indicator = indicatorContainer.querySelector('.section-indicator');
+        if (!indicator) return;
+
+        const sectionMainElement = indicatorContainer.querySelector('[section-main]');
+        if (!sectionMainElement) return;
+
+        const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
+        const isBlocked = this.isNavigationBlocked(sectionNumber);
+
+        if (isBlocked) {
+          indicator.style.pointerEvents = 'none';
+        } else {
+          indicator.style.pointerEvents = '';
+        }
+      });
     }
 
     goToStepFromIndicator(sectionNumber) {

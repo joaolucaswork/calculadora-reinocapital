@@ -286,6 +286,15 @@
           if (this.state.active || this.state.animating) return;
 
           clearTimeout(this.deactivateTimer);
+
+          // Add 700ms delay before state transition begins
+          await new Promise((resolve) => setTimeout(resolve, 300));
+
+          // Check if item is still supposed to be activated after delay
+          if (!this.state.interacting && !this.state.sliderDragging && !this.state.pinned) {
+            return;
+          }
+
           this.state.active = true;
           this.state.animating = true;
 
