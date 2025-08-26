@@ -17,7 +17,10 @@
         'Fundo de Investimento': '#e3ad0c',
         'Renda Variável': '#776a41',
         Internacional: '#bdaa6f',
-        Outros: '#c0c0c0',
+        COE: '#d17d00',
+        Previdência: '#8c5e00',
+        Outro: '#4f4f4f',
+        Outros: '#4f4f4f',
       };
 
       // Initialize Simple Hover Module (will be set up in init method)

@@ -35,6 +35,7 @@ import './config/taxas-tradicional.js';
 import './modules/rotation-index-integration.js';
 import './modules/tippy-tooltip-module.js';
 import './modules/rotation-slider-tooltip.js';
+import './modules/reino-debug-module.js';
 // Import CSS files
 import './css/tippy-custom.css';
 import './css/simple-button.css';
