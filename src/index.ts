@@ -9,6 +9,7 @@ import './modules/event-coordinator.js';
 import './modules/motion-animation.js';
 import './modules/patrimony-sync.js';
 import './modules/product-system.js';
+import './modules/click-product-system.js';
 import './modules/progress-bar-system.js';
 import './modules/resultado-comparativo-calculator.js';
 import './modules/resultado-sync.js';

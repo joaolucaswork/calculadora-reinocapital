@@ -1,13 +1,13 @@
 /**
- * Product System - Versão Webflow TXT
- * Handles product interaction logic for patrimony allocation items
+ * Click-Based Product System - Versão Webflow TXT
+ * Handles product interaction logic for patrimony allocation items with click-based edit icon triggers
  * Versão sem imports/exports para uso direto no Webflow
  */
 
 (function () {
   'use strict';
 
-  class ProductSystem {
+  class ClickProductSystem {
     constructor() {
       this.isInitialized = false;
       this.Motion = null;
@@ -35,27 +35,27 @@
     waitForMotion() {
       if (window.Motion) {
         this.Motion = window.Motion;
-        this.initProductSystem();
+        this.initClickProductSystem();
       } else {
         setTimeout(() => this.waitForMotion(), 50);
       }
     }
 
-    initProductSystem() {
-      /* COMMENTED OUT - ORIGINAL HOVER-BASED FUNCTIONALITY
-      const { animate, hover } = this.Motion;
+    initClickProductSystem() {
+      const { animate } = this.Motion;
 
-      // Configuração simplificada
       const config = {
         duration: {
           fast: 0.3,
           normal: 0.5,
           slow: 0.6,
         },
-        delay: {
-          deactivate: 1,
-          display: 0.45,
-        },
+        // COMMENTED OUT - No automatic visual state transitions
+        // Auto-save is handled by other systems (patrimony-sync, etc.)
+        // delay: {
+        //   deactivate: 5,
+        //   display: 0.45,
+        // },
         animation: {
           blur: 8,
           move: 15,
@@ -64,21 +64,21 @@
         ease: 'circOut',
       };
 
-      // Classe para gerenciar cada item
-      class ProductItem {
+      class ClickProductItem {
         constructor(element, index, parentSystem) {
           this.element = element;
           this.index = index;
           this.parentSystem = parentSystem;
           this.activeDiv = element.querySelector('.active-produto-item');
           this.disabledDiv = element.querySelector('.disabled-produto-item');
+          this.editIcon = element.querySelector('.edit-icon');
           this.input = element.querySelector('.currency-input.individual');
           this.slider = element.querySelector('range-slider');
           this.sliderThumb = element.querySelector('[data-thumb]');
           this.pinButton = element.querySelector('.pin-function');
 
           this.state = {
-            active: false,
+            active: true, // Start in edit mode by default
             interacting: false,
             sliderDragging: false,
             animating: false,
@@ -92,17 +92,16 @@
         init(animate, config) {
           if (!this.activeDiv || !this.disabledDiv) return;
 
-          // Estado inicial
-          this.activeDiv.style.display = 'none';
-          this.disabledDiv.style.display = 'flex';
+          // Start in active mode by default
+          this.disabledDiv.style.display = 'none';
+          this.activeDiv.style.display = 'block';
 
           if (this.pinButton) {
-            this.pinButton.style.display = 'none';
+            this.pinButton.style.display = 'block';
           }
 
-          this.setupEvents(animate, config);
+          this.setupClickEvents(animate, config);
 
-          // Animação de entrada
           animate(
             this.element,
             {
@@ -117,7 +116,19 @@
           );
         }
 
-        setupEvents(animate, config) {
+        setupClickEvents(animate, config) {
+          // Edit icon is only visible in disabled state, so it only activates
+          if (this.editIcon) {
+            this.editIcon.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (!this.state.active) {
+                this.activate(animate, config);
+              }
+            });
+
+            this.editIcon.style.cursor = 'pointer';
+          }
+
           if (this.pinButton) {
             this.pinButton.addEventListener('click', (e) => {
               e.stopPropagation();
@@ -129,45 +140,15 @@
             });
           }
 
-          // Eventos do container
-          const startInteraction = () => {
-            if (this.parentSystem.activeSlider && this.parentSystem.activeSlider !== this) return;
-            this.state.interacting = true;
-            this.activate(animate, config);
-          };
-
-          const endInteraction = () => {
-            if (!this.state.sliderDragging && !this.state.pinned) {
-              this.state.interacting = false;
-              this.scheduleDeactivate(animate, config);
-            }
-          };
-
-          this.element.addEventListener('mouseenter', startInteraction);
-          this.element.addEventListener('mouseleave', () => {
-            if (
-              !this.state.sliderDragging &&
-              !this.parentSystem.globalInteracting &&
-              !this.state.pinned
-            ) {
-              endInteraction();
-            }
-          });
-
-          this.element.addEventListener('touchstart', startInteraction, { passive: true });
-
-          // Input events
           if (this.input) {
             this.input.addEventListener('focus', () => {
               this.state.interacting = true;
-              this.activate(animate, config);
             });
 
             this.input.addEventListener('blur', () => {
-              if (!this.state.pinned) {
-                this.state.interacting = false;
-                this.scheduleDeactivate(animate, config);
-              }
+              this.state.interacting = false;
+              // Auto-save happens automatically via other systems
+              // No visual state change - only manual via pin button
             });
 
             this.input.addEventListener('mousedown', (e) => {
@@ -176,14 +157,12 @@
             });
           }
 
-          // Eventos do Slider
           if (this.slider) {
             const startSliderDrag = () => {
               this.state.sliderDragging = true;
               this.state.interacting = true;
               this.parentSystem.globalInteracting = true;
               this.parentSystem.activeSlider = this;
-              this.activate(animate, config);
               this.slider.classList.add('dragging');
             };
 
@@ -194,11 +173,9 @@
                 this.parentSystem.activeSlider = null;
                 this.slider.classList.remove('dragging');
 
-                const mouseOverElement = this.element.matches(':hover');
-                if (!mouseOverElement && !this.state.pinned) {
-                  this.state.interacting = false;
-                  this.scheduleDeactivate(animate, config);
-                }
+                this.state.interacting = false;
+                // Auto-save happens automatically via other systems
+                // No visual state change - only manual via pin button
               }
             };
 
@@ -221,11 +198,9 @@
 
             this.slider.addEventListener('input', () => {
               this.state.interacting = true;
-              this.activate(animate, config);
             });
           }
 
-          // Hover effect usando Motion
           if (this.parentSystem.Motion.hover && this.parentSystem.Motion.animate) {
             this.parentSystem.Motion.hover(this.element, (element) => {
               this.parentSystem.Motion.animate(
@@ -257,30 +232,24 @@
           }
         }
 
+        // toggleState removed - edit icon only activates, pin button only deactivates
+
         togglePin(animate) {
-          this.state.pinned = !this.state.pinned;
-
-          if (this.state.pinned) {
-            this.pinButton.classList.add('active');
+          // Pin button acts as a "save and close" button
+          // Auto-save is handled by other systems, this just changes visual state
+          if (this.state.active) {
+            // Force visual deactivation immediately (data is auto-saved by other systems)
+            this.state.interacting = false;
+            this.state.pinned = false;
             clearTimeout(this.deactivateTimer);
-          } else {
-            this.pinButton.classList.remove('active');
-            if (!this.state.interacting && !this.state.sliderDragging) {
-              this.scheduleDeactivate(animate, { delay: { deactivate: 1 } });
-            }
-          }
 
-          animate(
-            this.pinButton,
-            {
-              scale: [1.2, 1],
-              rotate: this.state.pinned ? 45 : 0,
-            },
-            {
-              duration: 0.3,
-              ease: 'backOut',
-            }
-          );
+            // Immediate visual deactivation when pin is clicked - no delay
+            this.deactivate(animate, {
+              duration: { fast: 0.3, normal: 0.5 },
+              animation: { move: 15 },
+              ease: 'circOut',
+            });
+          }
         }
 
         async activate(animate, config) {
@@ -288,16 +257,9 @@
 
           clearTimeout(this.deactivateTimer);
 
-          // Add 700ms delay before state transition begins
-          await new Promise((resolve) => setTimeout(resolve, 300));
-
-          // Check if item is still supposed to be activated after delay
-          if (!this.state.interacting && !this.state.sliderDragging && !this.state.pinned) {
-            return;
-          }
-
           this.state.active = true;
           this.state.animating = true;
+          this.state.interacting = true;
 
           await animate(
             this.disabledDiv,
@@ -347,14 +309,16 @@
           this.state.animating = false;
         }
 
+        /* COMMENTED OUT - No automatic visual state change, only manual via pin button
+         * Auto-save functionality is handled by other systems (patrimony-sync, etc.)
+         * This only controls the visual state transitions between active/disabled views
         scheduleDeactivate(animate, config) {
           clearTimeout(this.deactivateTimer);
 
           if (
             this.state.interacting ||
             this.state.sliderDragging ||
-            this.parentSystem.globalInteracting ||
-            this.state.pinned
+            this.parentSystem.globalInteracting
           ) {
             return;
           }
@@ -363,25 +327,20 @@
             if (
               !this.state.interacting &&
               !this.state.sliderDragging &&
-              !this.parentSystem.globalInteracting &&
-              !this.state.pinned
+              !this.parentSystem.globalInteracting
             ) {
               this.deactivate(animate, config);
             }
           }, config.delay.deactivate * 1000);
         }
+        */
 
         async deactivate(animate, config) {
-          if (
-            !this.state.active ||
-            this.state.animating ||
-            this.state.sliderDragging ||
-            this.state.pinned
-          )
-            return;
+          if (!this.state.active || this.state.animating || this.state.sliderDragging) return;
 
           this.state.active = false;
           this.state.animating = true;
+          this.state.interacting = false;
 
           if (this.pinButton) {
             await animate(
@@ -431,16 +390,13 @@
         }
       }
 
-      // Inicializa todos os items
       const items = document.querySelectorAll('.patrimonio_interactive_item');
 
       items.forEach((item, index) => {
-        this.items.push(new ProductItem(item, index, this));
+        this.items.push(new ClickProductItem(item, index, this));
       });
 
-      // Adiciona estilos para feedback visual durante arraste
       this.addDragStyles();
-      END OF COMMENTED OUT HOVER-BASED FUNCTIONALITY */
     }
 
     addDragStyles() {
@@ -458,14 +414,13 @@
       document.head.appendChild(style);
     }
 
-    // Métodos públicos para integração
     getItems() {
       return this.items;
     }
 
     resetAllItems() {
       this.items.forEach((item) => {
-        if (item.state.active && !item.state.pinned) {
+        if (item.state.active) {
           item.deactivate(this.Motion.animate, {
             duration: { fast: 0.3 },
             animation: { move: 15 },
@@ -475,28 +430,24 @@
     }
 
     forceUpdate() {
-      // Reinicializa se necessário
       if (this.items.length === 0) {
-        this.initProductSystem();
+        this.initClickProductSystem();
       }
     }
   }
 
-  /* COMMENTED OUT - ORIGINAL MODULE INITIALIZATION
-  // Cria instância global
-  window.ReinoProductSystem = new ProductSystem();
+  window.ClickProductSystem = ClickProductSystem;
 
-  // Auto-inicialização com delay para aguardar Motion.js
+  window.clickProductSystem = new ClickProductSystem();
+
+  // Backward compatibility - replace the old system with the new one
+  window.ReinoProductSystem = window.clickProductSystem;
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        window.ReinoProductSystem.init();
-      }, 200); // Delay maior para aguardar Motion.js
+      window.clickProductSystem.init();
     });
   } else {
-    setTimeout(() => {
-      window.ReinoProductSystem.init();
-    }, 200);
+    window.clickProductSystem.init();
   }
-  END OF COMMENTED OUT INITIALIZATION */
 })();
