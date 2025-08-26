@@ -1,0 +1,73 @@
+/**
+ * Donut List Interaction Styles
+ * Cross-component interaction between donut chart hover and lista-resultado-item opacity
+ */
+
+/* Base transition for lista-resultado-item elements */
+.lista-resultado-item {
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+/* Enhanced hover state for lista-resultado-item */
+.lista-resultado-item:hover {
+  transform: translateY(-1px);
+}
+
+/* Faded state for non-matching categories during donut hover */
+.lista-resultado-item.faded {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+/* Highlighted state for matching category during donut hover */
+.lista-resultado-item.highlighted {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Ensure smooth transitions when returning to normal state */
+.lista-resultado-item.normal {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Prevent pointer events during transition to avoid flickering */
+.lista-resultado-item.transitioning {
+  pointer-events: none;
+}
+
+/* Enhanced visual feedback for active category items */
+.lista-resultado-item.category-active {
+  box-shadow: 0 2px 8px rgba(162, 136, 59, 0.2);
+  border: 1px solid rgba(162, 136, 59, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .lista-resultado-item {
+    transition: opacity 0.2s ease, transform 0.15s ease;
+  }
+  
+  .lista-resultado-item:hover {
+    transform: translateY(-0.5px);
+  }
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .lista-resultado-item {
+    transition: none;
+  }
+  
+  .lista-resultado-item:hover {
+    transform: none;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .lista-resultado-item.category-active {
+    box-shadow: 0 2px 8px rgba(162, 136, 59, 0.3);
+    border: 1px solid rgba(162, 136, 59, 0.4);
+  }
+}

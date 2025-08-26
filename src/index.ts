@@ -3,6 +3,7 @@ import './modules/asset-selection-filter.js';
 import './modules/currency-control.js';
 import './modules/currency-formatting.js';
 import './modules/d3-donut-chart-section5.js';
+import './modules/donut-list-interaction.js';
 // import './modules/d3-pie-chart-webflow.js'; // COMENTADO - Gráfico de pizza da seção 4 desabilitado
 import './modules/event-coordinator.js';
 import './modules/motion-animation.js';
@@ -12,6 +13,8 @@ import './modules/progress-bar-system.js';
 import './modules/resultado-comparativo-calculator.js';
 import './modules/resultado-sync.js';
 import './modules/rotation-index-controller.js';
+import './modules/salesforce-integration.js';
+import './modules/salesforce-sync.js';
 import './modules/section-visibility.js';
 import './modules/settings-modal-controller.js';
 import './modules/simple-button-system.js';
@@ -32,9 +35,10 @@ import './config/taxas-tradicional.js';
 import './modules/rotation-index-integration.js';
 import './modules/tippy-tooltip-module.js';
 import './modules/rotation-slider-tooltip.js';
-import './modules/rotation-slider-tooltip.js';
+import './modules/reino-debug-module.js';
 // Import CSS files
 import './css/tippy-custom.css';
 import './css/simple-button.css';
 import './css/asset-selection-filter.css';
 import './css/range-slider.css';
+import './css/donut-list-interaction.css';

@@ -17,7 +17,10 @@
         'Fundo de Investimento': '#e3ad0c',
         'Renda Variável': '#776a41',
         Internacional: '#bdaa6f',
-        Outros: '#c0c0c0',
+        COE: '#d17d00',
+        Previdência: '#8c5e00',
+        Outro: '#4f4f4f',
+        Outros: '#4f4f4f',
       };
 
       // Initialize Simple Hover Module (will be set up in init method)
@@ -260,6 +263,9 @@
             .duration(150)
             .attr('d', hoverArc)
             .style('filter', 'brightness(1.1)');
+
+          // Trigger cross-component interaction
+          this.triggerCategoryHover(d.data.category || d.data.name);
         },
         onOut: (event, d) => {
           // Remove visual hover effect
@@ -269,6 +275,9 @@
             .duration(150)
             .attr('d', arc)
             .style('filter', 'brightness(1)');
+
+          // Clear cross-component interaction
+          this.clearCategoryHover();
         },
         tooltipContent: (d) => this.generateTooltipContent(d),
         className: 'd3-donut-tooltip-section5',
@@ -711,6 +720,22 @@
 
     refresh() {
       this.updateAllCharts();
+    }
+
+    triggerCategoryHover(category) {
+      if (!category) return;
+
+      // Dispatch custom event for cross-component interaction
+      document.dispatchEvent(
+        new CustomEvent('donutCategoryHover', {
+          detail: { category: category },
+        })
+      );
+    }
+
+    clearCategoryHover() {
+      // Dispatch custom event to clear cross-component interaction
+      document.dispatchEvent(new CustomEvent('donutCategoryHoverEnd'));
     }
   }
 
