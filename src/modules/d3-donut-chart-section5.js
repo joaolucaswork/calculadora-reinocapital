@@ -144,8 +144,8 @@
 
       container.innerHTML = '';
 
-      const width = 200;
-      const height = 200;
+      const width = 240;
+      const height = 240;
       const radius = Math.min(width, height) / 2 - 10;
 
       const svg = window.d3
@@ -156,6 +156,31 @@
 
       const g = svg.append('g').attr('transform', `translate(${width / 2}, ${height / 2})`);
 
+      // Add center text group
+      const centerGroup = g.append('g').attr('class', 'center-text-group');
+
+      // Main value text (larger)
+      centerGroup
+        .append('text')
+        .attr('class', 'center-value')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '-0.1em')
+        .style('font-size', '14px')
+        .style('font-weight', '600')
+        .style('fill', '#111827')
+        .style('opacity', 0);
+
+      // Category text (smaller, below)
+      centerGroup
+        .append('text')
+        .attr('class', 'center-category')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '1.2em')
+        .style('font-size', '12px')
+        .style('font-weight', '500')
+        .style('fill', '#6b7280')
+        .style('opacity', 0);
+
       const pie = window.d3
         .pie()
         .value((d) => d.value)
@@ -163,7 +188,7 @@
 
       const arc = window.d3
         .arc()
-        .innerRadius(radius * 0.5)
+        .innerRadius(radius * 0.65)
         .outerRadius(radius);
 
       const chart = {
@@ -230,7 +255,7 @@
 
       const hoverArc = window.d3
         .arc()
-        .innerRadius(chart.radius * 0.5)
+        .innerRadius(chart.radius * 0.65)
         .outerRadius(chart.radius + 10);
 
       // Verificar se há dados válidos antes de renderizar
@@ -246,11 +271,9 @@
       arcEnter
         .append('path')
         .attr('fill', (d) => this.colorScale(d.data.category))
-        .attr('stroke', '#fff')
-        .attr('stroke-width', 2)
+        .attr('stroke', 'none')
         .style('cursor', 'pointer')
-        .style('opacity', 1)
-        .style('transition', 'opacity 0.3s');
+        .style('opacity', 1);
 
       const arcUpdate = arcEnter.merge(arcs);
 
@@ -275,6 +298,9 @@
             .attr('d', hoverArc(d))
             .style('filter', 'brightness(1.1)');
 
+          // Show center text with category info
+          this.showCenterText(chart, d.data);
+
           // Trigger cross-component interaction
           this.triggerCategoryHover(d.data.category || d.data.name);
         },
@@ -289,6 +315,9 @@
             .duration(80)
             .attr('d', arc(d))
             .style('filter', 'brightness(1)');
+
+          // Hide center text
+          this.hideCenterText(chart);
 
           // Clear cross-component interaction
           this.clearCategoryHover();
@@ -750,6 +779,35 @@
     clearCategoryHover() {
       // Dispatch custom event to clear cross-component interaction
       document.dispatchEvent(new CustomEvent('donutCategoryHoverEnd'));
+    }
+
+    showCenterText(chart, data) {
+      const centerValue = chart.g.select('.center-value');
+      const centerCategory = chart.g.select('.center-category');
+
+      if (centerValue.empty() || centerCategory.empty()) return;
+
+      // Format the commission value
+      const formattedValue = this.formatCurrency(data.value);
+      const categoryName = data.category || data.name;
+
+      // Show value text
+      centerValue.text(formattedValue).transition().duration(80).style('opacity', 1);
+
+      // Show category text
+      centerCategory.text(categoryName).transition().duration(80).style('opacity', 0.7);
+    }
+
+    hideCenterText(chart) {
+      const centerValue = chart.g.select('.center-value');
+      const centerCategory = chart.g.select('.center-category');
+
+      if (centerValue.empty() || centerCategory.empty()) return;
+
+      // Hide both texts
+      centerValue.transition().duration(80).style('opacity', 0);
+
+      centerCategory.transition().duration(80).style('opacity', 0);
     }
   }
 
