@@ -50,9 +50,14 @@
       if (window.SimpleHoverModule) {
         this.hoverModule = new window.SimpleHoverModule({
           offset: { x: 15, y: -10 },
-          animationDuration: 150,
+          animationDuration: 80,
           className: 'd3-donut-tooltip-section5',
         });
+
+        // Override the updateTooltipPosition method for intelligent positioning
+        this.hoverModule.updateTooltipPosition = (event) => {
+          this.updateIntelligentTooltipPosition(event);
+        };
       } else {
         console.warn('Simple Hover Module not available, using fallback');
         // Create a comprehensive fallback
@@ -144,8 +149,8 @@
 
       container.innerHTML = '';
 
-      const width = 200;
-      const height = 200;
+      const width = 240;
+      const height = 240;
       const radius = Math.min(width, height) / 2 - 10;
 
       const svg = window.d3
@@ -156,6 +161,31 @@
 
       const g = svg.append('g').attr('transform', `translate(${width / 2}, ${height / 2})`);
 
+      // Add center text group
+      const centerGroup = g.append('g').attr('class', 'center-text-group');
+
+      // Main value text (larger)
+      centerGroup
+        .append('text')
+        .attr('class', 'center-value')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '-0.1em')
+        .style('font-size', '14px')
+        .style('font-weight', '600')
+        .style('fill', '#111827')
+        .style('opacity', 0);
+
+      // Category text (smaller, below)
+      centerGroup
+        .append('text')
+        .attr('class', 'center-category')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '1.2em')
+        .style('font-size', '12px')
+        .style('font-weight', '500')
+        .style('fill', '#6b7280')
+        .style('opacity', 0);
+
       const pie = window.d3
         .pie()
         .value((d) => d.value)
@@ -163,7 +193,7 @@
 
       const arc = window.d3
         .arc()
-        .innerRadius(radius * 0.5)
+        .innerRadius(radius * 0.65)
         .outerRadius(radius);
 
       const chart = {
@@ -230,7 +260,7 @@
 
       const hoverArc = window.d3
         .arc()
-        .innerRadius(chart.radius * 0.5)
+        .innerRadius(chart.radius * 0.65)
         .outerRadius(chart.radius + 10);
 
       // Verificar se há dados válidos antes de renderizar
@@ -246,35 +276,53 @@
       arcEnter
         .append('path')
         .attr('fill', (d) => this.colorScale(d.data.category))
-        .attr('stroke', '#fff')
-        .attr('stroke-width', 2)
-        .style('cursor', 'pointer');
+        .attr('stroke', 'none')
+        .style('cursor', 'pointer')
+        .style('opacity', 1);
 
       const arcUpdate = arcEnter.merge(arcs);
 
       // Use Simple Hover Module instead of direct event handlers
       this.hoverModule.attachHoverEvents(arcUpdate.select('path'), {
         onHover: (event, d) => {
-          // Apply visual hover effect
-          window.d3.selectAll('.arc path').style('filter', 'brightness(1)');
+          // Reset ALL slices to original state first (size, opacity, filter)
+          window.d3
+            .selectAll('.arc path')
+            .transition()
+            .duration(80)
+            .style('opacity', 0.3)
+            .attr('d', (sliceData) => arc(sliceData))
+            .style('filter', 'brightness(1)');
+
+          // Then apply hover effect to current slice
           window.d3
             .select(event.target)
             .transition()
-            .duration(150)
-            .attr('d', hoverArc)
+            .duration(80)
+            .style('opacity', 1)
+            .attr('d', hoverArc(d))
             .style('filter', 'brightness(1.1)');
+
+          // Show center text with category info
+          this.showCenterText(chart, d.data);
 
           // Trigger cross-component interaction
           this.triggerCategoryHover(d.data.category || d.data.name);
         },
         onOut: (event, d) => {
-          // Remove visual hover effect
+          // Restore all slices to full opacity with faster transition
+          window.d3.selectAll('.arc path').transition().duration(80).style('opacity', 1);
+
+          // Remove visual hover effect and reset arc size
           window.d3
             .select(event.target)
             .transition()
-            .duration(150)
-            .attr('d', arc)
+            .duration(80)
+            .attr('d', arc(d))
             .style('filter', 'brightness(1)');
+
+          // Hide center text
+          this.hideCenterText(chart);
 
           // Clear cross-component interaction
           this.clearCategoryHover();
@@ -736,6 +784,138 @@
     clearCategoryHover() {
       // Dispatch custom event to clear cross-component interaction
       document.dispatchEvent(new CustomEvent('donutCategoryHoverEnd'));
+    }
+
+    showCenterText(chart, data) {
+      const centerValue = chart.g.select('.center-value');
+      const centerCategory = chart.g.select('.center-category');
+
+      if (centerValue.empty() || centerCategory.empty()) return;
+
+      // Format the commission value
+      const formattedValue = this.formatCurrency(data.value);
+      const categoryName = data.category || data.name;
+
+      // Show value text
+      centerValue.text(formattedValue).transition().duration(80).style('opacity', 1);
+
+      // Show category text
+      centerCategory.text(categoryName).transition().duration(80).style('opacity', 0.7);
+    }
+
+    hideCenterText(chart) {
+      const centerValue = chart.g.select('.center-value');
+      const centerCategory = chart.g.select('.center-category');
+
+      if (centerValue.empty() || centerCategory.empty()) return;
+
+      // Hide both texts
+      centerValue.transition().duration(80).style('opacity', 0);
+
+      centerCategory.transition().duration(80).style('opacity', 0);
+    }
+
+    updateIntelligentTooltipPosition(event) {
+      if (!this.hoverModule.state.activeTooltip || !this.hoverModule.state.isVisible) return;
+
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+      const viewport = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+
+      // Get tooltip dimensions
+      let tooltipWidth = 280;
+      let tooltipHeight = 200;
+
+      if (this.hoverModule.state.activeTooltip) {
+        const tooltipNode = this.hoverModule.state.activeTooltip.node();
+        if (tooltipNode) {
+          const rect = tooltipNode.getBoundingClientRect();
+          tooltipWidth = rect.width || tooltipWidth;
+          tooltipHeight = rect.height || tooltipHeight;
+        }
+      }
+
+      // Find the donut chart center position
+      const donutCenter = this.getDonutCenterPosition();
+
+      // Calculate intelligent positioning
+      let x = mouseX + this.hoverModule.options.offset.x;
+      let y = mouseY + this.hoverModule.options.offset.y;
+
+      // Check if default position would overlap with donut center
+      if (donutCenter && this.wouldOverlapCenter(x, y, tooltipWidth, tooltipHeight, donutCenter)) {
+        // Position tooltip to the left of cursor instead
+        x = mouseX - tooltipWidth - Math.abs(this.hoverModule.options.offset.x);
+
+        // If still overlapping or going off-screen, try above/below
+        if (this.wouldOverlapCenter(x, y, tooltipWidth, tooltipHeight, donutCenter) || x < 20) {
+          x = mouseX + this.hoverModule.options.offset.x;
+
+          // Try positioning above the cursor
+          if (mouseY > donutCenter.y) {
+            y = mouseY - tooltipHeight - Math.abs(this.hoverModule.options.offset.y);
+          } else {
+            // Position below the cursor
+            y = mouseY + Math.abs(this.hoverModule.options.offset.y) + 20;
+          }
+        }
+      }
+
+      // Ensure tooltip stays within viewport bounds
+      if (x + tooltipWidth + 20 > viewport.width) {
+        x = mouseX - tooltipWidth - Math.abs(this.hoverModule.options.offset.x);
+      }
+
+      if (y + tooltipHeight + 20 > viewport.height) {
+        y = mouseY - tooltipHeight - Math.abs(this.hoverModule.options.offset.y);
+      }
+
+      // Final bounds checking
+      x = Math.max(20, Math.min(x, viewport.width - tooltipWidth - 20));
+      y = Math.max(20, Math.min(y, viewport.height - tooltipHeight - 20));
+
+      this.hoverModule.state.activeTooltip.style('left', x + 'px').style('top', y + 'px');
+    }
+
+    getDonutCenterPosition() {
+      const donutContainer = document.querySelector(
+        '[chart-content="tradicional"][chart-type="donut"]'
+      );
+      if (!donutContainer) return null;
+
+      const rect = donutContainer.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        radius: (Math.min(rect.width, rect.height) / 2) * 0.65, // Inner radius area
+      };
+    }
+
+    wouldOverlapCenter(tooltipX, tooltipY, tooltipWidth, tooltipHeight, center) {
+      // Check if tooltip rectangle would overlap with donut center circle
+      const tooltipRect = {
+        left: tooltipX,
+        right: tooltipX + tooltipWidth,
+        top: tooltipY,
+        bottom: tooltipY + tooltipHeight,
+      };
+
+      const centerRect = {
+        left: center.x - center.radius,
+        right: center.x + center.radius,
+        top: center.y - center.radius,
+        bottom: center.y + center.radius,
+      };
+
+      return !(
+        tooltipRect.right < centerRect.left ||
+        tooltipRect.left > centerRect.right ||
+        tooltipRect.bottom < centerRect.top ||
+        tooltipRect.top > centerRect.bottom
+      );
     }
   }
 
