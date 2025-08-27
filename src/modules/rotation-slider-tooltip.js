@@ -268,8 +268,8 @@
 
     getFormulaExplanation() {
       return `
-        <div style="font-weight: 500; font-size: 12px; color: #6B7280; line-height: 1.3;">
-          <p style="margin: 0;">
+        <div style="font-weight: 500; color: #6B7280; line-height: 1.3;">
+          <p style="margin: 0; font-size: 14px;">
             Quanto mais você movimenta o dinheiro, mais paga de corretagem.
           </p>
         </div>
