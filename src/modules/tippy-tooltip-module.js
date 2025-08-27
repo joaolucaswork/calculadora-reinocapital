@@ -96,7 +96,7 @@
           duration: this.options.duration,
           animation: this.options.animation,
           trigger: 'mouseenter focus',
-          hideOnClick: true,
+          hideOnClick: false,
           appendTo: () => document.body,
           onCreate: (tippyInstance) => {
             this.instances.set(button, tippyInstance);
@@ -173,7 +173,7 @@
         duration: this.options.duration,
         animation: this.options.animation,
         trigger: 'mouseenter focus',
-        hideOnClick: true,
+        hideOnClick: false,
         appendTo: () => document.body,
         onCreate: (tippyInstance) => {
           this.instances.set(button, tippyInstance);
