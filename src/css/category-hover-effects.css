@@ -1,0 +1,47 @@
+/**
+ * Category Hover Effects CSS
+ * Efeitos visuais para hover em categoria-ativo.v2
+ */
+
+/* Efeito de crescimento do travessão no hover */
+.categoria-ativo.v2::before {
+  transition: width 200ms ease-out, transform 200ms ease-out;
+  transform-origin: left center;
+}
+
+.categoria-ativo.v2:hover::before {
+  width: 24px; /* Cresce de 18px para 24px */
+  transform: scaleX(1.1); /* Efeito adicional de escala */
+}
+
+/* Estados para elementos destacados/desbotados */
+.category-highlighted {
+  opacity: 1 !important;
+}
+
+.category-dimmed {
+  opacity: 0.4 !important;
+}
+
+/* Transições suaves para todos os elementos categoria-ativo */
+.categoria-ativo.v2 {
+  transition: opacity 150ms ease-out;
+}
+
+/* Efeito adicional no texto durante hover */
+.categoria-ativo.v2:hover {
+  transform: translateX(2px);
+  transition: transform 200ms ease-out, opacity 150ms ease-out;
+}
+
+/* Responsivo para mobile */
+@media (max-width: 768px) {
+  .categoria-ativo.v2:hover::before {
+    width: 20px; /* Menor crescimento em mobile */
+    transform: scaleX(1.05);
+  }
+  
+  .categoria-ativo.v2:hover {
+    transform: translateX(1px); /* Movimento menor em mobile */
+  }
+}

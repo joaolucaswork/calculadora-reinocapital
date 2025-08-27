@@ -21,6 +21,8 @@ import './modules/settings-modal-controller.js';
 import './modules/simple-button-system.js';
 import './modules/simple-hover-module.js';
 import './modules/simple-sync.js';
+import './modules/selected-products-list.js';
+import './modules/category-hover-highlight.js';
 // import './modules/swiper-resultado.js'; // DESATIVADO - mantido para uso futuro
 import './modules/typebot-integration.js';
 // Import button system modules
@@ -44,3 +46,4 @@ import './css/simple-button.css';
 import './css/asset-selection-filter.css';
 import './css/range-slider.css';
 import './css/donut-list-interaction.css';
+import './css/category-hover-effects.css';
