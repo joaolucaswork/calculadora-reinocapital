@@ -53,6 +53,11 @@
           animationDuration: 80,
           className: 'd3-donut-tooltip-section5',
         });
+
+        // Override the updateTooltipPosition method for intelligent positioning
+        this.hoverModule.updateTooltipPosition = (event) => {
+          this.updateIntelligentTooltipPosition(event);
+        };
       } else {
         console.warn('Simple Hover Module not available, using fallback');
         // Create a comprehensive fallback
@@ -808,6 +813,109 @@
       centerValue.transition().duration(80).style('opacity', 0);
 
       centerCategory.transition().duration(80).style('opacity', 0);
+    }
+
+    updateIntelligentTooltipPosition(event) {
+      if (!this.hoverModule.state.activeTooltip || !this.hoverModule.state.isVisible) return;
+
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+      const viewport = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+
+      // Get tooltip dimensions
+      let tooltipWidth = 280;
+      let tooltipHeight = 200;
+
+      if (this.hoverModule.state.activeTooltip) {
+        const tooltipNode = this.hoverModule.state.activeTooltip.node();
+        if (tooltipNode) {
+          const rect = tooltipNode.getBoundingClientRect();
+          tooltipWidth = rect.width || tooltipWidth;
+          tooltipHeight = rect.height || tooltipHeight;
+        }
+      }
+
+      // Find the donut chart center position
+      const donutCenter = this.getDonutCenterPosition();
+
+      // Calculate intelligent positioning
+      let x = mouseX + this.hoverModule.options.offset.x;
+      let y = mouseY + this.hoverModule.options.offset.y;
+
+      // Check if default position would overlap with donut center
+      if (donutCenter && this.wouldOverlapCenter(x, y, tooltipWidth, tooltipHeight, donutCenter)) {
+        // Position tooltip to the left of cursor instead
+        x = mouseX - tooltipWidth - Math.abs(this.hoverModule.options.offset.x);
+
+        // If still overlapping or going off-screen, try above/below
+        if (this.wouldOverlapCenter(x, y, tooltipWidth, tooltipHeight, donutCenter) || x < 20) {
+          x = mouseX + this.hoverModule.options.offset.x;
+
+          // Try positioning above the cursor
+          if (mouseY > donutCenter.y) {
+            y = mouseY - tooltipHeight - Math.abs(this.hoverModule.options.offset.y);
+          } else {
+            // Position below the cursor
+            y = mouseY + Math.abs(this.hoverModule.options.offset.y) + 20;
+          }
+        }
+      }
+
+      // Ensure tooltip stays within viewport bounds
+      if (x + tooltipWidth + 20 > viewport.width) {
+        x = mouseX - tooltipWidth - Math.abs(this.hoverModule.options.offset.x);
+      }
+
+      if (y + tooltipHeight + 20 > viewport.height) {
+        y = mouseY - tooltipHeight - Math.abs(this.hoverModule.options.offset.y);
+      }
+
+      // Final bounds checking
+      x = Math.max(20, Math.min(x, viewport.width - tooltipWidth - 20));
+      y = Math.max(20, Math.min(y, viewport.height - tooltipHeight - 20));
+
+      this.hoverModule.state.activeTooltip.style('left', x + 'px').style('top', y + 'px');
+    }
+
+    getDonutCenterPosition() {
+      const donutContainer = document.querySelector(
+        '[chart-content="tradicional"][chart-type="donut"]'
+      );
+      if (!donutContainer) return null;
+
+      const rect = donutContainer.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        radius: (Math.min(rect.width, rect.height) / 2) * 0.65, // Inner radius area
+      };
+    }
+
+    wouldOverlapCenter(tooltipX, tooltipY, tooltipWidth, tooltipHeight, center) {
+      // Check if tooltip rectangle would overlap with donut center circle
+      const tooltipRect = {
+        left: tooltipX,
+        right: tooltipX + tooltipWidth,
+        top: tooltipY,
+        bottom: tooltipY + tooltipHeight,
+      };
+
+      const centerRect = {
+        left: center.x - center.radius,
+        right: center.x + center.radius,
+        top: center.y - center.radius,
+        bottom: center.y + center.radius,
+      };
+
+      return !(
+        tooltipRect.right < centerRect.left ||
+        tooltipRect.left > centerRect.right ||
+        tooltipRect.bottom < centerRect.top ||
+        tooltipRect.top > centerRect.bottom
+      );
     }
   }
 
