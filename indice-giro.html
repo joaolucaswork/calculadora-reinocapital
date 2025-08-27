@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Relatório + Calculadora — Comissão Média Anual | Reino Capital</title>
+<style>
+:root{--gold:#D4A100;--ink:#202020;--soft:#FFF9C4;--line:#222}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);
+     background:linear-gradient(180deg,var(--gold) 0%, #EFEFEF 45%, #F9F9F9 100%);}
+.wrap{max-width:1180px;margin:36px auto;background:#fff;border:1px solid #e7e7e7;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #eee}
+.brand{display:flex;gap:10px;align-items:center;font-weight:800}
+.logo{width:28px;height:28px;border-radius:6px;background:#202020;color:#fff;display:grid;place-items:center}
+h1{font-size:22px;margin:0}
+main{padding:22px}
+section{border:1px solid #eee;border-radius:12px;padding:16px;background:#fafafa;margin-bottom:16px}
+h2{margin:0 0 10px 0;font-size:18px}
+p{margin:6px 0 10px 0;line-height:1.6}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border:2px solid var(--line);padding:8px 10px;vertical-align:middle}
+th{background:#000;color:#fff;text-align:left;position:sticky;top:0}
+tr.yellow td{background:var(--soft)}
+.note{font-size:12px;color:#666}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#000;color:#fff;font-size:12px;margin-left:8px}
+input[type="number"]{width:120px;padding:6px 8px;border:1px solid #bbb;border-radius:8px}
+.currency{width:140px}
+.right{text-align:right}
+.interno{display:none}
+.interno-head{display:none}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.slider{width:200px}
+strong code{font-size:95%}
+</style>
+<script>
+function toBRL(v){try{return (new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})).format(v);}catch(e){return v.toFixed(2);}}
+function pct(v){return (v*100).toFixed(2)+'%';}
+function toggleInterno(){
+  document.querySelectorAll('.interno,.interno-head').forEach(el=>{
+    el.style.display = (el.style.display==='table-cell') ? 'none' : 'table-cell';
+  });
+}
+function recalc(){
+  const indice = parseInt(document.getElementById('indice').value,10);
+  document.getElementById('indiceVal').textContent = indice;
+  let total = 0;
+  document.querySelectorAll('tr[data-row]').forEach(tr=>{
+    const media = parseFloat(tr.dataset.media);  // fração
+    const prazo = parseFloat(tr.dataset.prazo);
+    const fator = parseFloat(tr.dataset.fator);
+    const valInput = tr.querySelector('input[type="number"]');
+    const investido = parseFloat(valInput.value||0);
+    // Comissão média anual (fração)
+    
+    let comissaoRate = 0;
+    if(!isNaN(media) && !isNaN(prazo)){
+      const fixed = tr.dataset.fixed === '1';
+      const indice = parseInt(document.getElementById('indice').value,10);
+      const fatorEfetivo = fixed ? 1 : (isNaN(fator) ? 0 : (fator * indice));
+      if(!isNaN(fatorEfetivo)) {
+        comissaoRate = ((media / prazo) * fatorEfetivo) * 100;
+      }
+    }
+    const tdRate = tr.querySelector('.rate');
+    const tdEst  = tr.querySelector('.estimado');
+     comissaoRate>0 ? (comissaoRate*100).toFixed(2)+'%' : '—';
+    const estimado = investido * comissaoRate;
+    tdEst.textContent = estimado>0 ? toBRL(estimado) : '—';
+    total += (isNaN(estimado)?0:estimado);
+  });
+  document.getElementById('total').textContent = toBRL(total);
+}
+document.addEventListener('input', (e)=>{
+  if(e.target.matches('input[type="number"], #indice')) recalc();
+});
+document.addEventListener('DOMContentLoaded', recalc);
+</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="brand"><div class="logo">R</div>Reino Capital®</div>
+<h1>Relatório + Calculadora — Comissão Média Anual</h1>
+</header>
+<main>
+<section>
+<h2>Fórmula (clara e objetiva)</h2>
+<p>Comissão Média Anual (fração) = Média de Corretagem (fração) ÷ Prazo Médio (anos) × Fator de Giro Efetivo.</p><p class="note">Fator de Giro Efetivo = 1 para produtos de Fundo de Investimento e Previdência; para os demais, usar o valor da tabela de Fator de Giro multiplicado pelo Índice de Giro da Carteira (1 a 4).</p>
+<p class="note">
+        Ex.: 2% → usar 0,02. Se o prazo médio = 3 anos, fator de giro = 1,2 e índice de giro = 2, então:<br/>
+<code>0,02 × 3 × 1,2 × 2 = 0,144</code> ⇒ <em>14,40% a.a.</em>
+</p>
+<div class="controls">
+<button onclick="toggleInterno()">Mostrar/Ocultar colunas internas</button>
+<label for="indice"><strong>Índice de Giro da Carteira</strong> (1 a 4):</label>
+<input class="slider" id="indice" max="4" min="1" step="1" type="range" value="1"/>
+<strong id="indiceVal">1</strong>
+</div>
+</section>
+<section>
+<h2>Categorias e Produtos <span class="pill">vista do cliente</span></h2>
+<table>
+<thead>
+<tr>
+<th style="width:220px">Categoria</th>
+<th>Produto</th>
+<th style="width:140px">Média de Corretagem</th>
+<th class="interno-head">Prazo Médio (anos)</th>
+<th class="interno-head">Fator de Giro</th>
+<th style="width:140px">Comissão Média Anual</th>
+<th class="right" style="width:160px">Valor Investido</th>
+<th class="right" style="width:160px">Comissão Estimada</th>
+</tr>
+</thead>
+<tbody>
+<tr class="yellow" data-fator="1.2" data-fixed="0" data-media="0.0002" data-prazo="3.0" data-row="">
+<td><strong>Renda Fixa</strong></td>
+<td>CDB, LCI, LCA</td>
+<td>2,00%</td>
+<td class="interno">3.00</td>
+<td class="interno">1.20</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="3.0" data-fixed="0" data-media="0.000425" data-prazo="8.0" data-row="">
+<td><strong>Renda Fixa</strong></td>
+<td>CRI, CRA, Debênture</td>
+<td>4,25%</td>
+<td class="interno">8.00</td>
+<td class="interno">3.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="3.0" data-fixed="0" data-media="0.00037500000000000006" data-prazo="10.0" data-row="">
+<td><strong>Renda Fixa</strong></td>
+<td>Títulos Públicos</td>
+<td>3,75%</td>
+<td class="interno">10.00</td>
+<td class="interno">3.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="0.00017500000000000003" data-prazo="1.0" data-row="">
+<td><strong>Fundo de Investimento</strong></td>
+<td>Ações (FIA)</td>
+<td>1,75%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="3.5000000000000004e-05" data-prazo="1.0" data-row="">
+<td><strong>Fundo de Investimento</strong></td>
+<td>Liquidez (DI/D0/D1)</td>
+<td>0,35%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="0.00017500000000000003" data-prazo="1.0" data-row="">
+<td><strong>Fundo de Investimento</strong></td>
+<td>Multimercado</td>
+<td>1,75%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="0.0002" data-prazo="1.0" data-row="">
+<td><strong>Fundo de Investimento</strong></td>
+<td>Imobiliários Cetipados (FII/FIAGRO)</td>
+<td>2,00%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="0.0002" data-prazo="1.0" data-row="">
+<td><strong>Fundo de Investimento</strong></td>
+<td>Private Equity</td>
+<td>2,00%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="3.0" data-fixed="0" data-media="5e-05" data-prazo="1.0" data-row="">
+<td><strong>Renda Variável</strong></td>
+<td>Ações e Ativos Listados</td>
+<td>0,50%</td>
+<td class="interno">1.00</td>
+<td class="interno">3.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="0" data-media="0.0005250000000000001" data-prazo="1.0" data-row="">
+<td><strong>Renda Variável</strong></td>
+<td>Operação Estruturada</td>
+<td>5,25%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="0" data-media="0.000325" data-prazo="1.0" data-row="">
+<td><strong>Renda Variável</strong></td>
+<td>Carteira Administrada</td>
+<td>3,25%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="0" data-media="0.0002" data-prazo="5.0" data-row="">
+<td><strong>Internacional</strong></td>
+<td>Investimentos em Dólar</td>
+<td>2,00%</td>
+<td class="interno">5.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="0" data-media="6.25e-05" data-prazo="1.0" data-row="">
+<td><strong>Internacional</strong></td>
+<td>ETF e Mutual Funds (Ouro, Cripto etc)</td>
+<td>0,63%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.2" data-fixed="0" data-media="0.00055" data-prazo="5.0" data-row="">
+<td><strong>COE</strong></td>
+<td>COE</td>
+<td>5,50%</td>
+<td class="interno">5.00</td>
+<td class="interno">1.20</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="0.00017500000000000003" data-prazo="1.0" data-row="">
+<td><strong>Previdência</strong></td>
+<td>Ações (FIA)</td>
+<td>1,75%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="0.00017500000000000003" data-prazo="1.0" data-row="">
+<td><strong>Previdência</strong></td>
+<td>Multimercado</td>
+<td>1,75%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="1" data-media="7.5e-05" data-prazo="1.0" data-row="">
+<td><strong>Previdência</strong></td>
+<td>Renda Fixa</td>
+<td>0,75%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="1.0" data-fixed="0" data-media="2e-05" data-prazo="1.0" data-row="">
+<td><strong>Outros</strong></td>
+<td>Poupança</td>
+<td>0,20%</td>
+<td class="interno">1.00</td>
+<td class="interno">1.00</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+<tr class="yellow" data-fator="0.33" data-fixed="0" data-media="0.00065" data-prazo="1.0" data-row="">
+<td><strong>Outros</strong></td>
+<td>Operação Compromissada</td>
+<td>6,50%</td>
+<td class="interno">1.00</td>
+<td class="interno">0.33</td>
+<td class="rate">—</td>
+<td class="right"><input class="currency" inputmode="decimal" min="0" step="1000" type="number" value="0"/></td>
+<td class="right estimado">—</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<th class="right" colspan="7">Total estimado</th>
+<th class="right" id="total">R$ 0,00</th>
+</tr>
+</tfoot>
+</table>
+<p class="note">Somente as células em amarelo são exibidas ao cliente. As colunas “Prazo” e “Fator” foram incluídas para a área técnica (ocultas por padrão).</p>
+</section>
+<section>
+<h2>Guia rápido para o programador (Java)</h2>
+<ol>
+<li><strong>Entrada de dados</strong>: <em>mediaCorretagem</em> deve ser armazenada em <u>fração</u> (2% = 0.02), <em>prazoMedioAnos</em> e <em>fatorGiro</em> em <code>BigDecimal</code>, e <em>indiceGiro</em> como <code>Integer</code> (1..4).</li>
+<li><strong>Cálculo</strong>: <code>comissao = mediaCorretagem × prazoMedioAnos × fatorGiro × indiceGiro</code>. Para estimar valor em R$ por produto: <code>estimado = valorInvestido × comissao</code>.</li>
+<li><strong>Formatação</strong>: converter fração em % apenas na camada de apresentação. Para BRL use <code>NumberFormat.getCurrencyInstance(new Locale("pt","BR"))</code>.</li>
+<li><strong>Visibilidade</strong>: apenas itens marcados como “visíveis” (amarelos) vão para a resposta ao cliente; as colunas internas podem ser servidas numa rota protegida.</li>
+</ol>
+<pre>// Exemplo sucinto (Java)
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Locale;
+
+record Produto(String categoria, String nome,
+               BigDecimal mediaCorretagem, BigDecimal prazoMedioAnos,
+               BigDecimal fatorGiro, boolean visivel) {}
+
+static BigDecimal comissaoRate(Produto p, int indiceGiro){
+  if(p.mediaCorretagem()==null || p.prazoMedioAnos()==null || p.fatorGiro()==null) return BigDecimal.ZERO;
+  return p.mediaCorretagem()
+          .multiply(p.prazoMedioAnos())
+          .multiply(p.fatorGiro())
+          .multiply(BigDecimal.valueOf(indiceGiro));
+}
+
+static BigDecimal estimadoBRL(BigDecimal valorInvestido, BigDecimal comissaoRate){
+  return valorInvestido.multiply(comissaoRate);
+}
+
+// Apresentação (UI): percentuais e moedas devem ser formatados aqui ou em DTOs específicos.</pre>
+</section>
+</main>
+</div>
+</body>
+</html>

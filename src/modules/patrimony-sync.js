@@ -197,7 +197,7 @@
         value = maxAllowed;
         item.input.value = Utils.formatCurrency(value);
         VisualFeedback.showAllocationWarning(
-          item.container,
+          item,
           `Valor máximo disponível: ${Utils.formatCurrency(maxAllowed)}`
         );
       }
@@ -232,10 +232,7 @@
         this.updatePercentageDisplay(item);
         this.updateValorProduto(item);
         this.updateBackgroundItemAcao(item);
-        VisualFeedback.showAllocationWarning(
-          item.container,
-          'Informe o valor do patrimônio primeiro'
-        );
+        VisualFeedback.showAllocationWarning(item, 'Informe o valor do patrimônio primeiro');
         return;
       }
 
@@ -251,7 +248,7 @@
         const cappedSliderValue = mainValue > 0 ? value / mainValue : 0;
         item.slider.value = cappedSliderValue;
         VisualFeedback.showAllocationWarning(
-          item.container,
+          item,
           `Valor máximo disponível: ${Utils.formatCurrency(maxAllowed)}`
         );
       }
@@ -389,6 +386,11 @@
 
   const VisualFeedback = {
     showAllocationWarning(item, message) {
+      if (!item || !item.container) {
+        console.error('VisualFeedback: item ou item.container não definido');
+        return;
+      }
+
       let warning = item.container.querySelector('.allocation-warning');
       if (!warning) {
         warning = document.createElement('div');

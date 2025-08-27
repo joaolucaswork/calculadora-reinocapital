@@ -9,6 +9,7 @@ import './modules/event-coordinator.js';
 import './modules/motion-animation.js';
 import './modules/patrimony-sync.js';
 import './modules/product-system.js';
+import './modules/click-product-system.js';
 import './modules/progress-bar-system.js';
 import './modules/resultado-comparativo-calculator.js';
 import './modules/resultado-sync.js';
@@ -35,6 +36,7 @@ import './config/taxas-tradicional.js';
 import './modules/rotation-index-integration.js';
 import './modules/tippy-tooltip-module.js';
 import './modules/rotation-slider-tooltip.js';
+import './modules/detalhes-calculo-tooltip.js';
 import './modules/reino-debug-module.js';
 // Import CSS files
 import './css/tippy-custom.css';

@@ -96,6 +96,7 @@
           if (this.tooltipInstance && this.tooltipInstance.state.isVisible) {
             this.updateCurrentData();
             this.tooltipInstance.setContent(this.generateTooltipContent());
+            this.updateNiveisOpacity();
           }
         };
 
@@ -201,9 +202,6 @@
           <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: #111827;">
             Índice de giro
           </h4>
-          <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 500; color: #374151;">
-            Maior índice = maior custo de corretagem
-          </p>
           ${calculationExample}
           ${formulaExplanation}
         </div>
@@ -267,11 +265,26 @@
     }
 
     getFormulaExplanation() {
+      const currentLevel = this.currentIndex;
+
       return `
-        <div style="font-weight: 500; font-size: 12px; color: #6B7280; line-height: 1.3;">
-          <p style="margin: 0;">
-            Quanto mais você movimenta o dinheiro, mais paga de corretagem.
-          </p>
+        <div style="font-weight: 500; color: #6B7280; line-height: 1.4; margin-top: 12px;" id="niveis-container">
+          <div class="nivel-item" data-nivel="1" style="margin-bottom: 8px; opacity: ${currentLevel === 1 ? '1' : '0.4'}; transition: opacity 0.3s ease;">
+            <strong style="color: #374151; font-size: 13px;">Nível 1</strong><br>
+            <span style="font-size: 12px;">Leva os ativos até o vencimento — não há movimentações na carteira ao longo do ano.</span>
+          </div>
+          <div class="nivel-item" data-nivel="2" style="margin-bottom: 8px; opacity: ${currentLevel === 2 ? '1' : '0.4'}; transition: opacity 0.3s ease;">
+            <strong style="color: #374151; font-size: 13px;">Nível 2 — Padrão</strong><br>
+            <span style="font-size: 12px;">Movimenta a carteira uma vez por ano — este é o padrão adotado nos nossos cálculos.</span>
+          </div>
+          <div class="nivel-item" data-nivel="3" style="margin-bottom: 8px; opacity: ${currentLevel === 3 ? '1' : '0.4'}; transition: opacity 0.3s ease;">
+            <strong style="color: #374151; font-size: 13px;">Nível 3</strong><br>
+            <span style="font-size: 12px;">Rebalanceia a cada 6 meses — duas janelas de movimentação dentro do ano.</span>
+          </div>
+          <div class="nivel-item" data-nivel="4" style="margin-bottom: 0; opacity: ${currentLevel === 4 ? '1' : '0.4'}; transition: opacity 0.3s ease;">
+            <strong style="color: #374151; font-size: 13px;">Nível 4</strong><br>
+            <span style="font-size: 12px;">Alta recorrência — operações frequentes ao longo do ano, com maior rotação de ativos.</span>
+          </div>
         </div>
       `;
     }
@@ -292,7 +305,24 @@
       if (this.tooltipInstance && this.tooltipInstance.state.isVisible) {
         this.updateCurrentData();
         this.tooltipInstance.setContent(this.generateTooltipContent());
+        this.updateNiveisOpacity();
       }
+    }
+
+    updateNiveisOpacity() {
+      if (!this.tooltipInstance || !this.tooltipInstance.state.isVisible) return;
+
+      const container = document.querySelector('#niveis-container');
+      if (!container) return;
+
+      const niveisItems = container.querySelectorAll('.nivel-item');
+      const currentLevel = this.currentIndex;
+
+      niveisItems.forEach((item) => {
+        const nivel = parseInt(item.getAttribute('data-nivel'), 10);
+        const opacity = nivel === currentLevel ? '1' : '0.4';
+        item.style.opacity = opacity;
+      });
     }
 
     destroy() {

@@ -1,21 +1,21 @@
 /**
- * Tippy.js Tooltip Module
+ * Detalhes Cálculo Tooltip Module
  * Versão sem imports/exports para uso direto no Webflow
- * Implementa tooltips usando Tippy.js para botões de ajuda
+ * Implementa tooltips para elementos .detalhes-calculo-geral
  */
 
 (function () {
   'use strict';
 
-  class TippyTooltipModule {
+  class DetalhesCalculoTooltip {
     constructor(options = {}) {
       this.options = {
-        theme: 'light', // Sem tema para usar nosso HTML customizado
+        theme: 'light',
         placement: 'top',
         arrow: true,
         interactive: false,
         allowHTML: true,
-        maxWidth: 280, // Largura otimizada para melhor legibilidade
+        maxWidth: 320,
         delay: [300, 100],
         duration: [200, 150],
         animation: 'fade',
@@ -37,7 +37,7 @@
         this.setupTooltips();
         this.isInitialized = true;
       } catch (error) {
-        console.error('TippyTooltipModule: Initialization failed:', error);
+        console.error('DetalhesCalculoTooltip: Initialization failed:', error);
       }
     }
 
@@ -70,19 +70,19 @@
     initializeTooltips() {
       if (this.isDestroyed) return;
 
-      this.setupAjudaBotaoTooltip();
+      this.setupDetalhesCalculoTooltip();
       this.observeNewElements();
     }
 
-    setupAjudaBotaoTooltip() {
-      const ajudaBotoes = document.querySelectorAll('.ajuda-botao');
+    setupDetalhesCalculoTooltip() {
+      const detalhesButtons = document.querySelectorAll('.detalhes-calculo-geral');
 
-      ajudaBotoes.forEach((button) => {
+      detalhesButtons.forEach((button) => {
         if (this.instances.has(button)) {
           return;
         }
 
-        const tooltipContent = this.getIndiceGiroContent();
+        const tooltipContent = this.getDetalhesCalculoContent();
 
         const instance = window.tippy(button, {
           content: tooltipContent,
@@ -112,15 +112,33 @@
       });
     }
 
-    getIndiceGiroContent() {
+    getDetalhesCalculoContent() {
       return `
-        <div style="padding: 12px; line-height: 1.5;">
-          <p style="font-weight: 500; margin: 0; font-size: 14px; color: #374151;">
-           É um indicador que aproxima o quanto a sua carteira é movimentada ao longo do tempo.
-            <br><br>
-            Usamos esse índice para estimar a média de comissão anual cobrada em diferentes cenários de rotação de ativos.
+        <div style="padding: 12px; line-height: 1.5; font-family: 'Satoshi Variable', Arial, sans-serif;">
+          <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 700; color: #111827;">
+            Como calculamos a média de comissão anual?
+          </h4>
 
+          <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 500; color: #374151;">
+            Para estimar o que o mercado costuma cobrar, consideramos uma <strong>média de corretagem</strong> por produto e aplicamos um fator de rotação compatível com o seu perfil.
           </p>
+
+          <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #374151;">
+            <li style="margin-bottom: 12px;">
+              <div style="margin-bottom: 6px;">
+                <strong>Fórmula base (em %):</strong>
+              </div>
+              <div style="border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; font-weight: 500; color: #1f2937;">
+                Comissão % = (Média de Corretagem ÷ Prazo Médio) × Fator de Giro.
+              </div>
+            </li>
+            <li style="margin-bottom: 8px; font-weight: 500;">
+              <strong>Premissas:</strong> usamos faixas de mercado, prazos médios representativos por produto e o <strong>nível 2</strong> como referência padrão.
+            </li>
+            <li style="margin-bottom: 0; font-weight: 500;">
+              <strong>Comissão estimada (R$):</strong> Valor investido × Comissão %.
+            </li>
+          </ul>
         </div>
       `;
     }
@@ -133,13 +151,13 @@
           if (mutation.type === 'childList') {
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === Node.ELEMENT_NODE) {
-                if (node.classList && node.classList.contains('ajuda-botao')) {
+                if (node.classList && node.classList.contains('detalhes-calculo-geral')) {
                   this.setupSingleTooltip(node);
                 } else {
-                  const ajudaBotoes =
-                    node.querySelectorAll && node.querySelectorAll('.ajuda-botao');
-                  if (ajudaBotoes) {
-                    ajudaBotoes.forEach((button) => this.setupSingleTooltip(button));
+                  const detalhesButtons =
+                    node.querySelectorAll && node.querySelectorAll('.detalhes-calculo-geral');
+                  if (detalhesButtons) {
+                    detalhesButtons.forEach((button) => this.setupSingleTooltip(button));
                   }
                 }
               }
@@ -159,7 +177,7 @@
     setupSingleTooltip(button) {
       if (this.isDestroyed || this.instances.has(button)) return;
 
-      const tooltipContent = this.getIndiceGiroContent();
+      const tooltipContent = this.getDetalhesCalculoContent();
 
       const instance = window.tippy(button, {
         content: tooltipContent,
@@ -224,7 +242,7 @@
         try {
           instance.destroy();
         } catch (error) {
-          console.warn('TippyTooltipModule: Error destroying instance:', error);
+          console.warn('DetalhesCalculoTooltip: Error destroying instance:', error);
         }
       });
 
@@ -240,7 +258,7 @@
     }
   }
 
-  window.TippyTooltipModule = TippyTooltipModule;
+  window.DetalhesCalculoTooltip = DetalhesCalculoTooltip;
 
-  window.tippyTooltipInstance = new TippyTooltipModule();
+  window.detalhesCalculoTooltipInstance = new DetalhesCalculoTooltip();
 })();

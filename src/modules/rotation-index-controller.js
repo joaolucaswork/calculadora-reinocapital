@@ -209,6 +209,12 @@
           fatorGiro: 1.0,
           fixed: true,
         },
+        'Fundo de Investimento:Ações FIA': {
+          mediaCorretagem: 0.0175,
+          prazoMedioAnos: 1.0,
+          fatorGiro: 1.0,
+          fixed: true,
+        },
         'Fundo de Investimento:Liquidez': {
           mediaCorretagem: 0.0035,
           prazoMedioAnos: 1.0,
@@ -227,7 +233,7 @@
           fatorGiro: 1.0,
           fixed: true,
         },
-        'Fundo de Investimento:Imobiliários': {
+        'Fundo de Investimento:Imobiliários Cetipados': {
           mediaCorretagem: 0.02,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
@@ -239,7 +245,7 @@
           fatorGiro: 1.0,
           fixed: true,
         },
-        'Renda Variável:Ações': {
+        'Renda Variável:Ações e Ativos': {
           mediaCorretagem: 0.005,
           prazoMedioAnos: 1.0,
           fatorGiro: 3.0,
@@ -251,19 +257,19 @@
           fatorGiro: 1.0,
           fixed: false,
         },
-        'Renda Variável:Carteira Administrada': {
+        'Renda Variável:Carteira administrada': {
           mediaCorretagem: 0.0325,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
           fixed: false,
         },
-        'Internacional:Investimentos': {
+        'Internacional:Dólar': {
           mediaCorretagem: 0.02,
           prazoMedioAnos: 5.0,
           fatorGiro: 1.0,
           fixed: false,
         },
-        'Internacional:ETF': {
+        'Internacional:Inter Produtos': {
           mediaCorretagem: 0.0063,
           prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
@@ -287,18 +293,6 @@
           fatorGiro: 1.0,
           fixed: true,
         },
-        'Outros:COE': {
-          mediaCorretagem: 0.055,
-          prazoMedioAnos: 5.0,
-          fatorGiro: 1.2,
-          fixed: false,
-        },
-        'Outros:Previdência': {
-          mediaCorretagem: 0.0175,
-          prazoMedioAnos: 1.0,
-          fatorGiro: 1.0,
-          fixed: true,
-        },
         'Outros:Poupança': {
           mediaCorretagem: 0.002,
           prazoMedioAnos: 1.0,
@@ -311,15 +305,11 @@
           fatorGiro: 0.33,
           fixed: false,
         },
-        'Outros:Imóvel': {
-          mediaCorretagem: 0.75,
+        'COE:COE': {
+          mediaCorretagem: 0.055,
+          prazoMedioAnos: 1.0,
           fatorGiro: 1.0,
-          fixed: false,
-        },
-        'Outros:Criptoativos': {
-          mediaCorretagem: 0,
-          fatorGiro: 1.0,
-          fixed: false,
+          fixed: true,
         },
       };
     }

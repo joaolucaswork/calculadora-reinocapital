@@ -113,6 +113,10 @@
         this.handleAssetSelection(e.target.checked, category, product, assetElement);
       });
 
+      checkbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
       assetElement.addEventListener('click', (e) => {
         if (!e.target.matches('.asset-checkbox, .asset-checkbox-label')) {
           checkbox.checked = !checkbox.checked;
