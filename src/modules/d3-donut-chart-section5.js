@@ -50,7 +50,7 @@
       if (window.SimpleHoverModule) {
         this.hoverModule = new window.SimpleHoverModule({
           offset: { x: 15, y: -10 },
-          animationDuration: 150,
+          animationDuration: 80,
           className: 'd3-donut-tooltip-section5',
         });
       } else {
@@ -248,32 +248,46 @@
         .attr('fill', (d) => this.colorScale(d.data.category))
         .attr('stroke', '#fff')
         .attr('stroke-width', 2)
-        .style('cursor', 'pointer');
+        .style('cursor', 'pointer')
+        .style('opacity', 1)
+        .style('transition', 'opacity 0.3s');
 
       const arcUpdate = arcEnter.merge(arcs);
 
       // Use Simple Hover Module instead of direct event handlers
       this.hoverModule.attachHoverEvents(arcUpdate.select('path'), {
         onHover: (event, d) => {
-          // Apply visual hover effect
-          window.d3.selectAll('.arc path').style('filter', 'brightness(1)');
+          // Reset ALL slices to original state first (size, opacity, filter)
+          window.d3
+            .selectAll('.arc path')
+            .transition()
+            .duration(80)
+            .style('opacity', 0.3)
+            .attr('d', (sliceData) => arc(sliceData))
+            .style('filter', 'brightness(1)');
+
+          // Then apply hover effect to current slice
           window.d3
             .select(event.target)
             .transition()
-            .duration(150)
-            .attr('d', hoverArc)
+            .duration(80)
+            .style('opacity', 1)
+            .attr('d', hoverArc(d))
             .style('filter', 'brightness(1.1)');
 
           // Trigger cross-component interaction
           this.triggerCategoryHover(d.data.category || d.data.name);
         },
         onOut: (event, d) => {
-          // Remove visual hover effect
+          // Restore all slices to full opacity with faster transition
+          window.d3.selectAll('.arc path').transition().duration(80).style('opacity', 1);
+
+          // Remove visual hover effect and reset arc size
           window.d3
             .select(event.target)
             .transition()
-            .duration(150)
-            .attr('d', arc)
+            .duration(80)
+            .attr('d', arc(d))
             .style('filter', 'brightness(1)');
 
           // Clear cross-component interaction
