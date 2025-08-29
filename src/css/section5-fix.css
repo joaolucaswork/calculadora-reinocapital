@@ -77,6 +77,35 @@ body[data-debug='true'] .progress-bar.aloca-section {
   visibility: hidden !important;
 }
 
+/* Force hide navbar in section 5 - more specific selector */
+[data-step='5'] ~ * .top-header-navbar,
+body [data-step='5'] ~ * .top-header-navbar,
+.top-header-navbar[style*='display: none'] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Additional force hide for all screen sizes */
+@media screen and (max-width: 991px) {
+  .top-header-navbar.hidden-section {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .top-header-navbar.hidden-section {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .top-header-navbar.hidden-section {
+    display: none !important;
+  }
+}
+
 /* Additional safety measures for overlapping elements */
 .container-float,
 .componente-alocao-float,

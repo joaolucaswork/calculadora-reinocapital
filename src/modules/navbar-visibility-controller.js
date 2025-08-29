@@ -13,7 +13,7 @@
       this.currentSection = null;
       this.isInitialized = false;
       this.debugMode = window.location.search.includes('debug=true');
-      
+
       this.hiddenSections = new Set(['resultado5']);
     }
 
@@ -30,7 +30,7 @@
 
     cacheElements() {
       this.navbar = document.querySelector('.top-header-navbar');
-      
+
       if (!this.navbar) {
         this.log('⚠️ top-header-navbar element not found');
         return;
@@ -74,7 +74,7 @@
 
       this.currentSection = sectionName;
       this.updateNavbarVisibility();
-      
+
       this.log(`🔄 Section changed to: ${sectionName}`);
     }
 
@@ -103,25 +103,33 @@
     hideNavbar() {
       if (!this.navbar) return;
 
+      // Force hide with multiple properties to override Webflow CSS
       this.navbar.style.display = 'none';
+      this.navbar.style.visibility = 'hidden';
+      this.navbar.style.opacity = '0';
+      this.navbar.style.pointerEvents = 'none';
       this.navbar.classList.add('hidden-section');
-      
+
       this.log('👁️ Navbar hidden');
     }
 
     showNavbar() {
       if (!this.navbar) return;
 
+      // Clear all hiding properties
       this.navbar.style.display = '';
+      this.navbar.style.visibility = '';
+      this.navbar.style.opacity = '';
+      this.navbar.style.pointerEvents = '';
       this.navbar.classList.remove('hidden-section');
-      
+
       this.log('👁️ Navbar shown');
     }
 
     addHiddenSection(sectionName) {
       this.hiddenSections.add(sectionName);
       this.log(`➕ Added hidden section: ${sectionName}`);
-      
+
       if (this.currentSection === sectionName) {
         this.updateNavbarVisibility();
       }
@@ -130,7 +138,7 @@
     removeHiddenSection(sectionName) {
       this.hiddenSections.delete(sectionName);
       this.log(`➖ Removed hidden section: ${sectionName}`);
-      
+
       if (this.currentSection === sectionName) {
         this.updateNavbarVisibility();
       }
@@ -152,7 +160,7 @@
         navbarFound: !!this.navbar,
         currentSection: this.currentSection,
         hiddenSections: Array.from(this.hiddenSections),
-        isVisible: this.navbar ? this.navbar.style.display !== 'none' : false
+        isVisible: this.navbar ? this.navbar.style.display !== 'none' : false,
       };
     }
 
@@ -172,5 +180,4 @@
   } else {
     window.ReinoNavbarVisibilityController.init();
   }
-
 })();
