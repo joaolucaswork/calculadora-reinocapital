@@ -23,6 +23,8 @@ import './modules/simple-hover-module.js';
 import './modules/simple-sync.js';
 import './modules/selected-products-list.js';
 import './modules/category-hover-highlight.js';
+import './modules/chamada-hover-effects.js';
+import './modules/popup-cta-modal.js';
 // import './modules/swiper-resultado.js'; // DESATIVADO - mantido para uso futuro
 import './modules/typebot-integration.js';
 // Import button system modules
@@ -40,6 +42,7 @@ import './modules/tippy-tooltip-module.js';
 import './modules/rotation-slider-tooltip.js';
 import './modules/detalhes-calculo-tooltip.js';
 import './modules/reino-debug-module.js';
+import './modules/navbar-hide-controller.js';
 // Import CSS files
 import './css/tippy-custom.css';
 import './css/simple-button.css';
