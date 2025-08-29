@@ -17,6 +17,7 @@ import './modules/rotation-index-controller.js';
 import './modules/salesforce-integration.js';
 import './modules/salesforce-sync.js';
 import './modules/section-visibility.js';
+import './modules/navbar-visibility-controller.js';
 import './modules/settings-modal-controller.js';
 import './modules/simple-button-system.js';
 import './modules/simple-hover-module.js';

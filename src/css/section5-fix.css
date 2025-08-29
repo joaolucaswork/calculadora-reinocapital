@@ -5,7 +5,7 @@
  */
 
 /* Ensure section 5 is always clickable and on top */
-[data-step="5"]._5-section-resultado {
+[data-step='5']._5-section-resultado {
   position: relative !important;
   z-index: 10000 !important;
   pointer-events: auto !important;
@@ -18,7 +18,7 @@
 }
 
 /* Ensure all child elements of section 5 are clickable */
-[data-step="5"] * {
+[data-step='5'] * {
   pointer-events: auto !important;
 }
 
@@ -32,33 +32,33 @@
 }
 
 /* Ensure interactive elements in section 5 work properly */
-[data-step="5"] .swiper-slide,
-[data-step="5"] .swiper-button-detalhes,
-[data-step="5"] .lista-resultado-item {
+[data-step='5'] .swiper-slide,
+[data-step='5'] .swiper-button-detalhes,
+[data-step='5'] .lista-resultado-item {
   pointer-events: auto !important;
   position: relative;
   z-index: 1;
 }
 
 /* Debug styles - only visible when ?debug=true is in URL */
-body[data-debug="true"] [data-step="5"] {
+body[data-debug='true'] [data-step='5'] {
   outline: 3px solid red !important;
 }
 
-body[data-debug="true"] .progress-bar {
+body[data-debug='true'] .progress-bar {
   outline: 3px solid blue !important;
 }
 
-body[data-debug="true"] .progress-bar.aloca-section {
+body[data-debug='true'] .progress-bar.aloca-section {
   outline: 3px solid green !important;
 }
 
 /* Mobile responsiveness */
 @media screen and (max-width: 991px) {
-  [data-step="5"]._5-section-resultado {
+  [data-step='5']._5-section-resultado {
     z-index: 10001 !important;
   }
-  
+
   .progress-bar.aloca-section {
     z-index: 998 !important;
   }
@@ -66,9 +66,15 @@ body[data-debug="true"] .progress-bar.aloca-section {
 
 /* Tablet responsiveness */
 @media screen and (max-width: 767px) {
-  [data-step="5"]._5-section-resultado {
+  [data-step='5']._5-section-resultado {
     z-index: 10002 !important;
   }
+}
+
+/* Hide navbar when in section 5 */
+.top-header-navbar.hidden-section {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 /* Additional safety measures for overlapping elements */
@@ -79,8 +85,8 @@ body[data-debug="true"] .progress-bar.aloca-section {
 }
 
 /* Ensure section 5 content is always accessible */
-[data-step="5"] .resultado-cinco-wrapper,
-[data-step="5"] .padding-espec.resultado {
+[data-step='5'] .resultado-cinco-wrapper,
+[data-step='5'] .padding-espec.resultado {
   pointer-events: auto !important;
   position: relative;
   z-index: 1;
