@@ -44,6 +44,7 @@ import './modules/rotation-slider-tooltip.js';
 import './modules/detalhes-calculo-tooltip.js';
 import './modules/reino-debug-module.js';
 import './modules/calendly-minimalist-widget.js';
+import './modules/lottie-lifecycle-manager.js';
 // Import CSS files
 import './css/tippy-custom.css';
 import './css/simple-button.css';
