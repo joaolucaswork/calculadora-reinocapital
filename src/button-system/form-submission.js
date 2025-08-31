@@ -82,7 +82,6 @@ window.ReinoFormSubmission = (function () {
       this.showValidationError(error.message);
 
       // Reset button
-      if (buttonText) buttonText.textContent = 'Enviar';
       button.disabled = false;
     }
   };
@@ -205,8 +204,6 @@ window.ReinoFormSubmission = (function () {
 
       // Start Typebot
       this.typebotIntegration.startTypebotFlow(formData, onTypebotCompletion);
-
-      if (buttonText) buttonText.textContent = 'Aguardando resposta...';
     } catch (error) {
       this.log('Typebot flow error: ' + error.message);
       // Fallback to direct submission

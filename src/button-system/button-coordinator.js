@@ -14,6 +14,7 @@
       this.navigationButtons = null;
       this.formSubmission = null;
       this.integrations = null;
+      this.isFullyAllocated = false;
     }
 
     async init(stepNavigationSystem) {
@@ -43,6 +44,7 @@
 
       // Setup Typebot integration - MOVED TO LAST
       this.setupTypebotIntegration();
+      this.setupAllocationValidation();
 
       this.setupDebugMode();
 
@@ -92,6 +94,37 @@
       this.log('✅ Typebot integration listeners added');
     }
 
+    setupAllocationValidation() {
+      document.addEventListener('allocationStatusChanged', (e) => {
+        const { isFullyAllocated } = e.detail;
+        this.isFullyAllocated = isFullyAllocated;
+        this.updateSendButtonState();
+        this.log(
+          `💰 Allocation status: ${isFullyAllocated ? 'Fully allocated' : 'Not fully allocated'}`
+        );
+      });
+
+      this.updateSendButtonState();
+      this.log('✅ Allocation validation setup complete');
+    }
+
+    updateSendButtonState() {
+      const sendButtons = document.querySelectorAll('[element-function="send"]');
+      sendButtons.forEach((button) => {
+        button.disabled = !this.isFullyAllocated;
+
+        if (this.isFullyAllocated) {
+          button.classList.remove('disabled');
+          button.style.opacity = '';
+          button.style.pointerEvents = '';
+        } else {
+          button.classList.add('disabled');
+          button.style.opacity = '0.5';
+          button.style.pointerEvents = 'none';
+        }
+      });
+    }
+
     removeExistingListeners() {
       // Clone and replace send buttons to remove existing listeners
       const sendButtons = document.querySelectorAll('[element-function="send"]');
@@ -107,10 +140,10 @@
       try {
         this.log('📤 Processing send button click');
 
-        // Change button text to indicate processing
-        const originalText = button.textContent;
-        const buttonDiv = button.querySelector('div') || button;
-        buttonDiv.textContent = 'Enviando...';
+        if (!this.isFullyAllocated) {
+          this.log('⚠️ Cannot send - patrimony not fully allocated');
+          return;
+        }
 
         // Collect form data
         const formData = this.collectFormData();
@@ -125,20 +158,10 @@
           window.ReinoTypebot.start(formData);
         } else {
           console.error('❌ Typebot integration not available');
-          buttonDiv.textContent = originalText;
           return;
         }
-
-        // Reset button text after a delay
-        setTimeout(() => {
-          if (buttonDiv.textContent === 'Enviando...') {
-            buttonDiv.textContent = originalText;
-          }
-        }, 5000);
       } catch (error) {
         console.error('❌ Error handling send button:', error);
-        const buttonDiv = button.querySelector('div') || button;
-        buttonDiv.textContent = buttonDiv.textContent.replace('Enviando...', 'Receber relatório');
       }
     }
 
@@ -252,6 +275,10 @@
               this.handleSendButtonClick(sendButton);
             }
           },
+          getAllocationStatus: () => ({
+            isFullyAllocated: this.isFullyAllocated,
+            sendButtonsDisabled: !this.isFullyAllocated,
+          }),
         };
       }
     }

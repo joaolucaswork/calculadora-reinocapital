@@ -149,8 +149,11 @@
 
       container.innerHTML = '';
 
-      const width = 240;
-      const height = 240;
+      const baseFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const widthInEm = 15;
+      const heightInEm = 15;
+      const width = widthInEm * baseFontSize;
+      const height = heightInEm * baseFontSize;
       const radius = Math.min(width, height) / 2 - 10;
 
       const svg = window.d3
@@ -170,7 +173,7 @@
         .attr('class', 'center-value')
         .attr('text-anchor', 'middle')
         .attr('dy', '-0.1em')
-        .style('font-size', '14px')
+        .style('font-size', '0.875em')
         .style('font-weight', '600')
         .style('fill', '#111827')
         .style('opacity', 0);
@@ -181,7 +184,7 @@
         .attr('class', 'center-category')
         .attr('text-anchor', 'middle')
         .attr('dy', '1.2em')
-        .style('font-size', '12px')
+        .style('font-size', '0.75em')
         .style('font-weight', '500')
         .style('fill', '#6b7280')
         .style('opacity', 0);
@@ -524,8 +527,8 @@
           <div style="width: 4px; height: 40px; background-color: ${categoryColor}; border-radius: 2px; margin-right: 12px;"></div>
           <div style="flex: 1;">
             <div style="font-weight: 600; color: #1f2937; margin-bottom: 2px;">${d.data.name}</div>
-            <div style="font-size: 24px; font-weight: 700; color: #111827; line-height: 1;">${formatValue}</div>
-            <div style="font-size: 11px; color: #6b7280; margin-top: 2px;">Custo de Comissão</div>
+            <div style="font-size: 1.5em; font-weight: 700; color: #111827; line-height: 1;">${formatValue}</div>
+            <div style="font-size: 0.6875em; color: #6b7280; margin-top: 2px;">Custo de Comissão</div>
           </div>
         </div>
       `;
@@ -533,15 +536,15 @@
       // Add percentage in highlighted box
       mainSection += `
         <div style="margin-top: 8px; padding: 8px; background-color: #f9fafb; border-radius: 6px;">
-          <div style="font-size: 12px; color: #6b7280; margin-bottom: 2px;">Percentual do Total</div>
-          <div style="font-weight: 600; color: #111827; font-size: 16px;">${d.data.percentage.toFixed(1)}%</div>
+          <div style="font-size: 0.75em; color: #6b7280; margin-bottom: 2px;">Percentual do Total</div>
+          <div style="font-weight: 600; color: #111827; font-size: 1em;">${d.data.percentage.toFixed(1)}%</div>
         </div>
       `;
 
       // Build details section with enhanced product display
       if (d.data.details && d.data.details.length > 0) {
         detailsHtml =
-          '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;"><div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">Produtos desta categoria:</div>';
+          '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;"><div style="font-size: 0.8125em; font-weight: 600; color: #374151; margin-bottom: 10px;">Produtos desta categoria:</div>';
 
         d.data.details.forEach((detail, index) => {
           if (index < 4) {
@@ -578,20 +581,20 @@
               <div style="padding: 10px 0; ${index < 3 && index < d.data.details.length - 1 ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                   <div style="flex: 1;">
-                    <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
-                    <div style="font-size: 12px; color: #6b7280;">${commissionDisplay}</div>
-                    ${giroInfo ? `<div style="font-size: 11px; color: #9ca3af; margin-top: 2px;">${giroInfo}</div>` : ''}
+                    <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
+                    <div style="font-size: 0.75em; color: #6b7280;">${commissionDisplay}</div>
+                    ${giroInfo ? `<div style="font-size: 0.6875em; color: #9ca3af; margin-top: 2px;">${giroInfo}</div>` : ''}
                   </div>
                   <div style="text-align: right;">
-                    <div style="font-size: 13px; font-weight: 600; color: #111827;">${detailValue}</div>
+                    <div style="font-size: 0.8125em; font-weight: 600; color: #111827;">${detailValue}</div>
                   </div>
                 </div>
                 ${
                   commissionValue
                     ? `
                   <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f3f4f6;">
-                    <span style="font-size: 11px; color: #6b7280;">Comissão média anual:</span>
-                    <span style="font-size: 12px; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
+                    <span style="font-size: 0.6875em; color: #6b7280;">Comissão média anual:</span>
+                    <span style="font-size: 0.75em; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
                   </div>
                 `
                     : ''
@@ -602,7 +605,7 @@
         });
 
         if (d.data.details.length > 4) {
-          detailsHtml += `<div style="font-size: 12px; color: #9ca3af; margin-top: 8px; text-align: center; font-style: italic; padding: 6px; background-color: #f9fafb; border-radius: 6px;">+${d.data.details.length - 4} outros produtos nesta categoria</div>`;
+          detailsHtml += `<div style="font-size: 0.75em; color: #9ca3af; margin-top: 8px; text-align: center; font-style: italic; padding: 6px; background-color: #f9fafb; border-radius: 6px;">+${d.data.details.length - 4} outros produtos nesta categoria</div>`;
         }
 
         detailsHtml += '</div>';
@@ -613,7 +616,7 @@
           ${mainSection}
 
           <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-            <div style="font-size: 12px; color: #6b7280; line-height: 1.4;">
+            <div style="font-size: 0.75em; color: #6b7280; line-height: 1.4;">
               Baseado em <strong>${d.data.details ? d.data.details.length : 0} ativo${d.data.details && d.data.details.length !== 1 ? 's' : ''}</strong> desta categoria
             </div>
           </div>
@@ -640,7 +643,7 @@
         transform: translate(-50%, -50%);
         text-align: center;
         color: #6B7280;
-        font-size: 14px;
+        font-size: 0.875em;
       `;
       message.textContent = 'Nenhum ativo selecionado';
 
