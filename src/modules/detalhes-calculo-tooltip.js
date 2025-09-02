@@ -11,7 +11,7 @@
     constructor(options = {}) {
       this.options = {
         theme: 'light',
-        placement: 'top',
+        placement: 'bottom',
         arrow: true,
         interactive: false,
         allowHTML: true,
@@ -19,6 +19,8 @@
         delay: [300, 100],
         duration: [200, 150],
         animation: 'fade',
+        flip: false,
+        flipOnUpdate: false,
         ...options,
       };
 
@@ -97,6 +99,8 @@
           animation: this.options.animation,
           trigger: 'mouseenter focus',
           hideOnClick: false,
+          flip: this.options.flip,
+          flipOnUpdate: this.options.flipOnUpdate,
           appendTo: () => document.body,
           onCreate: (tippyInstance) => {
             this.instances.set(button, tippyInstance);
@@ -192,6 +196,8 @@
         animation: this.options.animation,
         trigger: 'mouseenter focus',
         hideOnClick: false,
+        flip: this.options.flip,
+        flipOnUpdate: this.options.flipOnUpdate,
         appendTo: () => document.body,
         onCreate: (tippyInstance) => {
           this.instances.set(button, tippyInstance);
