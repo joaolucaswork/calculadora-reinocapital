@@ -1,0 +1,38 @@
+/**
+ * Settings Reset Button Enhancement
+ * Melhora o feedback visual do botão de reset
+ */
+
+/* Reset button base styles */
+
+/* Tooltip-like feedback on hover */
+.settings-patrimonio-button::after {
+  content: 'Resetar valores';
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.settings-patrimonio-button:hover::after {
+  opacity: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .settings-patrimonio-button::after {
+    font-size: 11px;
+    padding: 3px 6px;
+    top: -30px;
+  }
+}

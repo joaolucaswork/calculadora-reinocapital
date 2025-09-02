@@ -7,14 +7,14 @@
 .tippy-box .tippy-content {
   padding: 0 !important; /* Remove padding padrão pois usamos padding no HTML interno */
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 0.5rem;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 /* Garante que o tooltip tenha boa aparência */
 .tippy-box {
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 0.5rem;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 

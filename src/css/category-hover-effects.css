@@ -1,11 +1,13 @@
 /**
  * Category Hover Effects CSS
- * Efeitos visuais para hover em categoria-ativo.v2
+ * Efeitos visuais para hover em categoria-porcentagem e categoria-ativo.v2
  */
 
 /* Efeito de crescimento do travessão no hover */
 .categoria-ativo.v2::before {
-  transition: width 200ms ease-out, transform 200ms ease-out;
+  transition:
+    width 200ms ease-out,
+    transform 200ms ease-out;
   transform-origin: left center;
 }
 
@@ -31,7 +33,27 @@
 /* Efeito adicional no texto durante hover */
 .categoria-ativo.v2:hover {
   transform: translateX(2px);
-  transition: transform 200ms ease-out, opacity 150ms ease-out;
+  transition:
+    transform 200ms ease-out,
+    opacity 150ms ease-out;
+}
+
+/* Efeitos de hover para categoria-porcentagem */
+.categoria-porcentagem {
+  transition: transform 150ms ease-out;
+}
+
+.categoria-porcentagem:hover {
+  transform: translateY(-1px);
+}
+
+.categoria-porcentagem:hover .categoria-ativo.v2::before {
+  width: 24px; /* Cresce de 18px para 24px */
+  transform: scaleX(1.1); /* Efeito adicional de escala */
+}
+
+.categoria-porcentagem:hover .categoria-ativo.v2 {
+  transform: translateX(2px);
 }
 
 /* Responsivo para mobile */
@@ -40,8 +62,17 @@
     width: 20px; /* Menor crescimento em mobile */
     transform: scaleX(1.05);
   }
-  
+
   .categoria-ativo.v2:hover {
+    transform: translateX(1px); /* Movimento menor em mobile */
+  }
+
+  .categoria-porcentagem:hover .categoria-ativo.v2::before {
+    width: 20px; /* Menor crescimento em mobile */
+    transform: scaleX(1.05);
+  }
+
+  .categoria-porcentagem:hover .categoria-ativo.v2 {
     transform: translateX(1px); /* Movimento menor em mobile */
   }
 }

@@ -105,8 +105,32 @@
         }
       });
 
+      // Cache elementos categoria-porcentagem
+      const categoryPercentageElements = document.querySelectorAll(
+        '.categoria-porcentagem[ativo-category]'
+      );
+      categoryPercentageElements.forEach((categoryElement) => {
+        const category = categoryElement.getAttribute('ativo-category');
+
+        if (category) {
+          const normalizedKey = `${category.toLowerCase().trim()}-percentage`;
+
+          this.categoryItems.set(normalizedKey, {
+            element: categoryElement, // O elemento categoria-porcentagem
+            targetElement: null,
+            category: category,
+            visible: true,
+            isPercentage: true, // Flag para identificar elementos de porcentagem
+          });
+
+          if (this.config.enableLogging) {
+            console.log(`📦 Cached categoria-porcentagem: ${category}`);
+          }
+        }
+      });
+
       if (this.config.enableLogging) {
-        console.log(`📋 Cached ${this.categoryItems.size} categoria-ativo items`);
+        console.log(`📋 Cached ${this.categoryItems.size} category items (ativo + porcentagem)`);
       }
     }
 
@@ -226,10 +250,11 @@
     toggleItemVisibility(item, show) {
       if (!item.element) return;
 
-      const categoryElement = item.element; // O elemento .categoria-ativo
+      const categoryElement = item.element;
+      const elementType = item.isPercentage ? 'categoria-porcentagem' : 'categoria-ativo';
 
       if (show) {
-        // Mostra o elemento categoria-ativo
+        // Mostra o elemento
         categoryElement.style.display = '';
         categoryElement.style.opacity = '0';
         categoryElement.style.transform = 'translateY(10px)';
@@ -242,10 +267,10 @@
         }, 10);
 
         if (this.config.enableLogging) {
-          console.log(`👁️ Showing categoria-ativo: ${item.category}`);
+          console.log(`👁️ Showing ${elementType}: ${item.category}`);
         }
       } else {
-        // Esconde o elemento categoria-ativo
+        // Esconde o elemento
         categoryElement.style.transition = `opacity ${this.config.animationDuration}ms ease, transform ${this.config.animationDuration}ms ease`;
         categoryElement.style.opacity = '0';
         categoryElement.style.transform = 'translateY(-10px)';
@@ -255,7 +280,7 @@
         }, this.config.animationDuration);
 
         if (this.config.enableLogging) {
-          console.log(`🙈 Hiding categoria-ativo: ${item.category}`);
+          console.log(`🙈 Hiding ${elementType}: ${item.category}`);
         }
       }
     }
