@@ -187,27 +187,22 @@
         data.patrimonioNumeric = 0;
       }
 
-      // Get selected assets (simple format for Typebot)
+      // Get selected assets from DOM (reliable source)
       const selectedAssets = [];
-      if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
-        window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
-          selectedAssets.push(asset);
-        });
-      }
+      const activeItems = document.querySelectorAll(
+        '.patrimonio_interactive_item .active-produto-item'
+      );
 
-      // Fallback: check sliders with values > 0
-      if (selectedAssets.length === 0) {
-        const sliders = document.querySelectorAll('range-slider');
-        sliders.forEach((slider) => {
-          if (parseFloat(slider.value) > 0) {
-            const item = slider.closest('.patrimonio_interactive_item');
-            const product = item?.getAttribute('ativo-product');
-            if (product) {
-              selectedAssets.push(product);
-            }
-          }
-        });
-      }
+      activeItems.forEach((item) => {
+        const container = item.closest('.patrimonio_interactive_item');
+        const product = container.getAttribute('ativo-product');
+        const category = container.getAttribute('ativo-category');
+
+        if (product && category) {
+          // Use clean format: "Product (Category)"
+          selectedAssets.push(`${product} (${category})`);
+        }
+      });
 
       data.ativos_selecionados = selectedAssets.join(', ') || 'Nenhum ativo selecionado';
 
@@ -247,7 +242,7 @@
     getSelectedAssetsDetailed() {
       const selectedAssets = [];
 
-      // Get from active allocation items
+      // Get from active allocation items (DOM is source of truth)
       const activeItems = document.querySelectorAll(
         '.patrimonio_interactive_item .active-produto-item'
       );

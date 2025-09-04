@@ -117,13 +117,14 @@ class ReinoTypebotIntegrationSystem {
 
       // Prepare variables for Typebot with calculator data
       // IMPORTANT: Variable names must match exactly what's defined in Typebot
+      // Force fresh data collection at the moment of sending
       const typebotVariables = {
         nome: this.currentFormData.nome || '',
         email: this.currentFormData.email || '',
         telefone: this.currentFormData.telefone || '',
-        patrimonio: this.currentFormData.patrimonio || this.getPatrimonioValue(),
-        ativos: this.currentFormData.ativos_selecionados || this.getSelectedAssets(),
-        totalAlocado: this.formatCurrency(this.currentFormData.totalAlocado || 0),
+        patrimonio: this.getPatrimonioValue(), // Always get fresh data
+        ativos: this.getSelectedAssets(), // Always get fresh data
+        totalAlocado: this.formatCurrency(this.getTotalAllocated()), // Always get fresh data
         source: 'webflow_calculator',
       };
 
@@ -159,7 +160,7 @@ class ReinoTypebotIntegrationSystem {
       patrimonio: this.getPatrimonioValue(),
       ativos_selecionados: this.getSelectedAssets(),
       economia_anual: this.getEconomiaValue(),
-      // Add detailed calculator data
+      // Add detailed calculator data - use DOM as source of truth
       ativosEscolhidos: this.getSelectedAssetsDetailed(),
       alocacao: this.getAllocationData(),
       totalAlocado: this.getTotalAllocated(),
@@ -233,7 +234,7 @@ class ReinoTypebotIntegrationSystem {
   getSelectedAssetsDetailed() {
     const selectedAssets = [];
 
-    // Get from active allocation items
+    // Get from active allocation items (most reliable source)
     const activeItems = document.querySelectorAll(
       '.patrimonio_interactive_item .active-produto-item'
     );
@@ -304,23 +305,44 @@ class ReinoTypebotIntegrationSystem {
   getSelectedAssets() {
     const selectedAssets = [];
 
-    // Try to get from asset selection system
-    if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
-      window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
-        selectedAssets.push(asset);
-      });
+    // Get from active allocation items (more reliable)
+    const activeItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+
+    activeItems.forEach((item) => {
+      const container = item.closest('.patrimonio_interactive_item');
+      const product = container.getAttribute('ativo-product');
+      const category = container.getAttribute('ativo-category');
+
+      if (product && category) {
+        // Format: "Product (Category)" - cleaner format like the image
+        const formattedAsset = `${product} (${category})`;
+        selectedAssets.push(formattedAsset);
+      }
+    });
+
+    // If we found active items, use them (don't use fallback)
+    if (selectedAssets.length > 0) {
+      return selectedAssets.join(', ');
     }
 
-    // Fallback: check for selected asset elements
-    if (selectedAssets.length === 0) {
-      const assetElements = document.querySelectorAll('.patrimonio_interactive_item');
-      assetElements.forEach((element) => {
-        const slider = element.querySelector('range-slider');
-        if (slider && parseFloat(slider.value) > 0) {
-          const product = element.getAttribute('ativo-product');
-          if (product) {
-            selectedAssets.push(product);
+    // Only use fallback if no active items found
+    if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
+      // Convert old format to new format
+      window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
+        // If asset contains "|", split and format properly
+        if (asset.includes('|')) {
+          const parts = asset.split('|');
+          if (parts.length === 2) {
+            const category = parts[0].trim();
+            const product = parts[1].trim();
+            const formattedAsset = `${product} (${category})`;
+            selectedAssets.push(formattedAsset);
           }
+        } else {
+          // If no "|", use as is
+          selectedAssets.push(asset);
         }
       });
     }
@@ -598,24 +620,8 @@ class ReinoTypebotIntegrationSystem {
       converted.patrimonio = parseFloat(cleanValue) || 0;
     }
 
-    // Convert selected assets from string to array format
-    if (buttonCoordinatorData.ativos_selecionados) {
-      const assetsStr = buttonCoordinatorData.ativos_selecionados;
-      if (assetsStr !== 'Nenhum ativo selecionado') {
-        const assetNames = assetsStr.split(', ');
-
-        // Map asset names to category-product format
-        assetNames.forEach((assetName) => {
-          const category = this.getAssetCategory(assetName);
-          if (category) {
-            converted.ativosEscolhidos.push({
-              product: assetName,
-              category: category,
-            });
-          }
-        });
-      }
-    }
+    // Get selected assets directly from DOM (most reliable)
+    converted.ativosEscolhidos = this.getSelectedAssetsDetailed();
 
     // Get allocation data from DOM
     const allocationItems = document.querySelectorAll(
