@@ -16,6 +16,7 @@ import './modules/resultado-sync.js';
 import './modules/rotation-index-controller.js';
 import './modules/salesforce-integration.js';
 import './modules/salesforce-sync.js';
+import './modules/supabase-integration.js';
 import './modules/section-visibility.js';
 import './modules/navbar-visibility-controller.js';
 import './modules/settings-modal-controller.js';

@@ -11,28 +11,48 @@ window.ReinoFormSubmission = (function () {
     this.typebotIntegration = null;
     this.useTypebot = true;
     this.dgmCanvasIntegration = window.ReinoDGMCanvasIntegration;
-    this.supabaseReady = false;
+    this.supabaseIntegration = null;
 
-    // Aguardar ReinoSupabase estar disponível
-    this.waitForSupabase();
+    // Aguardar ReinoSupabaseIntegration estar disponível
+    this.waitForSupabaseIntegration();
   }
 
   FormSubmission.prototype.init = function () {
     this.setupSendButton();
+    this.setupTypebotCallback();
     this.log('✅ Form submission initialized');
   };
 
-  FormSubmission.prototype.waitForSupabase = function () {
+  FormSubmission.prototype.waitForSupabaseIntegration = function () {
     var self = this;
-    var checkSupabase = function () {
-      if (window.ReinoSupabase && window.ReinoSupabase.client) {
-        self.supabaseReady = true;
-        self.log('✅ Supabase client available');
+    var checkSupabaseIntegration = function () {
+      if (window.ReinoSupabaseIntegration && window.ReinoSupabaseIntegration.isReady) {
+        self.supabaseIntegration = window.ReinoSupabaseIntegration;
+        self.log('✅ Supabase integration available');
         return;
       }
-      setTimeout(checkSupabase, 100);
+      setTimeout(checkSupabaseIntegration, 100);
     };
-    checkSupabase();
+    checkSupabaseIntegration();
+  };
+
+  FormSubmission.prototype.setupTypebotCallback = function () {
+    var self = this;
+
+    // Wait for Typebot integration to be available
+    var checkTypebot = function () {
+      if (window.ReinoTypebotIntegrationSystem) {
+        // Register callback for when Typebot completes
+        window.ReinoTypebotIntegrationSystem.onCompletion(function (enhancedFormData) {
+          self.log('🤖 Typebot completion callback triggered');
+          self.handleTypebotCompletion(enhancedFormData);
+        });
+        self.log('✅ Typebot callback registered');
+        return;
+      }
+      setTimeout(checkTypebot, 100);
+    };
+    checkTypebot();
   };
 
   FormSubmission.prototype.setupSendButton = function () {
@@ -63,7 +83,14 @@ window.ReinoFormSubmission = (function () {
     try {
       // Collect and validate form data
       var formData = this.collectFormData();
-      var validation = this.validateFormData(formData);
+
+      // Use Supabase integration validation if available, otherwise fallback
+      var validation;
+      if (this.supabaseIntegration) {
+        validation = this.supabaseIntegration.validateFormData(formData);
+      } else {
+        validation = this.validateFormData(formData);
+      }
 
       if (!validation.isValid) {
         throw new Error('Validação falhou: ' + validation.errors.join(', '));
@@ -95,6 +122,9 @@ window.ReinoFormSubmission = (function () {
       session_id: this.generateSessionId(),
       user_agent: navigator.userAgent,
       page_url: window.location.href,
+      nome: null,
+      email: null,
+      telefone: null,
     };
 
     // Coleta valor do patrimônio
@@ -103,21 +133,47 @@ window.ReinoFormSubmission = (function () {
       data.patrimonio = this.parseCurrencyValue(patrimonioInput.value);
     }
 
-    // Coleta ativos selecionados
-    var selectedAssets = document.querySelectorAll('.selected-asset');
-    for (var i = 0; i < selectedAssets.length; i++) {
-      var asset = selectedAssets[i];
-      var product = asset.getAttribute('ativo-product');
-      var category = asset.getAttribute('ativo-category');
+    // Coleta informações de contato se disponíveis
+    var nameInput = document.querySelector(
+      'input[name*="nome"], input[placeholder*="nome"], #nome'
+    );
+    if (nameInput && nameInput.value) {
+      data.nome = nameInput.value.trim();
+    }
+
+    var emailInput = document.querySelector('input[type="email"], input[name*="email"], #email');
+    if (emailInput && emailInput.value) {
+      data.email = emailInput.value.trim();
+    }
+
+    var phoneInput = document.querySelector(
+      'input[type="tel"], input[name*="telefone"], input[name*="phone"], #telefone'
+    );
+    if (phoneInput && phoneInput.value) {
+      data.telefone = phoneInput.value.trim();
+    }
+
+    // Coleta ativos selecionados - busca por elementos ativos
+    var activeItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+    for (var i = 0; i < activeItems.length; i++) {
+      var item = activeItems[i].closest('.patrimonio_interactive_item');
+      var product = item.getAttribute('ativo-product');
+      var category = item.getAttribute('ativo-category');
       if (product && category) {
         data.ativosEscolhidos.push({ product: product, category: category });
       }
     }
 
-    // Coleta alocações
-    var allocationItems = document.querySelectorAll('.patrimonio_interactive_item');
+    // Coleta alocações com cálculos
+    var totalAlocado = 0;
+    var allocationItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+
     for (var i = 0; i < allocationItems.length; i++) {
-      var item = allocationItems[i];
+      var item = allocationItems[i].closest('.patrimonio_interactive_item');
       var product = item.getAttribute('ativo-product');
       var category = item.getAttribute('ativo-category');
       var input = item.querySelector('.currency-input');
@@ -133,8 +189,15 @@ window.ReinoFormSubmission = (function () {
           category: category,
           product: product,
         };
+
+        totalAlocado += value;
       }
     }
+
+    // Adiciona cálculos derivados
+    data.totalAlocado = totalAlocado;
+    data.percentualAlocado = data.patrimonio > 0 ? (totalAlocado / data.patrimonio) * 100 : 0;
+    data.patrimonioRestante = data.patrimonio - totalAlocado;
 
     return data;
   };
@@ -168,35 +231,44 @@ window.ReinoFormSubmission = (function () {
       // Callback for when Typebot completes
       var onTypebotCompletion = function (typebotData) {
         try {
-          var enhancedFormData = {
-            timestamp: formData.timestamp,
-            patrimonio: formData.patrimonio,
-            ativosEscolhidos: formData.ativosEscolhidos,
-            alocacao: formData.alocacao,
-            session_id: formData.session_id,
-            user_agent: formData.user_agent,
-            page_url: formData.page_url,
-            typebot_results: typebotData,
-            submission_type: 'typebot_enhanced',
-            completed_at: new Date().toISOString(),
-          };
+          // Usar o novo módulo de integração Supabase
+          if (self.supabaseIntegration) {
+            self.supabaseIntegration
+              .saveCalculatorSubmission(formData, typebotData)
+              .then(function (result) {
+                if (result.success) {
+                  // Criar dados para Salesforce com informações do Typebot
+                  var enhancedFormData = {
+                    timestamp: formData.timestamp,
+                    patrimonio: formData.patrimonio,
+                    ativosEscolhidos: formData.ativosEscolhidos,
+                    alocacao: formData.alocacao,
+                    session_id: formData.session_id,
+                    user_agent: formData.user_agent,
+                    page_url: formData.page_url,
+                    typebot_results: typebotData,
+                    submission_type: 'typebot_enhanced',
+                    completed_at: new Date().toISOString(),
+                    nome: typebotData.nome,
+                    email: typebotData.email,
+                    telefone: typebotData.telefone,
+                  };
 
-          self
-            .sendToSupabase(enhancedFormData)
-            .then(function (result) {
-              if (result.success) {
-                // Enviar para Salesforce também
-                self.sendToSalesforce(enhancedFormData);
+                  // Enviar para Salesforce também
+                  self.sendToSalesforce(enhancedFormData);
 
-                if (self.dgmCanvasIntegration) {
-                  self.dgmCanvasIntegration.sendData(enhancedFormData);
+                  if (self.dgmCanvasIntegration) {
+                    self.dgmCanvasIntegration.sendData(enhancedFormData);
+                  }
+                  self.handleSuccessfulSubmission();
                 }
-                self.handleSuccessfulSubmission();
-              }
-            })
-            .catch(function (error) {
-              self.log('Typebot completion error: ' + error.message);
-            });
+              })
+              .catch(function (error) {
+                self.log('Typebot completion error: ' + error.message);
+              });
+          } else {
+            self.log('⚠️ Supabase integration not available');
+          }
         } catch (error) {
           self.log('Typebot completion error: ' + error.message);
         }
@@ -218,33 +290,44 @@ window.ReinoFormSubmission = (function () {
     try {
       if (buttonText) buttonText.textContent = 'Enviando...';
 
-      this.sendToSupabase(formData)
-        .then(function (result) {
-          if (result.success) {
-            // Enviar para Salesforce também
-            self.sendToSalesforce(formData);
+      // Usar o novo módulo de integração Supabase
+      if (self.supabaseIntegration) {
+        self.supabaseIntegration
+          .saveCalculatorSubmission(formData)
+          .then(function (result) {
+            if (result.success) {
+              // Enviar para Salesforce também
+              self.sendToSalesforce(formData);
 
-            if (self.dgmCanvasIntegration) {
-              self.dgmCanvasIntegration.sendData(formData);
+              if (self.dgmCanvasIntegration) {
+                self.dgmCanvasIntegration.sendData(formData);
+              }
+              self.handleSuccessfulSubmission();
             }
-            self.handleSuccessfulSubmission();
-          }
 
-          // Reset button
-          if (buttonText) buttonText.textContent = 'Enviar';
-          button.disabled = false;
-        })
-        .catch(function (error) {
-          self.log('Direct submission error: ' + error.message);
-          self.showValidationError(error.message);
+            // Reset button
+            if (buttonText) buttonText.textContent = 'Enviar';
+            button.disabled = false;
+          })
+          .catch(function (error) {
+            self.log('Direct submission error: ' + error.message);
+            self.showValidationError(error.message);
 
-          // Reset button
-          if (buttonText) buttonText.textContent = 'Enviar';
-          button.disabled = false;
-        });
+            // Reset button
+            if (buttonText) buttonText.textContent = 'Enviar';
+            button.disabled = false;
+          });
+      } else {
+        self.log('⚠️ Supabase integration not available');
+        self.showValidationError('Sistema de armazenamento não disponível');
+
+        // Reset button
+        if (buttonText) buttonText.textContent = 'Enviar';
+        button.disabled = false;
+      }
     } catch (error) {
       this.log('Direct submission error: ' + error.message);
-      this.showValidationError(error.message);
+      self.showValidationError(error.message);
 
       // Reset button
       if (buttonText) buttonText.textContent = 'Enviar';
@@ -252,41 +335,50 @@ window.ReinoFormSubmission = (function () {
     }
   };
 
-  FormSubmission.prototype.sendToSupabase = function (data) {
+  FormSubmission.prototype.handleTypebotCompletion = function (enhancedFormData) {
     var self = this;
 
-    return new Promise(function (resolve, reject) {
-      try {
-        // Usar configuração IIFE
-        if (!window.ReinoSupabase || !window.ReinoSupabase.client) {
-          throw new Error('Supabase not available');
-        }
+    try {
+      self.log('📝 Processing Typebot completion data:', enhancedFormData);
 
-        if (!window.ReinoSupabase.validateConfig()) {
-          throw new Error('Supabase not configured properly');
-        }
+      // Use Supabase integration to save data
+      if (self.supabaseIntegration) {
+        // Extract Typebot data for Supabase
+        var typebotDataForSupabase = {
+          nome: enhancedFormData.nome,
+          email: enhancedFormData.email,
+          telefone: enhancedFormData.telefone,
+          sessionId: enhancedFormData.typebotSessionId,
+          resultId: enhancedFormData.typebotResultId,
+        };
 
-        window.ReinoSupabase.client
-          .from(window.ReinoSupabase.tableName)
-          .insert([data])
-          .select()
+        self.supabaseIntegration
+          .saveCalculatorSubmission(enhancedFormData, typebotDataForSupabase)
           .then(function (result) {
-            if (result.error) {
-              throw new Error(result.error.message);
-            }
+            if (result.success) {
+              self.log('✅ Data saved to Supabase via Typebot completion');
 
-            self.log('Data sent to Supabase successfully');
-            resolve({ success: true, data: result.data });
+              // Also send to Salesforce
+              self.sendToSalesforce(enhancedFormData);
+
+              if (self.dgmCanvasIntegration) {
+                self.dgmCanvasIntegration.sendData(enhancedFormData);
+              }
+
+              self.handleSuccessfulSubmission();
+            } else {
+              self.log('❌ Failed to save to Supabase: ' + result.error);
+            }
           })
           .catch(function (error) {
-            self.log('Supabase error: ' + error.message);
-            reject({ success: false, error: error.message });
+            self.log('❌ Supabase integration error: ' + error.message);
           });
-      } catch (error) {
-        self.log('Supabase error: ' + error.message);
-        reject({ success: false, error: error.message });
+      } else {
+        self.log('⚠️ Supabase integration not available for Typebot completion');
       }
-    });
+    } catch (error) {
+      self.log('❌ Error handling Typebot completion: ' + error.message);
+    }
   };
 
   FormSubmission.prototype.handleSuccessfulSubmission = function () {
