@@ -91,22 +91,8 @@ class ReinoTypebotIntegrationSystem {
       throw new Error('Typebot library not loaded');
     }
 
-    try {
-      // Initialize the popup with correct typebot ID
-      await this.typebotLibrary.initPopup({
-        typebot: this.config.PUBLIC_ID,
-        prefilledVariables: {},
-        onMessage: () => {
-          // Message handling can be added here if needed
-        },
-        onEnd: () => {
-          this.handleTypebotEnd();
-        },
-      });
-    } catch (error) {
-      console.error('❌ Failed to initialize Typebot popup:', error);
-      throw error;
-    }
+    // Don't initialize popup here - wait until we have variables in startTypebotFlow
+    // This prevents the Typebot from being initialized without variables
   }
 
   handleTypebotEnd() {
@@ -130,20 +116,31 @@ class ReinoTypebotIntegrationSystem {
       this.isTypebotActive = true;
 
       // Prepare variables for Typebot with calculator data
+      // IMPORTANT: Variable names must match exactly what's defined in Typebot
       const typebotVariables = {
-        nome: formData.nome || '',
-        email: formData.email || '',
-        telefone: formData.telefone || '',
-        patrimonio: formData.patrimonio || this.getPatrimonioValue(),
-        ativos: formData.ativos_selecionados || this.getSelectedAssets(),
-        totalAlocado: this.formatCurrency(formData.totalAlocado || 0),
+        nome: this.currentFormData.nome || '',
+        email: this.currentFormData.email || '',
+        telefone: this.currentFormData.telefone || '',
+        patrimonio: this.currentFormData.patrimonio || this.getPatrimonioValue(),
+        ativos: this.currentFormData.ativos_selecionados || this.getSelectedAssets(),
+        totalAlocado: this.formatCurrency(this.currentFormData.totalAlocado || 0),
         source: 'webflow_calculator',
       };
 
-      // Open Typebot popup with prefilled variables
-      this.typebotLibrary.open({
+      // Initialize Typebot popup with variables (first time or reinitialize)
+      await this.typebotLibrary.initPopup({
+        typebot: this.config.PUBLIC_ID,
         prefilledVariables: typebotVariables,
+        onMessage: () => {
+          // Message handling can be added here if needed
+        },
+        onEnd: () => {
+          this.handleTypebotEnd();
+        },
       });
+
+      // Open Typebot popup
+      this.typebotLibrary.open();
 
       return true;
     } catch (error) {
@@ -211,11 +208,12 @@ class ReinoTypebotIntegrationSystem {
         .replace(/[^\d,]/g, '')
         .replace(',', '.');
       const value = parseFloat(cleaned) || 0;
-      return new Intl.NumberFormat('pt-BR', {
+      const formatted = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
         minimumFractionDigits: 0,
       }).format(value);
+      return formatted;
     }
     return 'R$ 0';
   }
