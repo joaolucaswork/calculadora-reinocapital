@@ -151,10 +151,8 @@
 
         // Start Typebot flow
         if (window.ReinoTypebotIntegrationSystem) {
-          this.log('🤖 Starting Typebot via integration system with data:', formData);
           window.ReinoTypebotIntegrationSystem.startTypebotFlow(formData);
         } else if (window.ReinoTypebot) {
-          this.log('🤖 Starting Typebot via global API with data:', formData);
           window.ReinoTypebot.start(formData);
         } else {
           console.error('❌ Typebot integration not available');
@@ -243,7 +241,6 @@
         data.economia_anual = 'Calculando...';
       }
 
-      this.log('📊 Collected comprehensive form data:', data);
       return data;
     }
 

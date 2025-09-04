@@ -96,8 +96,8 @@ class ReinoTypebotIntegrationSystem {
       await this.typebotLibrary.initPopup({
         typebot: this.config.PUBLIC_ID,
         prefilledVariables: {},
-        onMessage: (message) => {
-          this.handleTypebotMessage(message);
+        onMessage: () => {
+          // Message handling can be added here if needed
         },
         onEnd: () => {
           this.handleTypebotEnd();
@@ -107,10 +107,6 @@ class ReinoTypebotIntegrationSystem {
       console.error('❌ Failed to initialize Typebot popup:', error);
       throw error;
     }
-  }
-
-  handleTypebotMessage(message) {
-    // Message handling logic can be added here
   }
 
   handleTypebotEnd() {
@@ -133,16 +129,14 @@ class ReinoTypebotIntegrationSystem {
       this.currentFormData = { ...collectedData, ...formData };
       this.isTypebotActive = true;
 
-      console.log('📋 [TypebotIntegration] Starting Typebot with form data:', this.currentFormData);
-
-      // Prepare variables for Typebot
+      // Prepare variables for Typebot with calculator data
       const typebotVariables = {
         nome: formData.nome || '',
         email: formData.email || '',
         telefone: formData.telefone || '',
         patrimonio: formData.patrimonio || this.getPatrimonioValue(),
-        ativos_selecionados: formData.ativos_selecionados || this.getSelectedAssets(),
-        economia_anual: formData.economia_anual || this.getEconomiaValue(),
+        ativos: formData.ativos_selecionados || this.getSelectedAssets(),
+        totalAlocado: this.formatCurrency(formData.totalAlocado || 0),
         source: 'webflow_calculator',
       };
 
@@ -206,7 +200,6 @@ class ReinoTypebotIntegrationSystem {
       data.telefone = phoneInputs[0].value || '';
     }
 
-    console.log('📊 [TypebotIntegration] Collected form data:', data);
     return data;
   }
 
@@ -384,41 +377,29 @@ class ReinoTypebotIntegrationSystem {
     try {
       // Prevent duplicate processing
       if (this.isProcessingCompletion) {
-        console.log('⚠️ [TypebotIntegration] Already processing completion, skipping...');
         return;
       }
 
       // Only process if we have valid data (not empty object)
       if (!typebotData || Object.keys(typebotData).length === 0) {
-        console.log('⚠️ [TypebotIntegration] Empty typebotData, skipping...');
         return;
       }
 
       this.isProcessingCompletion = true;
-      console.log('🤖 [TypebotIntegration] handleTypebotCompletion called with data:', typebotData);
 
       if (!this.currentFormData) {
-        console.warn('⚠️ No form data available for completion, trying to collect now...');
         // Try to collect form data now
         this.currentFormData = this.collectFormData();
         if (!this.currentFormData || Object.keys(this.currentFormData).length === 0) {
-          console.error('❌ Could not collect form data for Typebot completion');
           this.isProcessingCompletion = false;
           return;
         }
-        console.log('✅ Form data collected successfully:', this.currentFormData);
       }
 
       // Extract nome, email and telefone from typebot data
       let nome = null;
       let email = null;
       let telefone = null;
-
-      // Log complete typebot data structure for debugging
-      console.log(
-        '🔍 [TypebotIntegration] Complete typebotData structure:',
-        JSON.stringify(typebotData, null, 2)
-      );
 
       // Method 1: Direct properties
       if (typebotData.nome && !this.isEncryptedValue(typebotData.nome)) {
@@ -471,18 +452,11 @@ class ReinoTypebotIntegrationSystem {
         }
       }
 
-      console.log('📝 [TypebotIntegration] Extracted user info from Typebot:', {
-        nome,
-        email,
-        telefone,
-      });
-
       // Apply nome to DOM elements if extracted from Typebot
       if (nome) {
         this.applyNomeToElements(nome);
       } else {
         // Fallback to form data nome if no nome from Typebot
-        console.log('⚠️ No nome from Typebot, using form data nome:', this.currentFormData.nome);
         this.applyNomeToElements(this.currentFormData.nome);
       }
 
@@ -493,7 +467,6 @@ class ReinoTypebotIntegrationSystem {
         email,
         telefone
       );
-      console.log('📋 [TypebotIntegration] Prepared form data for callbacks:', formDataForCallback);
 
       // Merge typebot data with original form data (following old module pattern)
       const enhancedFormData = {
@@ -529,8 +502,6 @@ class ReinoTypebotIntegrationSystem {
           },
         })
       );
-
-      console.log('✅ [TypebotIntegration] handleTypebotCompletion completed successfully');
     } catch (error) {
       console.error('❌ Error handling Typebot completion:', error);
       await this.handleTypebotError(error);
@@ -611,7 +582,7 @@ class ReinoTypebotIntegrationSystem {
       patrimonio: 0,
       ativosEscolhidos: [],
       alocacao: {},
-      session_id: 'calc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      session_id: 'calc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11),
       user_agent: navigator.userAgent,
       page_url: window.location.href,
       nome: nome,
@@ -722,6 +693,15 @@ class ReinoTypebotIntegrationSystem {
     return parseFloat(cleaned) || 0;
   }
 
+  formatCurrency(value) {
+    if (!value || value === 0) return 'R$ 0';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+    }).format(value);
+  }
+
   setupCompletionListener() {
     // Listen for external completion events
     document.addEventListener('triggerTypebotCompletion', () => {
@@ -768,22 +748,7 @@ class ReinoTypebotIntegrationSystem {
 
     // Listen for postMessage from Typebot
     window.addEventListener('message', (event) => {
-      // Log ALL messages to debug
-      if (event.data) {
-        console.log('📬 [TypebotIntegration] ALL postMessage received:', {
-          origin: event.origin,
-          type: event.data?.type,
-          hasData: !!event.data.data,
-          fullData: event.data,
-        });
-      }
-
       if (event.data && event.data.type === 'typebot-completion') {
-        console.log(
-          '🎯 [TypebotIntegration] typebot-completion message detected, data:',
-          event.data.data
-        );
-
         // Call handleTypebotCompletion directly with the data
         this.handleTypebotCompletion(event.data.data);
 
@@ -802,10 +767,6 @@ class ReinoTypebotIntegrationSystem {
 
     // Also listen for the enhanced script completion event
     document.addEventListener('typebotEnhancedCompletion', (event) => {
-      console.log(
-        '🎯 [TypebotIntegration] typebotEnhancedCompletion event received:',
-        event.detail
-      );
       this.handleTypebotCompletion(event.detail);
     });
   }
