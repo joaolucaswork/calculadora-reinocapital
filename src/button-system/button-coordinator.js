@@ -151,10 +151,8 @@
 
         // Start Typebot flow
         if (window.ReinoTypebotIntegrationSystem) {
-          this.log('🤖 Starting Typebot via integration system');
           window.ReinoTypebotIntegrationSystem.startTypebotFlow(formData);
         } else if (window.ReinoTypebot) {
-          this.log('🤖 Starting Typebot via global API');
           window.ReinoTypebot.start(formData);
         } else {
           console.error('❌ Typebot integration not available');
@@ -168,7 +166,7 @@
     collectFormData() {
       const data = {};
 
-      // Get patrimonio value
+      // Get patrimonio value (formatted for display)
       const patrimonioInput = document.querySelector('#currency');
       if (patrimonioInput && patrimonioInput.value) {
         const cleaned = patrimonioInput.value
@@ -181,33 +179,44 @@
           currency: 'BRL',
           minimumFractionDigits: 0,
         }).format(value);
+
+        // Also store numeric value for calculations
+        data.patrimonioNumeric = value;
       } else {
         data.patrimonio = 'R$ 0';
+        data.patrimonioNumeric = 0;
       }
 
-      // Get selected assets
+      // Get selected assets from DOM (reliable source)
       const selectedAssets = [];
-      if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
-        window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
-          selectedAssets.push(asset);
-        });
-      }
+      const activeItems = document.querySelectorAll(
+        '.patrimonio_interactive_item .active-produto-item'
+      );
 
-      // Fallback: check sliders with values > 0
-      if (selectedAssets.length === 0) {
-        const sliders = document.querySelectorAll('range-slider');
-        sliders.forEach((slider) => {
-          if (parseFloat(slider.value) > 0) {
-            const item = slider.closest('.patrimonio_interactive_item');
-            const product = item?.getAttribute('ativo-product');
-            if (product) {
-              selectedAssets.push(product);
-            }
-          }
-        });
-      }
+      activeItems.forEach((item) => {
+        const container = item.closest('.patrimonio_interactive_item');
+        const product = container.getAttribute('ativo-product');
+        const category = container.getAttribute('ativo-category');
+
+        if (product && category) {
+          // Use clean format: "Product (Category)"
+          selectedAssets.push(`${product} (${category})`);
+        }
+      });
 
       data.ativos_selecionados = selectedAssets.join(', ') || 'Nenhum ativo selecionado';
+
+      // Get detailed assets for Supabase (detailed format)
+      data.ativosEscolhidos = this.getSelectedAssetsDetailed();
+
+      // Get allocation data
+      data.alocacao = this.getAllocationData();
+
+      // Calculate totals
+      data.totalAlocado = this.getTotalAllocated();
+      data.percentualAlocado =
+        data.patrimonioNumeric > 0 ? (data.totalAlocado / data.patrimonioNumeric) * 100 : 0;
+      data.patrimonioRestante = data.patrimonioNumeric - data.totalAlocado;
 
       // Get economia value
       if (window.ReinoResultadoComparativoCalculator) {
@@ -228,6 +237,86 @@
       }
 
       return data;
+    }
+
+    getSelectedAssetsDetailed() {
+      const selectedAssets = [];
+
+      // Get from active allocation items (DOM is source of truth)
+      const activeItems = document.querySelectorAll(
+        '.patrimonio_interactive_item .active-produto-item'
+      );
+      activeItems.forEach((item) => {
+        const container = item.closest('.patrimonio_interactive_item');
+        const product = container.getAttribute('ativo-product');
+        const category = container.getAttribute('ativo-category');
+
+        if (product && category) {
+          selectedAssets.push({
+            product: product,
+            category: category,
+          });
+        }
+      });
+
+      return selectedAssets;
+    }
+
+    getAllocationData() {
+      const alocacao = {};
+      const activeItems = document.querySelectorAll(
+        '.patrimonio_interactive_item .active-produto-item'
+      );
+
+      activeItems.forEach((item) => {
+        const container = item.closest('.patrimonio_interactive_item');
+        const product = container.getAttribute('ativo-product');
+        const category = container.getAttribute('ativo-category');
+        const input = container.querySelector('.currency-input');
+        const slider = container.querySelector('.slider');
+
+        if (product && category && (input || slider)) {
+          const value = input ? this.parseCurrencyValue(input.value) : 0;
+          const percentage = slider ? parseFloat(slider.value) * 100 : 0;
+
+          alocacao[category + '-' + product] = {
+            value: value,
+            percentage: percentage,
+            category: category,
+            product: product,
+          };
+        }
+      });
+
+      return alocacao;
+    }
+
+    getTotalAllocated() {
+      let total = 0;
+      const activeItems = document.querySelectorAll(
+        '.patrimonio_interactive_item .active-produto-item'
+      );
+
+      activeItems.forEach((item) => {
+        const container = item.closest('.patrimonio_interactive_item');
+        const input = container.querySelector('.currency-input');
+
+        if (input) {
+          const value = this.parseCurrencyValue(input.value);
+          total += value;
+        }
+      });
+
+      return total;
+    }
+
+    parseCurrencyValue(value) {
+      if (!value) return 0;
+      const cleaned = value
+        .toString()
+        .replace(/[^\d,]/g, '')
+        .replace(',', '.');
+      return parseFloat(cleaned) || 0;
     }
 
     waitForDOM() {

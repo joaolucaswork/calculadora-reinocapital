@@ -574,6 +574,11 @@
       // Notifica o button system sobre mudança de step
       this.notifyWebflowButtonSystem();
 
+      // Notifica o Lottie Lifecycle Manager sobre mudança de step
+      if (window.ReinoLottieLifecycleManager) {
+        window.ReinoLottieLifecycleManager.handleStepChange(stepIndex, previousStep);
+      }
+
       // Scroll para o topo
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

@@ -335,6 +335,7 @@
       const total = this.getTotalAllocated();
       const mainValue = MainInputSync.getValue();
       const remaining = mainValue - total;
+      const isFullyAllocated = Math.abs(remaining) < 0.01;
 
       document.dispatchEvent(
         new CustomEvent('allocationStatusChanged', {
@@ -343,10 +344,33 @@
             mainValue,
             remaining,
             isOverAllocated: total > mainValue,
-            isFullyAllocated: Math.abs(remaining) < 0.01,
+            isFullyAllocated,
           },
         })
       );
+
+      this.updateRetornoValorAlocado(isFullyAllocated);
+    },
+
+    updateRetornoValorAlocado(isFullyAllocated) {
+      const retornoValorAlocadoElement = document.querySelector('.retorno-valor-alocado');
+      const aloqueTodoValorElement = document.querySelector('.aloque-todo-valor');
+
+      if (retornoValorAlocadoElement) {
+        if (isFullyAllocated) {
+          retornoValorAlocadoElement.classList.remove('desativado');
+        } else {
+          retornoValorAlocadoElement.classList.add('desativado');
+        }
+      }
+
+      if (aloqueTodoValorElement) {
+        if (isFullyAllocated) {
+          aloqueTodoValorElement.classList.add('desativado');
+        } else {
+          aloqueTodoValorElement.classList.remove('desativado');
+        }
+      }
     },
 
     getTotalAllocated() {

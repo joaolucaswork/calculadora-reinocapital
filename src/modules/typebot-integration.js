@@ -11,6 +11,7 @@ class ReinoTypebotIntegrationSystem {
     this.currentFormData = null;
     this.isTypebotActive = false;
     this.typebotLibrary = null;
+    this.isProcessingCompletion = false; // Add flag to prevent duplicate processing
 
     // Config
     this.config = {
@@ -90,26 +91,8 @@ class ReinoTypebotIntegrationSystem {
       throw new Error('Typebot library not loaded');
     }
 
-    try {
-      // Initialize the popup with correct typebot ID
-      await this.typebotLibrary.initPopup({
-        typebot: this.config.PUBLIC_ID,
-        prefilledVariables: {},
-        onMessage: (message) => {
-          this.handleTypebotMessage(message);
-        },
-        onEnd: () => {
-          this.handleTypebotEnd();
-        },
-      });
-    } catch (error) {
-      console.error('❌ Failed to initialize Typebot popup:', error);
-      throw error;
-    }
-  }
-
-  handleTypebotMessage(message) {
-    // Message handling logic can be added here
+    // Don't initialize popup here - wait until we have variables in startTypebotFlow
+    // This prevents the Typebot from being initialized without variables
   }
 
   handleTypebotEnd() {
@@ -127,29 +110,38 @@ class ReinoTypebotIntegrationSystem {
     }
 
     try {
-      this.currentFormData = formData;
+      // Always collect comprehensive form data and merge with provided data
+      const collectedData = this.collectFormData();
+      this.currentFormData = { ...collectedData, ...formData };
       this.isTypebotActive = true;
 
-      // Collect data from form if not provided
-      if (!formData.nome || !formData.email) {
-        formData = this.collectFormData();
-      }
-
-      // Prepare variables for Typebot
+      // Prepare variables for Typebot with calculator data
+      // IMPORTANT: Variable names must match exactly what's defined in Typebot
+      // Force fresh data collection at the moment of sending
       const typebotVariables = {
-        nome: formData.nome || '',
-        email: formData.email || '',
-        telefone: formData.telefone || '',
-        patrimonio: formData.patrimonio || this.getPatrimonioValue(),
-        ativos_selecionados: formData.ativos_selecionados || this.getSelectedAssets(),
-        economia_anual: formData.economia_anual || this.getEconomiaValue(),
+        nome: this.currentFormData.nome || '',
+        email: this.currentFormData.email || '',
+        telefone: this.currentFormData.telefone || '',
+        patrimonio: this.getPatrimonioValue(), // Always get fresh data
+        ativos: this.getSelectedAssets(), // Always get fresh data
+        totalAlocado: this.formatCurrency(this.getTotalAllocated()), // Always get fresh data
         source: 'webflow_calculator',
       };
 
-      // Open Typebot popup with prefilled variables
-      this.typebotLibrary.open({
+      // Initialize Typebot popup with variables (first time or reinitialize)
+      await this.typebotLibrary.initPopup({
+        typebot: this.config.PUBLIC_ID,
         prefilledVariables: typebotVariables,
+        onMessage: () => {
+          // Message handling can be added here if needed
+        },
+        onEnd: () => {
+          this.handleTypebotEnd();
+        },
       });
+
+      // Open Typebot popup
+      this.typebotLibrary.open();
 
       return true;
     } catch (error) {
@@ -160,7 +152,7 @@ class ReinoTypebotIntegrationSystem {
   }
 
   collectFormData() {
-    // Collect basic form data from the page
+    // Collect comprehensive form data from the page
     const data = {
       nome: '',
       email: '',
@@ -168,7 +160,19 @@ class ReinoTypebotIntegrationSystem {
       patrimonio: this.getPatrimonioValue(),
       ativos_selecionados: this.getSelectedAssets(),
       economia_anual: this.getEconomiaValue(),
+      // Add detailed calculator data - use DOM as source of truth
+      ativosEscolhidos: this.getSelectedAssetsDetailed(),
+      alocacao: this.getAllocationData(),
+      totalAlocado: this.getTotalAllocated(),
+      percentualAlocado: 0,
+      patrimonioRestante: 0,
     };
+
+    // Calculate derived values
+    const patrimonioNumeric = this.getPatrimonioNumericValue();
+    data.percentualAlocado =
+      patrimonioNumeric > 0 ? (data.totalAlocado / patrimonioNumeric) * 100 : 0;
+    data.patrimonioRestante = patrimonioNumeric - data.totalAlocado;
 
     // Try to get name from various inputs
     const nameInputs = document.querySelectorAll(
@@ -186,6 +190,14 @@ class ReinoTypebotIntegrationSystem {
       data.email = emailInputs[0].value || '';
     }
 
+    // Try to get telefone from various inputs
+    const phoneInputs = document.querySelectorAll(
+      'input[type="tel"], input[name*="telefone"], input[name*="phone"], #telefone'
+    );
+    if (phoneInputs.length > 0) {
+      data.telefone = phoneInputs[0].value || '';
+    }
+
     return data;
   }
 
@@ -197,35 +209,140 @@ class ReinoTypebotIntegrationSystem {
         .replace(/[^\d,]/g, '')
         .replace(',', '.');
       const value = parseFloat(cleaned) || 0;
-      return new Intl.NumberFormat('pt-BR', {
+      const formatted = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
         minimumFractionDigits: 0,
       }).format(value);
+      return formatted;
     }
     return 'R$ 0';
+  }
+
+  getPatrimonioNumericValue() {
+    const patrimonioInput = document.querySelector('#currency');
+    if (patrimonioInput && patrimonioInput.value) {
+      const cleaned = patrimonioInput.value
+        .toString()
+        .replace(/[^\d,]/g, '')
+        .replace(',', '.');
+      return parseFloat(cleaned) || 0;
+    }
+    return 0;
+  }
+
+  getSelectedAssetsDetailed() {
+    const selectedAssets = [];
+
+    // Get from active allocation items (most reliable source)
+    const activeItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+    activeItems.forEach((item) => {
+      const container = item.closest('.patrimonio_interactive_item');
+      const product = container.getAttribute('ativo-product');
+      const category = container.getAttribute('ativo-category');
+
+      if (product && category) {
+        selectedAssets.push({
+          product: product,
+          category: category,
+        });
+      }
+    });
+
+    return selectedAssets;
+  }
+
+  getAllocationData() {
+    const alocacao = {};
+    const activeItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+
+    activeItems.forEach((item) => {
+      const container = item.closest('.patrimonio_interactive_item');
+      const product = container.getAttribute('ativo-product');
+      const category = container.getAttribute('ativo-category');
+      const input = container.querySelector('.currency-input');
+      const slider = container.querySelector('.slider');
+
+      if (product && category && (input || slider)) {
+        const value = input ? this.parseCurrencyValue(input.value) : 0;
+        const percentage = slider ? parseFloat(slider.value) * 100 : 0;
+
+        alocacao[category + '-' + product] = {
+          value: value,
+          percentage: percentage,
+          category: category,
+          product: product,
+        };
+      }
+    });
+
+    return alocacao;
+  }
+
+  getTotalAllocated() {
+    let total = 0;
+    const activeItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+
+    activeItems.forEach((item) => {
+      const container = item.closest('.patrimonio_interactive_item');
+      const input = container.querySelector('.currency-input');
+
+      if (input) {
+        const value = this.parseCurrencyValue(input.value);
+        total += value;
+      }
+    });
+
+    return total;
   }
 
   getSelectedAssets() {
     const selectedAssets = [];
 
-    // Try to get from asset selection system
-    if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
-      window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
-        selectedAssets.push(asset);
-      });
+    // Get from active allocation items (more reliable)
+    const activeItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+
+    activeItems.forEach((item) => {
+      const container = item.closest('.patrimonio_interactive_item');
+      const product = container.getAttribute('ativo-product');
+      const category = container.getAttribute('ativo-category');
+
+      if (product && category) {
+        // Format: "Product (Category)" - cleaner format like the image
+        const formattedAsset = `${product} (${category})`;
+        selectedAssets.push(formattedAsset);
+      }
+    });
+
+    // If we found active items, use them (don't use fallback)
+    if (selectedAssets.length > 0) {
+      return selectedAssets.join(', ');
     }
 
-    // Fallback: check for selected asset elements
-    if (selectedAssets.length === 0) {
-      const assetElements = document.querySelectorAll('.patrimonio_interactive_item');
-      assetElements.forEach((element) => {
-        const slider = element.querySelector('range-slider');
-        if (slider && parseFloat(slider.value) > 0) {
-          const product = element.getAttribute('ativo-product');
-          if (product) {
-            selectedAssets.push(product);
+    // Only use fallback if no active items found
+    if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
+      // Convert old format to new format
+      window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
+        // If asset contains "|", split and format properly
+        if (asset.includes('|')) {
+          const parts = asset.split('|');
+          if (parts.length === 2) {
+            const category = parts[0].trim();
+            const product = parts[1].trim();
+            const formattedAsset = `${product} (${category})`;
+            selectedAssets.push(formattedAsset);
           }
+        } else {
+          // If no "|", use as is
+          selectedAssets.push(asset);
         }
       });
     }
@@ -242,7 +359,7 @@ class ReinoTypebotIntegrationSystem {
         window.ReinoResultadoComparativoCalculator.cache &&
         window.ReinoResultadoComparativoCalculator.cache.economia
       ) {
-        const economia = window.ReinoResultadoComparativoCalculator.cache.economia;
+        const { economia } = window.ReinoResultadoComparativoCalculator.cache;
         return new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL',
@@ -278,22 +395,31 @@ class ReinoTypebotIntegrationSystem {
 
   async handleTypebotCompletion(typebotData = {}) {
     try {
-      console.log('🤖 [TypebotIntegration] handleTypebotCompletion called with data:', typebotData);
-
-      if (!this.currentFormData) {
-        console.warn('⚠️ No form data available for completion');
+      // Prevent duplicate processing
+      if (this.isProcessingCompletion) {
         return;
       }
 
-      // Extract nome and email from typebot data (matching old module behavior)
+      // Only process if we have valid data (not empty object)
+      if (!typebotData || Object.keys(typebotData).length === 0) {
+        return;
+      }
+
+      this.isProcessingCompletion = true;
+
+      if (!this.currentFormData) {
+        // Try to collect form data now
+        this.currentFormData = this.collectFormData();
+        if (!this.currentFormData || Object.keys(this.currentFormData).length === 0) {
+          this.isProcessingCompletion = false;
+          return;
+        }
+      }
+
+      // Extract nome, email and telefone from typebot data
       let nome = null;
       let email = null;
-
-      // Log complete typebot data structure for debugging
-      console.log(
-        '🔍 [TypebotIntegration] Complete typebotData structure:',
-        JSON.stringify(typebotData, null, 2)
-      );
+      let telefone = null;
 
       // Method 1: Direct properties
       if (typebotData.nome && !this.isEncryptedValue(typebotData.nome)) {
@@ -301,6 +427,9 @@ class ReinoTypebotIntegrationSystem {
       }
       if (typebotData.email && !this.isEncryptedValue(typebotData.email)) {
         email = typebotData.email;
+      }
+      if (typebotData.telefone && !this.isEncryptedValue(typebotData.telefone)) {
+        telefone = typebotData.telefone;
       }
 
       // Method 2: Check for alternative property names
@@ -311,6 +440,11 @@ class ReinoTypebotIntegrationSystem {
       if (!email) {
         email = typebotData.e_mail || typebotData.userEmail || typebotData.email_usuario || null;
         if (email && this.isEncryptedValue(email)) email = null;
+      }
+      if (!telefone) {
+        telefone =
+          typebotData.phone || typebotData.telefone_usuario || typebotData.userPhone || null;
+        if (telefone && this.isEncryptedValue(telefone)) telefone = null;
       }
 
       // Method 3: Check variables property
@@ -329,24 +463,41 @@ class ReinoTypebotIntegrationSystem {
         ) {
           email = typebotData.variables.email;
         }
+        if (
+          !telefone &&
+          typebotData.variables.telefone &&
+          !this.isEncryptedValue(typebotData.variables.telefone)
+        ) {
+          telefone = typebotData.variables.telefone;
+        }
       }
-
-      console.log('📝 [TypebotIntegration] Extracted user info from Typebot:', { nome, email });
 
       // Apply nome to DOM elements if extracted from Typebot
       if (nome) {
         this.applyNomeToElements(nome);
       } else {
         // Fallback to form data nome if no nome from Typebot
-        console.log('⚠️ No nome from Typebot, using form data nome:', this.currentFormData.nome);
         this.applyNomeToElements(this.currentFormData.nome);
       }
 
-      // Merge typebot data with original form data
+      // Convert button-coordinator format to form-submission format for callbacks
+      const formDataForCallback = this.convertFormDataForSupabase(
+        this.currentFormData,
+        nome,
+        email,
+        telefone
+      );
+
+      // Merge typebot data with original form data (following old module pattern)
       const enhancedFormData = {
-        ...this.currentFormData,
-        nome: nome || this.currentFormData.nome,
-        email: email || this.currentFormData.email,
+        ...formDataForCallback,
+        // Add user contact information from Typebot
+        nome: nome,
+        email: email,
+        telefone: telefone,
+        // Typebot metadata
+        typebotSessionId: typebotData.sessionId || 'typebot_' + Date.now(),
+        typebotResultId: typebotData.resultId || 'result_' + Date.now(),
         typebotData: typebotData,
         completedAt: new Date().toISOString(),
       };
@@ -371,11 +522,12 @@ class ReinoTypebotIntegrationSystem {
           },
         })
       );
-
-      console.log('✅ [TypebotIntegration] handleTypebotCompletion completed successfully');
     } catch (error) {
       console.error('❌ Error handling Typebot completion:', error);
       await this.handleTypebotError(error);
+    } finally {
+      // Reset processing flag
+      this.isProcessingCompletion = false;
     }
   }
 
@@ -443,6 +595,117 @@ class ReinoTypebotIntegrationSystem {
     return false;
   }
 
+  convertFormDataForSupabase(buttonCoordinatorData, nome, email, telefone) {
+    // Convert button-coordinator format to form-submission format
+    const converted = {
+      timestamp: new Date().toISOString(),
+      patrimonio: 0,
+      ativosEscolhidos: [],
+      alocacao: {},
+      session_id: 'calc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11),
+      user_agent: navigator.userAgent,
+      page_url: window.location.href,
+      nome: nome,
+      email: email,
+      telefone: telefone,
+      totalAlocado: 0,
+      percentualAlocado: 0,
+      patrimonioRestante: 0,
+    };
+
+    // Extract patrimonio value from formatted string
+    if (buttonCoordinatorData.patrimonio) {
+      const patrimonioStr = buttonCoordinatorData.patrimonio.toString();
+      const cleanValue = patrimonioStr.replace(/[^\d,]/g, '').replace(',', '.');
+      converted.patrimonio = parseFloat(cleanValue) || 0;
+    }
+
+    // Get selected assets directly from DOM (most reliable)
+    converted.ativosEscolhidos = this.getSelectedAssetsDetailed();
+
+    // Get allocation data from DOM
+    const allocationItems = document.querySelectorAll(
+      '.patrimonio_interactive_item .active-produto-item'
+    );
+    let totalAlocado = 0;
+
+    allocationItems.forEach((item) => {
+      const container = item.closest('.patrimonio_interactive_item');
+      const product = container.getAttribute('ativo-product');
+      const category = container.getAttribute('ativo-category');
+      const input = container.querySelector('.currency-input');
+      const slider = container.querySelector('.slider');
+
+      if (product && category && (input || slider)) {
+        const value = input ? this.parseCurrencyValue(input.value) : 0;
+        const percentage = slider ? parseFloat(slider.value) * 100 : 0;
+
+        converted.alocacao[category + '-' + product] = {
+          value: value,
+          percentage: percentage,
+          category: category,
+          product: product,
+        };
+
+        totalAlocado += value;
+      }
+    });
+
+    // Calculate derived values
+    converted.totalAlocado = totalAlocado;
+    converted.percentualAlocado =
+      converted.patrimonio > 0 ? (totalAlocado / converted.patrimonio) * 100 : 0;
+    converted.patrimonioRestante = converted.patrimonio - totalAlocado;
+
+    return converted;
+  }
+
+  getAssetCategory(assetName) {
+    // Map asset names to categories based on the calculator structure
+    const categoryMap = {
+      CDB: 'Renda Fixa',
+      LCI: 'Renda Fixa',
+      LCA: 'Renda Fixa',
+      CRI: 'Renda Fixa',
+      CRA: 'Renda Fixa',
+      DEBÊNTURE: 'Renda Fixa',
+      'Títulos Públicos': 'Renda Fixa',
+      Ações: 'Fundo de Investimento',
+      Liquidez: 'Fundo de Investimento',
+      Multimercado: 'Fundo de Investimento',
+      Imobiliário: 'Fundo de Investimento',
+      'Ações Nacionais': 'Renda Variável',
+      ETF: 'Renda Variável',
+      BDR: 'Renda Variável',
+      'Ações Internacionais': 'Internacional',
+      'ETF Internacional': 'Internacional',
+      'Renda Fixa Internacional': 'Internacional',
+      COE: 'COE',
+      Previdência: 'Previdência',
+      Outros: 'Outros',
+    };
+
+    return categoryMap[assetName] || 'Outros';
+  }
+
+  parseCurrencyValue(value) {
+    if (!value) return 0;
+    const cleaned = value
+      .toString()
+      .replace(/[^\d,]/g, '')
+      .replace(',', '.');
+    return parseFloat(cleaned) || 0;
+  }
+
+  formatCurrency(value) {
+    if (!value || value === 0) return 'R$ 0';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+    }).format(value);
+  }
+
   setupCompletionListener() {
     // Listen for external completion events
     document.addEventListener('triggerTypebotCompletion', () => {
@@ -490,7 +753,10 @@ class ReinoTypebotIntegrationSystem {
     // Listen for postMessage from Typebot
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'typebot-completion') {
-        // Dispatch navigation event
+        // Call handleTypebotCompletion directly with the data
+        this.handleTypebotCompletion(event.data.data);
+
+        // Also dispatch navigation event
         document.dispatchEvent(
           new CustomEvent('forceNavigateToResults', {
             detail: {
@@ -501,6 +767,11 @@ class ReinoTypebotIntegrationSystem {
           })
         );
       }
+    });
+
+    // Also listen for the enhanced script completion event
+    document.addEventListener('typebotEnhancedCompletion', (event) => {
+      this.handleTypebotCompletion(event.detail);
     });
   }
 

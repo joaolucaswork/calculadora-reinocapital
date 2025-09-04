@@ -1,7 +1,7 @@
 /**
  * Category Hover Highlight Module
  * Versão sem imports/exports para uso direto no Webflow
- * Destaca patrimonio_interactive_item baseado no hover de categoria-ativo.v2
+ * Destaca patrimonio_interactive_item baseado no hover de categoria-porcentagem
  */
 
 (function () {
@@ -44,8 +44,8 @@
     }
 
     cacheCategoryTriggers() {
-      // Busca todos os elementos categoria-ativo.v2 com atributo ativo-category
-      const triggers = document.querySelectorAll('.categoria-ativo.v2[ativo-category]');
+      // Busca todos os elementos categoria-porcentagem com atributo ativo-category
+      const triggers = document.querySelectorAll('.categoria-porcentagem[ativo-category]');
 
       this.categoryTriggers = [];
 

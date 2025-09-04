@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html-structure>
+  <metadata>
+    <title>Reino Capital Calculator - HTML Structure Map</title>
+    <description>Machine-readable structure map for AI processing</description>
+    <sections-count>6</sections-count>
+    <data-step-range>0-5</data-step-range>
+  </metadata>
+
+  <section data-step="0" class="_0-home-section-calc-intro step-section">
+    <purpose>Landing page with hero content and call-to-action</purpose>
+    <components>
+      <component type="container" selector=".intro_content-wrapper"/>
+      <component type="text-content" selector=".intro_text-wrapper"/>
+      <component type="interactive-cards" selector=".interactive-cards-wrapper"/>
+      <component type="button" function="next" selector="button[element-function='next']"/>
+      <component type="styled-button" selector=".button-hero.variation"/>
+    </components>
+    <js-integration>
+      <module>simple-button-system.js</module>
+      <module>motion-animation.js</module>
+      <module>lottie-animation.js</module>
+    </js-integration>
+    <data-attributes>
+      <attribute name="element-function" values="next"/>
+    </data-attributes>
+  </section>
+
+  <section data-step="1" class="_1-section-calc-money step-section">
+    <purpose>User inputs their total investment amount</purpose>
+    <components>
+      <component type="currency-input" selector="#currency" data-currency="true" is-main="true"/>
+      <component type="control-button" selector="button[currency-control='decrease']"/>
+      <component type="control-button" selector="button[currency-control='increase']"/>
+      <component type="navigation-button" selector="button[element-function='next']"/>
+      <component type="animation-target" selector="[data-animation-target='patrimonio']"/>
+    </components>
+    <js-integration>
+      <module>currency-input-system.js</module>
+      <module>simple-button-system.js</module>
+      <module>animation-system.js</module>
+    </js-integration>
+    <data-attributes>
+      <attribute name="data-currency" values="true"/>
+      <attribute name="currency-control" values="increase,decrease"/>
+      <attribute name="element-function" values="next"/>
+      <attribute name="is-main" values="true"/>
+    </data-attributes>
+  </section>
+
+  <section data-step="2" class="_2-section-calc-ativos step-section">
+    <purpose>User selects investment categories and products</purpose>
+    <components>
+      <component type="dropdown-menu" selector=".w-dropdown"/>
+      <component type="asset-item" selector=".ativo-item-subcategory"/>
+      <component type="navigation-button" selector="button[element-function='next']"/>
+    </components>
+    <asset-categories>
+      <category name="Renda Fixa" color="#a2883b">
+        <product name="CDB" display="CDB, LCI, LCA"/>
+        <product name="CRI" display="CRI, CRA, DEBÊNTURE"/>
+        <product name="Títulos Públicos" display="Títulos Públicos"/>
+      </category>
+      <category name="Fundo de Investimento" color="#e3ad0c">
+        <product name="Ações" display="Ações (FIA)"/>
+        <product name="Liquidez" display="Liquidez (DI/D0/D1)"/>
+        <product name="Multimercado" display="Multimercado"/>
+        <product name="Imobiliários Cetipados" display="Imobiliários Cetipados (FII/FIAGRO)"/>
+        <product name="Private Equity" display="Private Equity"/>
+      </category>
+      <category name="Renda Variável" color="#776a41">
+        <product name="Ações e Ativos" display="Ações e Ativos Listados"/>
+        <product name="Operação Estruturada" display="Operação Estruturada"/>
+        <product name="Carteira administrada" display="Carteira administrada"/>
+      </category>
+      <category name="Internacional" color="#bdaa6f">
+        <product name="Dólar" display="Investimentos em Dólar"/>
+        <product name="Inter Produtos" display="ETF e Mutual Funds (Ouro, Cripto etc)"/>
+      </category>
+      <category name="COE" color="#d17d00">
+        <product name="COE" display="COE"/>
+      </category>
+      <category name="Previdência" color="#8c5e00">
+        <product name="Ações" display="Ações (FIA)"/>
+        <product name="Multimercado" display="Multimercado"/>
+        <product name="Renda Fixa" display="Renda Fixa"/>
+      </category>
+      <category name="Outros" color="#4f4f4f">
+        <product name="Poupança" display="Poupança"/>
+        <product name="Operação compromissada" display="Operação compromissada"/>
+      </category>
+    </asset-categories>
+    <js-integration>
+      <module>asset-selection-system.js</module>
+      <module>dropdown-interaction.js</module>
+      <module>simple-button-system.js</module>
+    </js-integration>
+    <data-attributes>
+      <attribute name="ativo-product" values="CDB,CRI,Títulos Públicos,Ações,Liquidez,Multimercado,etc"/>
+      <attribute name="ativo-category" values="Renda Fixa,Fundo de Investimento,Renda Variável,Internacional,COE,Previdência,Outros"/>
+    </data-attributes>
+  </section>
+
+  <section data-step="3" class="_3-section-patrimonio-alocation step-section">
+    <purpose>User allocates percentage of patrimony to selected assets</purpose>
+    <components>
+      <component type="grid-container" selector=".patrimonio_interactive_content-wrapper"/>
+      <component type="allocation-item" selector=".patrimonio_interactive_item"/>
+      <component type="range-slider" selector="range-slider.slider"/>
+      <component type="currency-input" selector=".currency-input.individual"/>
+      <component type="category-summary" selector=".lista-produtos-selecionados"/>
+      <component type="send-button" selector="button[element-function='send']"/>
+    </components>
+    <allocation-structure>
+      <item-template>
+        <currency-input data-currency="true" input-settings="receive"/>
+        <range-slider min="0" max="1" value="0" step="0.01"/>
+        <percentage-display class="porcentagem-calculadora"/>
+      </item-template>
+    </allocation-structure>
+    <js-integration>
+      <module>range-slider-system.js</module>
+      <module>currency-input-system.js</module>
+      <module>allocation-calculator.js</module>
+      <module>validation-system.js</module>
+    </js-integration>
+    <data-attributes>
+      <attribute name="ativo-product" values="dynamic-based-on-step-2"/>
+      <attribute name="ativo-category" values="dynamic-based-on-step-2"/>
+      <attribute name="data-currency" values="true"/>
+      <attribute name="input-settings" values="receive"/>
+      <attribute name="element-function" values="send"/>
+    </data-attributes>
+  </section>
+
+  <section data-step="4" class="_4-section-resultado step-section">
+    <purpose>Displays commission calculations and donut chart</purpose>
+    <components>
+      <component type="chart-container" selector=".resultado-grafico-wrapper"/>
+      <component type="chart-legend" selector=".lista-resultado"/>
+      <component type="legend-item" selector=".lista-resultado-item"/>
+      <component type="commission-display" selector=".comissos-indicator"/>
+    </components>
+    <chart-elements>
+      <legend-item category="Renda Fixa" color-class="renda-fixa"/>
+      <legend-item category="Fundo de Investimento" color-class="fundo-investimento"/>
+      <legend-item category="Renda Variável" color-class="renda-variavel"/>
+      <legend-item category="Internacional" color-class="internacional"/>
+      <legend-item category="COE" color-class="coe"/>
+      <legend-item category="Previdência" color-class="previdencia"/>
+      <legend-item category="Outros" color-class="outro"/>
+    </chart-elements>
+    <js-integration>
+      <module>d3-chart-system.js</module>
+      <module>donut-chart.js</module>
+      <module>hover-effects.js</module>
+      <module>commission-calculator.js</module>
+    </js-integration>
+    <data-attributes>
+      <attribute name="ativo-category" values="Renda Fixa,Fundo de Investimento,Renda Variável,Internacional,COE,Previdência,Outros"/>
+    </data-attributes>
+  </section>
+
+  <section data-step="5" class="_5-section-resultado step-section">
+    <purpose>Comprehensive report with rotation index and final calculations</purpose>
+    <components>
+      <component type="user-name" selector="[nome-definido='typebot']"/>
+      <component type="rotation-slider" selector="range-slider.indice-giro" id="indice-giro"/>
+      <component type="asset-breakdown" selector=".ativos-produtos-item"/>
+      <component type="final-calculations" selector=".resultado-cinco-wrapper"/>
+    </components>
+    <rotation-index>
+      <slider min="1" max="4" value="2" step="1" class="indice-giro"/>
+      <tooltip-integration module="tippy-tooltip-module.js"/>
+    </rotation-index>
+    <js-integration>
+      <module>rotation-calculator.js</module>
+      <module>tippy-tooltip-module.js</module>
+      <module>final-report-generator.js</module>
+      <module>range-slider-system.js</module>
+    </js-integration>
+    <data-attributes>
+      <attribute name="nome-definido" values="typebot"/>
+      <attribute name="ativo-product" values="all-selected-products"/>
+      <attribute name="ativo-category" values="all-selected-categories"/>
+    </data-attributes>
+  </section>
+
+  <global-components>
+    <navigation>
+      <component type="header" selector=".top-header-navbar"/>
+      <component type="logo" selector=".logo-reino-3"/>
+      <component type="back-button" selector=".back-button"/>
+      <component type="step-buttons" selector=".step-buttons"/>
+    </navigation>
+    <styling>
+      <component type="progress-bar" selector=".progress-bar"/>
+      <component type="responsive-grid" selector=".patrimonio_interactive_content-wrapper"/>
+      <component type="color-system" selector="[ativo-category]"/>
+    </styling>
+  </global-components>
+
+  <external-dependencies>
+    <library name="range-slider-element" version="2" type="module"/>
+    <library name="tippy.js" version="6.3.7" type="stylesheet"/>
+    <library name="gsap" version="3.13.0" type="script"/>
+    <library name="d3.js" type="script"/>
+  </external-dependencies>
+</html-structure>
