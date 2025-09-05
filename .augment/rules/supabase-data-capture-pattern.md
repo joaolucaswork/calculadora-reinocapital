@@ -1,3 +1,7 @@
+---
+type: "always_apply"
+---
+
 # SUPABASE DATA CAPTURE PATTERN - EVENT-DRIVEN INTEGRATION
 
 ## 🎯 CORE PRINCIPLE

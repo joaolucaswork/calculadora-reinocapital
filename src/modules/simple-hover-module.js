@@ -18,7 +18,11 @@
       this.state = {
         activeTooltip: null,
         isVisible: false,
+        isPinned: false,
       };
+
+      // Callback for when tooltip is unpinned
+      this.onUnpinCallback = null;
     }
 
     createTooltip(className = 'simple-tooltip') {
@@ -56,6 +60,11 @@
       return tooltip;
     }
 
+    togglePinnedTooltip(event, data, contentFunction, className = 'simple-tooltip') {
+      // Always pin the new tooltip, replacing any existing pinned tooltip
+      this.pinTooltip(event, data, contentFunction, className);
+    }
+
     attachHoverEvents(selection, options = {}) {
       const {
         onHover = () => {},
@@ -75,12 +84,20 @@
           onOut(event, d);
         })
         .on('mousemove', (event, d) => {
-          this.updateTooltipPosition(event);
+          // Don't update position when tooltip is pinned
+          if (!this.state.isPinned) {
+            this.updateTooltipPosition(event);
+          }
           onMove(event, d);
         });
     }
 
     showTooltip(event, data, contentFunction, className = 'simple-tooltip') {
+      // Don't show hover tooltips when a tooltip is pinned
+      if (this.state.isPinned) {
+        return;
+      }
+
       if (!this.state.activeTooltip) {
         this.state.activeTooltip = this.createTooltip(className);
       }
@@ -104,6 +121,10 @@
     }
 
     hideTooltip() {
+      if (this.state.isPinned) {
+        return;
+      }
+
       if (this.state.activeTooltip && this.state.isVisible) {
         this.state.activeTooltip
           .transition()
@@ -112,6 +133,80 @@
           .style('visibility', 'hidden');
 
         this.state.isVisible = false;
+      }
+    }
+
+    pinTooltip(event, data, contentFunction, className = 'simple-tooltip') {
+      if (!this.state.activeTooltip) {
+        this.state.activeTooltip = this.createTooltip(className);
+      }
+
+      if (!this.state.activeTooltip) return;
+
+      const content = contentFunction(data);
+      this.state.activeTooltip.html(content);
+
+      this.state.isPinned = true;
+      this.state.isVisible = true;
+
+      this.state.activeTooltip.style('pointer-events', 'auto').style('user-select', 'text');
+
+      // Prevent clicks inside tooltip from closing it
+      this.state.activeTooltip.on('click', (e) => {
+        e.stopPropagation();
+      });
+
+      this.updateTooltipPosition(event);
+
+      this.state.activeTooltip
+        .transition()
+        .duration(this.options.animationDuration)
+        .style('opacity', 1)
+        .style('visibility', 'visible');
+
+      this.setupEscapeHandler();
+    }
+
+    unpinTooltip() {
+      if (this.state.activeTooltip && this.state.isPinned) {
+        // Remove click event listener
+        this.state.activeTooltip.on('click', null);
+
+        this.state.activeTooltip
+          .style('pointer-events', 'none')
+          .style('user-select', 'none')
+          .transition()
+          .duration(this.options.animationDuration)
+          .style('opacity', 0)
+          .style('visibility', 'hidden');
+      }
+
+      this.state.isPinned = false;
+      this.state.isVisible = false;
+
+      this.removeEscapeHandler();
+
+      // Notify parent component that tooltip was unpinned
+      if (this.onUnpinCallback) {
+        this.onUnpinCallback();
+      }
+    }
+
+    setupEscapeHandler() {
+      const handleEscape = (event) => {
+        if (event.key === 'Escape' && this.state.isPinned) {
+          this.unpinTooltip();
+        }
+      };
+
+      document.addEventListener('keydown', handleEscape);
+      this._escapeHandler = handleEscape;
+    }
+
+    removeEscapeHandler() {
+      if (this._escapeHandler) {
+        document.removeEventListener('keydown', this._escapeHandler);
+        this._escapeHandler = null;
       }
     }
 
@@ -186,6 +281,8 @@
     }
 
     destroy() {
+      this.unpinTooltip();
+
       if (this.state.activeTooltip) {
         this.state.activeTooltip.remove();
         this.state.activeTooltip = null;
