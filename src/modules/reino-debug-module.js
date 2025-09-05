@@ -55,33 +55,11 @@
 
     activateDebugMode() {
       try {
-        console.log('🐛 STEP 1: Testing tooltips BEFORE debug activation');
-        this.testTooltipsFunctionality();
-
         this.isDebugModeActive = true;
-
-        console.log('🐛 STEP 2: Testing tooltips AFTER setting debug flag');
-        this.testTooltipsFunctionality();
-
         this.setMainCurrencyInput();
-
-        console.log('🐛 STEP 3: Testing tooltips AFTER currency input');
-        this.testTooltipsFunctionality();
-
         this.selectAllAssets();
-
-        console.log('🐛 STEP 4: Testing tooltips AFTER asset selection');
-        this.testTooltipsFunctionality();
-
         this.distributePortfolio();
-
-        console.log('🐛 STEP 5: Testing tooltips AFTER portfolio distribution');
-        this.testTooltipsFunctionality();
-
         this.setupDebugSendButtonBehavior();
-
-        console.log('🐛 STEP 6: Testing tooltips AFTER send button setup');
-        this.testTooltipsFunctionality();
 
         // Notify button coordinator to update send button state
         document.dispatchEvent(
@@ -89,9 +67,6 @@
             detail: { isActive: true },
           })
         );
-
-        console.log('🐛 STEP 7: Testing tooltips AFTER event dispatch');
-        this.testTooltipsFunctionality();
 
         console.log('🐛 Debug mode activated - send button bypass enabled');
       } catch (error) {
@@ -211,41 +186,6 @@
 
     isDebugActive() {
       return this.isDebugModeActive;
-    }
-
-    testTooltipsFunctionality() {
-      const tooltipElements = {
-        'ajuda-botao': document.querySelectorAll('.ajuda-botao'),
-        'detalhes-calculo-geral': document.querySelectorAll('.detalhes-calculo-geral'),
-        'rotation-slider': document.querySelectorAll('#indice-giro [data-thumb]'),
-      };
-
-      Object.entries(tooltipElements).forEach(([name, elements]) => {
-        console.log(`🔍 ${name}: Found ${elements.length} elements`);
-        elements.forEach((el, index) => {
-          const hasTooltip = el._tippy || el.hasAttribute('data-tippy-content') || el.title;
-          console.log(`  - Element ${index}: ${hasTooltip ? '✅ Has tooltip' : '❌ No tooltip'}`);
-        });
-      });
-
-      // Check tooltip instances
-      const tooltipSystems = [
-        'tippyTooltipInstance',
-        'detalhesCalculoTooltipInstance',
-        'rotationSliderTooltipInstance',
-      ];
-      tooltipSystems.forEach((system) => {
-        if (window[system]) {
-          console.log(`🔍 ${system}: ✅ Available`);
-          if (window[system].instances) {
-            console.log(
-              `  - Instances: ${window[system].instances.size || window[system].instances.length || 'unknown'}`
-            );
-          }
-        } else {
-          console.log(`🔍 ${system}: ❌ Not found`);
-        }
-      });
     }
 
     // Method to check debug status from console

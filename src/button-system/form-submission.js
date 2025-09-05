@@ -12,6 +12,7 @@ window.ReinoFormSubmission = (function () {
     this.useTypebot = true;
     this.dgmCanvasIntegration = window.ReinoDGMCanvasIntegration;
     this.supabaseIntegration = null;
+    this.isProcessingTypebotCompletion = false; // Flag to prevent duplicate processing
 
     // Aguardar ReinoSupabaseIntegration estar disponível
     this.waitForSupabaseIntegration();
@@ -346,7 +347,21 @@ window.ReinoFormSubmission = (function () {
     var self = this;
 
     try {
+      // Prevent duplicate processing
+      if (self.isProcessingTypebotCompletion) {
+        self.log('🚫 Typebot completion already being processed, skipping duplicate');
+        return;
+      }
+
+      self.isProcessingTypebotCompletion = true;
       self.log('📝 Processing Typebot completion data:', enhancedFormData);
+
+      // Validate required data
+      if (!enhancedFormData || (!enhancedFormData.nome && !enhancedFormData.email)) {
+        self.log('⚠️ Invalid Typebot completion data, skipping');
+        self.isProcessingTypebotCompletion = false;
+        return;
+      }
 
       // Use Supabase integration to save data
       if (self.supabaseIntegration) {
@@ -379,12 +394,18 @@ window.ReinoFormSubmission = (function () {
           })
           .catch(function (error) {
             self.log('❌ Supabase integration error: ' + error.message);
+          })
+          .finally(function () {
+            // Reset processing flag
+            self.isProcessingTypebotCompletion = false;
           });
       } else {
         self.log('⚠️ Supabase integration not available for Typebot completion');
+        self.isProcessingTypebotCompletion = false;
       }
     } catch (error) {
       self.log('❌ Error handling Typebot completion: ' + error.message);
+      self.isProcessingTypebotCompletion = false;
     }
   };
 

@@ -53,12 +53,8 @@
     }
 
     setupTypebotIntegration() {
-      // TEMPORARILY DISABLE removeExistingListeners to preserve tooltips
-      // This method was breaking all tooltips in the application
-      console.log('⚠️ Skipping removeExistingListeners to preserve tooltips');
-
-      // TODO: Find a better way to handle listener conflicts without breaking tooltips
-      // this.removeExistingListeners();
+      // Remove existing listeners to avoid conflicts
+      this.removeExistingListeners();
 
       // Add listener with high priority (capture phase)
       document.addEventListener(
@@ -140,8 +136,6 @@
     }
 
     removeExistingListeners() {
-      console.log('🔄 removeExistingListeners called - this might break tooltips!');
-
       // Clone and replace send buttons to remove existing listeners
       const sendButtons = document.querySelectorAll('[element-function="send"]');
       sendButtons.forEach((button) => {
@@ -150,32 +144,6 @@
       });
 
       this.log(`🔄 Cleaned ${sendButtons.length} send buttons`);
-
-      // Reinitialize ALL tooltip systems after button replacement
-      setTimeout(() => {
-        console.log('🔄 Attempting to reinitialize all tooltip systems...');
-
-        // Reinitialize all tooltip systems
-        const tooltipSystems = [
-          { name: 'ReinoSendButtonTooltip', method: 'setupSendButtonTooltip' },
-          { name: 'tippyTooltipInstance', method: 'setupTooltips' },
-          { name: 'detalhesCalculoTooltipInstance', method: 'setupTooltips' },
-          { name: 'rotationSliderTooltipInstance', method: 'init' },
-        ];
-
-        tooltipSystems.forEach((system) => {
-          if (window[system.name] && typeof window[system.name][system.method] === 'function') {
-            try {
-              window[system.name][system.method]();
-              console.log(`✅ Reinitialized ${system.name}`);
-            } catch (error) {
-              console.error(`❌ Error reinitializing ${system.name}:`, error);
-            }
-          } else {
-            console.log(`⚠️ ${system.name} not found or method ${system.method} not available`);
-          }
-        });
-      }, 200);
     }
 
     handleSendButtonClick(button) {
@@ -185,10 +153,6 @@
         // Check if debug mode is active and handle navigation directly
         if (window.ReinoDebugModule && window.ReinoDebugModule.isDebugActive()) {
           this.log('🐛 Debug mode active - navigating to step 5');
-
-          // Test tooltips BEFORE navigation
-          console.log('🔍 Testing tooltips BEFORE navigation to step 5');
-          this.testTooltipsBeforeNavigation();
 
           // Navigate directly to step 5
           if (window.ReinoProgressBarSystem && window.ReinoProgressBarSystem.showStep) {
@@ -218,13 +182,6 @@
               console.log('🐛 Debug navigation: Direct DOM manipulation to show step 5');
             }
           }
-
-          // Test tooltips AFTER navigation
-          setTimeout(() => {
-            console.log('🔍 Testing tooltips AFTER navigation to step 5');
-            this.testTooltipsAfterNavigation();
-          }, 1000);
-
           return;
         }
 
@@ -440,78 +397,6 @@
           }),
         };
       }
-    }
-
-    testTooltipsBeforeNavigation() {
-      const tooltipElements = {
-        'ajuda-botao': document.querySelectorAll('.ajuda-botao'),
-        'detalhes-calculo-geral': document.querySelectorAll('.detalhes-calculo-geral'),
-        'rotation-slider': document.querySelectorAll('#indice-giro [data-thumb]'),
-      };
-
-      Object.entries(tooltipElements).forEach(([name, elements]) => {
-        console.log(`🔍 BEFORE NAV - ${name}: Found ${elements.length} elements`);
-        elements.forEach((el, index) => {
-          const hasTooltip = el._tippy || el.hasAttribute('data-tippy-content') || el.title;
-          console.log(`  - Element ${index}: ${hasTooltip ? '✅ Has tooltip' : '❌ No tooltip'}`);
-        });
-      });
-    }
-
-    testTooltipsAfterNavigation() {
-      const tooltipElements = {
-        'ajuda-botao': document.querySelectorAll('.ajuda-botao'),
-        'detalhes-calculo-geral': document.querySelectorAll('.detalhes-calculo-geral'),
-        'rotation-slider': document.querySelectorAll('#indice-giro [data-thumb]'),
-      };
-
-      Object.entries(tooltipElements).forEach(([name, elements]) => {
-        console.log(`🔍 AFTER NAV - ${name}: Found ${elements.length} elements`);
-        elements.forEach((el, index) => {
-          const hasTooltip = el._tippy || el.hasAttribute('data-tippy-content') || el.title;
-          console.log(`  - Element ${index}: ${hasTooltip ? '✅ Has tooltip' : '❌ No tooltip'}`);
-        });
-      });
-
-      // Also check section 5 specifically
-      const section5Elements = document.querySelectorAll(
-        '[data-step="5"] .ajuda-botao, [data-step="5"] .detalhes-calculo-geral'
-      );
-      console.log(`🔍 SECTION 5 SPECIFIC - Found ${section5Elements.length} tooltip elements`);
-      section5Elements.forEach((el, index) => {
-        const hasTooltip = el._tippy || el.hasAttribute('data-tippy-content') || el.title;
-        console.log(
-          `  - Section 5 Element ${index}: ${hasTooltip ? '✅ Has tooltip' : '❌ No tooltip'} (${el.className})`
-        );
-
-        // Check CSS properties that might interfere with interaction
-        const computedStyle = window.getComputedStyle(el);
-        const rect = el.getBoundingClientRect();
-        console.log(`    CSS Check:`, {
-          pointerEvents: computedStyle.pointerEvents,
-          zIndex: computedStyle.zIndex,
-          position: computedStyle.position,
-          visibility: computedStyle.visibility,
-          display: computedStyle.display,
-          opacity: computedStyle.opacity,
-          width: rect.width,
-          height: rect.height,
-          top: rect.top,
-          left: rect.left,
-        });
-
-        // Test if element can receive mouse events
-        const elementAtPoint = document.elementFromPoint(
-          rect.left + rect.width / 2,
-          rect.top + rect.height / 2
-        );
-        console.log(
-          `    Mouse Event Test: ${elementAtPoint === el ? '✅ Can receive events' : '❌ Blocked by other element'}`
-        );
-        if (elementAtPoint !== el) {
-          console.log(`    Blocking element:`, elementAtPoint);
-        }
-      });
     }
 
     log(message) {
