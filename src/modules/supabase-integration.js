@@ -14,6 +14,8 @@
       this.isReady = false;
       this.debugMode = window.location.search.includes('debug=true');
 
+      this.lastCommissionData = null;
+
       this.init();
     }
 
@@ -21,6 +23,7 @@
       try {
         await this.waitForSupabaseClient();
         this.setupClient();
+        this.setupEventListeners();
         this.isReady = true;
         this.log('✅ Supabase integration initialized');
       } catch (error) {
@@ -55,6 +58,17 @@
       } else {
         throw new Error('ReinoSupabase not available');
       }
+    }
+
+    setupEventListeners() {
+      document.addEventListener('totalComissaoChanged', (e) => {
+        this.lastCommissionData = {
+          total: e.detail.total,
+          details: e.detail.details,
+          timestamp: new Date().toISOString(),
+        };
+        this.log('📊 Commission data captured:', this.lastCommissionData);
+      });
     }
 
     async saveCalculatorSubmission(formData, typebotData = null) {
@@ -97,6 +111,16 @@
         patrimonio_restante: formData.patrimonioRestante || 0,
         submitted_at: new Date().toISOString(),
       };
+
+      const indiceGiro = window.ReinoRotationIndexController
+        ? window.ReinoRotationIndexController.getCurrentIndex()
+        : 2;
+
+      baseData.comissao_total_calculada = this.lastCommissionData
+        ? this.lastCommissionData.total
+        : 0;
+      baseData.indice_giro_usado = indiceGiro;
+      baseData.detalhes_comissao = this.lastCommissionData ? this.lastCommissionData.details : [];
 
       if (typebotData) {
         baseData.nome = typebotData.nome || formData.nome;
@@ -192,6 +216,25 @@
         isValid: errors.length === 0,
         errors,
       };
+    }
+
+    getCurrentCommissionData() {
+      return {
+        commission: this.lastCommissionData,
+        rotationIndex: window.ReinoRotationIndexController
+          ? window.ReinoRotationIndexController.getCurrentIndex()
+          : 2,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    parseCurrencyValue(value) {
+      if (!value) return 0;
+      const cleaned = value
+        .toString()
+        .replace(/[^\d,]/g, '')
+        .replace(',', '.');
+      return parseFloat(cleaned) || 0;
     }
 
     getStatus() {
