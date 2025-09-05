@@ -8,8 +8,8 @@
 
 .asset-checkbox {
   appearance: none;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border: 2px solid #ccc;
   border-radius: 0.25rem;
   margin: 0;
@@ -18,26 +18,33 @@
   transition: all 0.2s ease;
   position: relative;
   background: white;
+  overflow: hidden;
 }
 
 .asset-checkbox:hover {
-  border-color: #000;
+  border-color: #d4ab07;
 }
 
 .asset-checkbox:checked {
-  background-color: #000;
-  border-color: #000;
+  background-color: #d4ab07;
+  border-color: #d4ab07;
+  animation: checkboxPulse 0.4s ease-out;
 }
 
 .asset-checkbox:checked::after {
   content: '✓';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: -2px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
   color: white;
-  font-size: 0.8rem;
+  font-size: 1.2rem;
   font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .asset-checkbox-label {
@@ -103,12 +110,12 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .asset-checkbox {
-    width: 1rem;
-    height: 1rem;
+    width: 1.3rem;
+    height: 1.3rem;
   }
 
   .asset-checkbox:checked::after {
-    font-size: 0.7rem;
+    font-size: 1.1rem;
   }
 
   .asset-checkbox-container {
@@ -131,6 +138,61 @@
 
 .selected-asset {
   animation: selectAsset 0.3s ease;
+}
+
+/* Checkbox pulse animation - similar to currency control buttons */
+@keyframes checkboxPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(212, 171, 7, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(212, 171, 7, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(212, 171, 7, 0);
+  }
+}
+
+/* Ripple effect for checkbox */
+.asset-checkbox::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(212, 171, 7, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s ease-out;
+}
+
+.asset-checkbox:checked::before {
+  width: 40px;
+  height: 40px;
+  opacity: 1;
+  animation: rippleEffect 0.4s ease-out;
+}
+
+@keyframes rippleEffect {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    width: 40px;
+    height: 40px;
+    opacity: 0;
+  }
 }
 
 /* End of file */

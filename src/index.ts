@@ -48,6 +48,9 @@ import './modules/send-button-tooltip.js';
 import './modules/reino-debug-module.js';
 import './modules/calendly-minimalist-widget.js';
 import './modules/lottie-lifecycle-manager.js';
+import './modules/focus-visible-polyfill.js';
+import './modules/keyboard-navigation.js';
+import './modules/keyboard-navigation-test.js';
 // Import CSS files
 import './css/tippy-custom.css';
 import './css/simple-button.css';
@@ -57,3 +60,4 @@ import './css/donut-list-interaction.css';
 import './css/category-hover-effects.css';
 import './css/settings-reset-button.css';
 import './css/send-button-tooltip.css';
+import './css/focus-management.css';

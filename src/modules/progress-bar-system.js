@@ -70,6 +70,40 @@
       this.debouncedValidation = this.debounce(() => {
         this.updateNavigationState();
       }, 300);
+
+      // Focus management state
+      this.userIsUsingKeyboard = false;
+      this.lastInteractionWasKeyboard = false;
+      this.setupFocusDetection();
+    }
+
+    setupFocusDetection() {
+      // Track keyboard usage to determine when to apply automatic focus
+      document.addEventListener('keydown', (e) => {
+        // Tab, Shift+Tab, Arrow keys, Enter, Space indicate keyboard navigation
+        if (
+          e.key === 'Tab' ||
+          e.key === 'ArrowUp' ||
+          e.key === 'ArrowDown' ||
+          e.key === 'ArrowLeft' ||
+          e.key === 'ArrowRight' ||
+          e.key === 'Enter' ||
+          e.key === ' '
+        ) {
+          this.userIsUsingKeyboard = true;
+          this.lastInteractionWasKeyboard = true;
+        }
+      });
+
+      // Track mouse usage to reset keyboard flag
+      document.addEventListener('mousedown', () => {
+        this.lastInteractionWasKeyboard = false;
+      });
+
+      // Track touch usage to reset keyboard flag
+      document.addEventListener('touchstart', () => {
+        this.lastInteractionWasKeyboard = false;
+      });
     }
 
     async init(config = {}) {
@@ -801,7 +835,12 @@
     }
 
     focusManagement(stepIndex) {
-      // Gerencia foco entre steps
+      // Only apply automatic focus if user is actively using keyboard navigation
+      if (!this.lastInteractionWasKeyboard) {
+        return;
+      }
+
+      // Gerencia foco entre steps para usuários de teclado
       const currentSection = this.sectionCache.get(this.steps[stepIndex].id);
       if (currentSection) {
         const focusableElement = currentSection.querySelector(

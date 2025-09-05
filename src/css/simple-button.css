@@ -46,6 +46,6 @@
 /* Focus states for accessibility */
 [element-function='next']:not(:disabled):focus,
 .step-btn.prev-btn:not(:disabled):focus {
-  outline: 2px solid #007bff;
+  outline: 2px solid #be9326;
   outline-offset: 2px;
 }

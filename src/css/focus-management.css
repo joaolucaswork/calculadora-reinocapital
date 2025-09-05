@@ -1,0 +1,100 @@
+/**
+ * Focus Management CSS
+ * Handles focus outlines to prevent unwanted focus rings on page load
+ * while maintaining proper keyboard accessibility
+ */
+
+/* 
+ * Modern approach: Use :focus-visible to only show focus outlines
+ * when the user is actually navigating with keyboard
+ */
+
+/* Remove default focus outlines for mouse/touch users */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+[tabindex]:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Enhanced focus styles for keyboard users */
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible,
+a:focus-visible {
+  outline: 2px solid #be9326;
+  outline-offset: 2px;
+  transition: outline 0.2s ease;
+}
+
+/* Specific styles for navigation buttons */
+[element-function='next']:focus-visible,
+.step-btn.prev-btn:focus-visible {
+  outline: 2px solid #be9326;
+  outline-offset: 2px;
+}
+
+/* Section indicators focus styles */
+.section-indicator:focus-visible {
+  outline: 2px solid #be9326;
+  outline-offset: 2px;
+}
+
+/* Asset selection buttons focus styles */
+.ativos_item:focus-visible,
+button[ativo-category]:focus-visible {
+  outline: 2px solid #be9326;
+  outline-offset: 2px;
+}
+
+/* Range slider focus styles */
+range-slider [data-thumb]:focus-visible {
+  outline: 2px solid #be9326;
+  outline-offset: 2px;
+}
+
+/* Currency input focus styles */
+.currency-input:focus-visible {
+  outline: 2px solid #be9326;
+  outline-offset: 2px;
+}
+
+/* Fallback for browsers that don't support :focus-visible */
+@supports not selector(:focus-visible) {
+  /* For older browsers, use a JavaScript-based approach */
+  .js-focus-visible button:focus:not(.focus-visible),
+  .js-focus-visible input:focus:not(.focus-visible),
+  .js-focus-visible [tabindex]:focus:not(.focus-visible),
+  .js-focus-visible a:focus:not(.focus-visible) {
+    outline: none;
+  }
+
+  .js-focus-visible button.focus-visible,
+  .js-focus-visible input.focus-visible,
+  .js-focus-visible [tabindex].focus-visible,
+  .js-focus-visible a.focus-visible {
+    outline: 2px solid #be9326;
+    outline-offset: 2px;
+  }
+}
+
+/* Ensure focus styles are visible in high contrast mode */
+@media (prefers-contrast: high) {
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible,
+  a:focus-visible {
+    outline: 3px solid;
+    outline-offset: 2px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible,
+  a:focus-visible {
+    transition: none;
+  }
+}
