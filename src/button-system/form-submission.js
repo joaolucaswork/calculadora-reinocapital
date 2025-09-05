@@ -75,6 +75,13 @@ window.ReinoFormSubmission = (function () {
   FormSubmission.prototype.handleDataSubmission = function (button) {
     var self = this;
 
+    // Check if debug mode is active
+    var isDebugActive = window.ReinoDebugModule && window.ReinoDebugModule.isDebugActive();
+    if (isDebugActive) {
+      this.log('🐛 Debug mode active - form submission bypassed');
+      return; // Let debug module handle navigation
+    }
+
     // Update button state
     var buttonText = button.querySelector('div');
     if (buttonText) buttonText.textContent = 'Processando...';

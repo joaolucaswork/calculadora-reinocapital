@@ -680,17 +680,27 @@ class ReinoTypebotIntegrationSystem {
       const { step, data } = event.detail;
 
       try {
-        // Navigate to section 5
-        const currentSection = document.querySelector(
-          '.step-section[style*="display: block"], .step-section:not([style*="display: none"])'
-        );
-        const targetSection = document.querySelector('[data-step="' + step + '"]');
+        // Use the proper progress bar system instead of direct DOM manipulation
+        if (window.ReinoProgressBarSystem && window.ReinoProgressBarSystem.showStep) {
+          console.log('🤖 Using progress bar system to navigate to step', step);
+          window.ReinoProgressBarSystem.showStep(step);
+        } else {
+          // Fallback to direct DOM manipulation if progress bar system is not available
+          console.warn('⚠️ Progress bar system not available, using direct DOM manipulation');
+          const currentSection = document.querySelector(
+            '.step-section[style*="display: block"], .step-section:not([style*="display: none"])'
+          );
+          const targetSection = document.querySelector('[data-step="' + step + '"]');
 
-        if (currentSection) {
-          currentSection.style.display = 'none';
-        }
-        if (targetSection) {
-          targetSection.style.display = 'block';
+          if (currentSection) {
+            currentSection.style.display = 'none';
+            currentSection.style.pointerEvents = 'none';
+          }
+          if (targetSection) {
+            targetSection.style.display = 'block';
+            targetSection.style.pointerEvents = 'auto';
+            targetSection.style.opacity = '1';
+          }
         }
 
         // Apply user data

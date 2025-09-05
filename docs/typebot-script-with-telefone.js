@@ -27,28 +27,37 @@ setTimeout(() => {
   console.log('🔄 Forcing navigation to section 5...');
   
   try {
-    // Method 1: Direct DOM manipulation (most reliable)
-    const currentSections = window.parent.document.querySelectorAll('.step-section');
-    const targetSection = window.parent.document.querySelector('[data-step="5"]');
-    
-    if (targetSection) {
-      // Hide all sections
-      currentSections.forEach(section => {
-        section.style.display = 'none';
-        section.style.visibility = 'hidden';
-      });
-      
-      // Show target section
-      targetSection.style.display = 'block';
-      targetSection.style.visibility = 'visible';
-      targetSection.style.opacity = '1';
-      targetSection.style.position = 'relative';
-      targetSection.style.zIndex = '1';
-      
-      console.log('✅ Section 5 forced visible via DOM');
-      
-      // Scroll to top
-      window.parent.scrollTo(0, 0);
+    // Method 1: Use progress bar system for proper state management
+    if (window.parent.ReinoProgressBarSystem && window.parent.ReinoProgressBarSystem.showStep) {
+      console.log('✅ Using progress bar system for navigation');
+      window.parent.ReinoProgressBarSystem.showStep(5);
+    } else {
+      // Method 2: Direct DOM manipulation with pointer-events fix
+      console.warn('⚠️ Progress bar system not available, using DOM manipulation');
+      const currentSections = window.parent.document.querySelectorAll('.step-section');
+      const targetSection = window.parent.document.querySelector('[data-step="5"]');
+
+      if (targetSection) {
+        // Hide all sections
+        currentSections.forEach(section => {
+          section.style.display = 'none';
+          section.style.visibility = 'hidden';
+          section.style.pointerEvents = 'none';
+        });
+
+        // Show target section with proper pointer events
+        targetSection.style.display = 'block';
+        targetSection.style.visibility = 'visible';
+        targetSection.style.opacity = '1';
+        targetSection.style.position = 'relative';
+        targetSection.style.zIndex = '1';
+        targetSection.style.pointerEvents = 'auto';
+
+        console.log('✅ Section 5 forced visible via DOM with pointer-events fix');
+
+        // Scroll to top
+        window.parent.scrollTo(0, 0);
+      }
     }
     
     // Method 2: Dispatch events as backup
