@@ -159,7 +159,7 @@ class ReinoTypebotIntegrationSystem {
       telefone: '',
       patrimonio: this.getPatrimonioValue(),
       ativos_selecionados: this.getSelectedAssets(),
-      economia_anual: this.getEconomiaValue(),
+
       // Add detailed calculator data - use DOM as source of truth
       ativosEscolhidos: this.getSelectedAssetsDetailed(),
       alocacao: this.getAllocationData(),
@@ -348,49 +348,6 @@ class ReinoTypebotIntegrationSystem {
     }
 
     return selectedAssets.join(', ') || 'Nenhum ativo selecionado';
-  }
-
-  getEconomiaValue() {
-    // Try to get from resultado calculator
-    try {
-      // Check if calculator exists and has cache
-      if (
-        window.ReinoResultadoComparativoCalculator &&
-        window.ReinoResultadoComparativoCalculator.cache &&
-        window.ReinoResultadoComparativoCalculator.cache.economia
-      ) {
-        const { economia } = window.ReinoResultadoComparativoCalculator.cache;
-        return new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-          minimumFractionDigits: 0,
-        }).format(economia);
-      }
-
-      // Fallback: try to calculate economia manually
-      const patrimonioInput = document.querySelector('#currency');
-      if (patrimonioInput && patrimonioInput.value) {
-        const patrimonio =
-          parseFloat(
-            patrimonioInput.value
-              .toString()
-              .replace(/[^\d,]/g, '')
-              .replace(',', '.')
-          ) || 0;
-        if (patrimonio > 0) {
-          // Simple estimation: 2-3% economy
-          const estimatedEconomy = patrimonio * 0.025;
-          return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            minimumFractionDigits: 0,
-          }).format(estimatedEconomy);
-        }
-      }
-    } catch (error) {
-      console.warn('Could not get economia from calculator:', error);
-    }
-    return 'Calculando...';
   }
 
   async handleTypebotCompletion(typebotData = {}) {

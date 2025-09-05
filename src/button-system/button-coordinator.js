@@ -218,24 +218,6 @@
         data.patrimonioNumeric > 0 ? (data.totalAlocado / data.patrimonioNumeric) * 100 : 0;
       data.patrimonioRestante = data.patrimonioNumeric - data.totalAlocado;
 
-      // Get economia value
-      if (window.ReinoResultadoComparativoCalculator) {
-        try {
-          const comparison = window.ReinoResultadoComparativoCalculator.getComparison();
-          if (comparison && comparison.economia) {
-            data.economia_anual = new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-              minimumFractionDigits: 0,
-            }).format(comparison.economia);
-          }
-        } catch (error) {
-          data.economia_anual = 'Calculando...';
-        }
-      } else {
-        data.economia_anual = 'Calculando...';
-      }
-
       return data;
     }
 
