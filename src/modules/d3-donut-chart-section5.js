@@ -189,7 +189,8 @@
         .select(container)
         .append('svg')
         .attr('width', width)
-        .attr('height', height);
+        .attr('height', height)
+        .style('overflow', 'visible');
 
       const g = svg.append('g').attr('transform', `translate(${width / 2}, ${height / 2})`);
 
@@ -859,9 +860,6 @@
         return;
       }
 
-      // Reset all visual effects before pinning new slice
-      this.resetAllSliceEffects();
-
       // Pin the new slice tooltip (replaces any existing pinned tooltip)
       if (this.hoverModule && this.hoverModule.togglePinnedTooltip) {
         this.hoverModule.togglePinnedTooltip(
@@ -871,8 +869,8 @@
           'd3-donut-tooltip-section5'
         );
 
-        // Apply visual indication to the newly pinned slice
-        this.applyPinnedSliceEffects(event.target, d.data);
+        // Apply pinned state visual effects
+        this.applyPinnedStateEffects(event.target, d);
 
         // Show center text for pinned slice
         this.showCenterText(chart, d.data);
@@ -893,16 +891,59 @@
         .style('filter', 'brightness(1)')
         .style('stroke', 'none')
         .style('stroke-width', null);
+
+      // Reset all slice transforms (explode effect)
+      window.d3
+        .selectAll('.arc')
+        .transition()
+        .duration(250)
+        .ease(window.d3.easeBackIn)
+        .attr('transform', 'translate(0, 0)');
     }
 
-    applyPinnedSliceEffects(element, data) {
-      // Apply visual indication to pinned slice
+    applyPinnedStateEffects(selectedElement, selectedData) {
+      // First, reset all transforms
+      window.d3.selectAll('.arc').transition().duration(250).attr('transform', 'translate(0, 0)');
+
+      // Set all slices to reduced opacity
       window.d3
-        .select(element)
+        .selectAll('.arc path')
+        .style('opacity', 0.3)
+        .style('filter', 'brightness(1)')
+        .style('stroke', 'none')
+        .style('stroke-width', null);
+
+      // Highlight the selected slice (no border, just opacity and brightness)
+      window.d3
+        .select(selectedElement)
         .style('opacity', 1)
         .style('filter', 'brightness(1.1)')
-        .style('stroke', '#3b82f6')
-        .style('stroke-width', '2px');
+        .style('stroke', 'none')
+        .style('stroke-width', null);
+
+      // Apply explode effect to selected slice
+      this.explodeSlice(selectedElement, selectedData);
+    }
+
+    explodeSlice(element, sliceData) {
+      if (!this.currentChart || !sliceData) return;
+
+      const explodeDistance = 12; // Distance to move the slice outward
+
+      // Calculate the angle to determine direction
+      const angle = (sliceData.startAngle + sliceData.endAngle) / 2;
+
+      // Calculate explode offset
+      const explodeX = Math.sin(angle) * explodeDistance;
+      const explodeY = -Math.cos(angle) * explodeDistance;
+
+      // Apply transform to move the slice group
+      window.d3
+        .select(element.parentNode)
+        .transition()
+        .duration(300)
+        .ease(window.d3.easeBackOut.overshoot(1.2))
+        .attr('transform', `translate(${explodeX}, ${explodeY})`);
     }
 
     updateIntelligentTooltipPosition(event) {
