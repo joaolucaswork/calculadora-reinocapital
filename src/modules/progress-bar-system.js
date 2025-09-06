@@ -613,6 +613,11 @@
         window.ReinoLottieLifecycleManager.handleStepChange(stepIndex, previousStep);
       }
 
+      // Notifica o D3 Donut Chart Section 5 sobre mudança de step
+      if (window.ReinoD3DonutChartSection5System) {
+        window.ReinoD3DonutChartSection5System.handleStepChange(stepIndex, previousStep);
+      }
+
       // Scroll para o topo
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

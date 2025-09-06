@@ -30,6 +30,10 @@
       this.currentPinnedSliceData = null;
       this.currentChart = null;
 
+      // Animation state tracking
+      this.hasPlayedEntranceAnimation = false;
+      this.currentStep = -1;
+
       this.setupColorScale();
     }
 
@@ -46,6 +50,30 @@
         document.dispatchEvent(new CustomEvent('donutChartSection5Ready'));
       } catch (error) {
         console.error('Failed to initialize D3DonutChartSection5System:', error);
+      }
+    }
+
+    handleStepChange(newStep, previousStep) {
+      console.log(`🎬 D3DonutChartSection5: Step change ${previousStep} → ${newStep}`);
+      this.currentStep = newStep;
+
+      // Reset animation state when navigating to step 4 (results section)
+      if (newStep === 4 && previousStep !== 4) {
+        console.log('🎬 Preparing entrance animations for step 4');
+        this.hasPlayedEntranceAnimation = false;
+
+        // Clear existing charts to force re-render with entrance animations
+        this.charts.forEach((chart) => {
+          if (chart.g) {
+            chart.g.selectAll('.arc').remove();
+          }
+        });
+
+        // Trigger chart update after a brief delay to ensure DOM is ready
+        setTimeout(() => {
+          console.log('🎬 Triggering chart update with entrance animations');
+          this.updateAllCharts();
+        }, 100);
       }
     }
 
@@ -304,6 +332,10 @@
 
       const arcEnter = arcs.enter().append('g').attr('class', 'arc');
 
+      // Check if this is the first render and we're on step 4 (entrance animation)
+      const isFirstRender =
+        !this.hasPlayedEntranceAnimation && this.currentStep === 4 && arcEnter.size() > 0;
+
       arcEnter
         .append('path')
         .attr('fill', (d) => this.colorScale(d.data.category))
@@ -313,6 +345,18 @@
 
       const arcUpdate = arcEnter.merge(arcs);
 
+      // Apply entrance animations if this is the first render
+      if (isFirstRender) {
+        this.applyEntranceAnimations(chart, arcUpdate, validData);
+      } else {
+        // Standard update animation for subsequent renders
+        this.applyStandardAnimation(arcUpdate, arc);
+        // Setup interactions immediately for standard updates
+        this.setupInteractions(arcUpdate, chart);
+      }
+    }
+
+    setupInteractions(arcUpdate, chart) {
       // Use Simple Hover Module instead of direct event handlers
       this.hoverModule.attachHoverEvents(arcUpdate.select('path'), {
         onHover: (event, d) => {
@@ -369,11 +413,72 @@
       arcUpdate.select('path').on('click', (event, d) => {
         this.handleSliceClick(event, d, chart);
       });
+    }
 
+    applyEntranceAnimations(chart, arcUpdate, validData) {
+      const { g, pie, arc } = chart;
+
+      // Mark that entrance animation is being played
+      this.hasPlayedEntranceAnimation = true;
+
+      // Step 1: Apply 360-degree rotation to the entire chart group using SVG transform
+      const { width, height } = chart;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      g.transition()
+        .duration(800)
+        .ease(window.d3.easeCubicOut)
+        .attrTween('transform', function () {
+          const interpolateRotation = window.d3.interpolate(360, 0);
+          return function (t) {
+            const rotation = interpolateRotation(t);
+            return `translate(${centerX}, ${centerY}) rotate(${rotation})`;
+          };
+        });
+
+      // Step 2: Sequential segment growth animation
+      const pieData = pie(validData);
+
+      arcUpdate
+        .select('path')
+        .each(function (d, i) {
+          // Store original angles for later use
+          d.originalStartAngle = d.startAngle;
+          d.originalEndAngle = d.endAngle;
+
+          // Start with zero-size segments
+          d.startAngle = d.originalStartAngle;
+          d.endAngle = d.originalStartAngle;
+        })
+        .attr('d', arc)
+        .transition()
+        .delay((d, i) => 400 + i * 200) // Staggered delay for sequential appearance
+        .duration(600)
+        .ease(window.d3.easeBackOut.overshoot(1.2))
+        .attrTween('d', function (d) {
+          const interpolateEnd = window.d3.interpolate(d.originalStartAngle, d.originalEndAngle);
+          return function (t) {
+            d.endAngle = interpolateEnd(t);
+            return arc(d);
+          };
+        })
+        .attr('fill', (d) => this.colorScale(d.data.category))
+        .on('end', (d, i, nodes) => {
+          // Setup interactions after animation completes
+          if (i === nodes.length - 1) {
+            this.setupInteractions(arcUpdate, chart);
+          }
+        });
+    }
+
+    applyStandardAnimation(arcUpdate, arc) {
+      // Standard update animation for subsequent renders
       arcUpdate
         .select('path')
         .transition()
         .duration(750)
+        .ease(window.d3.easeCubicInOut)
         .attr('d', (d) => {
           try {
             return arc(d);

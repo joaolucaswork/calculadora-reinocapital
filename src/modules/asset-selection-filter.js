@@ -111,6 +111,14 @@
 
       checkbox.addEventListener('change', (e) => {
         this.handleAssetSelection(e.target.checked, category, product, assetElement);
+
+        // Add pulse effect when checked
+        if (e.target.checked) {
+          checkboxContainer.classList.add('pulse-effect');
+          setTimeout(() => {
+            checkboxContainer.classList.remove('pulse-effect');
+          }, 400);
+        }
       });
 
       checkbox.addEventListener('click', (e) => {
@@ -121,6 +129,14 @@
         if (!e.target.matches('.asset-checkbox, .asset-checkbox-label')) {
           checkbox.checked = !checkbox.checked;
           checkbox.dispatchEvent(new Event('change'));
+
+          // Add pulse effect when checked via element click
+          if (checkbox.checked) {
+            checkboxContainer.classList.add('pulse-effect');
+            setTimeout(() => {
+              checkboxContainer.classList.remove('pulse-effect');
+            }, 400);
+          }
         }
       });
 
