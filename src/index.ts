@@ -61,3 +61,4 @@ import './css/category-hover-effects.css';
 import './css/settings-reset-button.css';
 import './css/send-button-tooltip.css';
 import './css/focus-management.css';
+import './styles/components/asset-selection.css';
