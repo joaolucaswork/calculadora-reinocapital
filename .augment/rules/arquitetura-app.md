@@ -190,8 +190,8 @@ The Reino Capital calculator is a multi-step form application with 6 main sectio
 Categories have consistent color schemes across all components:
 
 - **Renda Fixa:** #a2883b
-- **Fundo de Investimento:** #e3ad0c  
-- **Renda Variável:** #776a41
+- **Fundo de Investimento:** #e3ad0c
+- **Renda Variável:** #5d4e2a
 - **Internacional:** #bdaa6f
 - **COE:** #d17d00
 - **Previdência:** #8c5e00

@@ -317,9 +317,10 @@
           }
         }
       } else {
-        // Seções 1 e 2: sem classe especial
+        // Seções 1 e 2: sem classe especial - deve estar visível com position: fixed
         if (this.config.enableLogging) {
-          console.warn('🎯 Progress bar sem classe especial (seções 1-2)');
+          console.warn('🎯 Progress bar sem classe especial (seções 1-2) - deve estar visível');
+          this.debugProgressBarVisibility(stepIndex);
         }
       }
 
@@ -516,6 +517,42 @@
       } else {
         element.classList.remove(className);
       }
+    }
+
+    /**
+     * Debug progress bar visibility issues
+     */
+    debugProgressBarVisibility(stepIndex) {
+      if (!this.progressBar) {
+        console.error('❌ Progress bar element not found');
+        return;
+      }
+
+      const computedStyle = window.getComputedStyle(this.progressBar);
+      const rect = this.progressBar.getBoundingClientRect();
+
+      console.group(`🔍 Progress Bar Debug - Step ${stepIndex}`);
+      console.log('Element:', this.progressBar);
+      console.log('Classes:', Array.from(this.progressBar.classList));
+      console.log('Computed styles:', {
+        position: computedStyle.position,
+        display: computedStyle.display,
+        opacity: computedStyle.opacity,
+        visibility: computedStyle.visibility,
+        zIndex: computedStyle.zIndex,
+        bottom: computedStyle.bottom,
+        left: computedStyle.left,
+        transform: computedStyle.transform,
+      });
+      console.log('Bounding rect:', {
+        width: rect.width,
+        height: rect.height,
+        top: rect.top,
+        left: rect.left,
+        visible: rect.width > 0 && rect.height > 0,
+      });
+      console.log('Parent container:', this.progressBar.parentElement);
+      console.groupEnd();
     }
 
     /**

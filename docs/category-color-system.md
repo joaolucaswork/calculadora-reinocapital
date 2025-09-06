@@ -182,7 +182,7 @@ Esta div contém os itens individuais de produtos para alocação de patrimônio
 .lista-produtos-selecionados .categoria-porcentagem[ativo-category="Renda Variável"] .categoria-ativo::before,
 .patrimonio_interactive_content-wrapper .patrimonio_interactive_item[ativo-category="Renda Variável"] .categoria-ativo::before,
 .categoria-ativo[ativo-category="Renda Variável"]::before {
-  background-color: #776a41;
+  background-color: #5d4e2a;
 }
 
 /* Internacional */
@@ -240,7 +240,7 @@ Esta div contém os itens individuais de produtos para alocação de patrimônio
 |-----------|-----|----------|
 | Renda Fixa | ![#a2883b](https://via.placeholder.com/15/a2883b/000000?text=+) | `#a2883b` |
 | Fundo de Investimento | ![#e3ad0c](https://via.placeholder.com/15/e3ad0c/000000?text=+) | `#e3ad0c` |
-| Renda Variável | ![#776a41](https://via.placeholder.com/15/776a41/000000?text=+) | `#776a41` |
+| Renda Variável | ![#5d4e2a](https://via.placeholder.com/15/5d4e2a/000000?text=+) | `#5d4e2a` |
 | Internacional | ![#bdaa6f](https://via.placeholder.com/15/bdaa6f/000000?text=+) | `#bdaa6f` |
 | COE | ![#d17d00](https://via.placeholder.com/15/d17d00/000000?text=+) | `#d17d00` |
 | Previdência | ![#8c5e00](https://via.placeholder.com/15/8c5e00/000000?text=+) | `#8c5e00` |

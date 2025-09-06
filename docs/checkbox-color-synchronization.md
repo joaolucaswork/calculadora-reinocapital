@@ -18,7 +18,7 @@ The following colors were extracted from the D3.js donut chart and applied to ch
 |----------|-------|----------|
 | Renda Fixa | ![#a2883b](https://via.placeholder.com/15/a2883b/000000?text=+) | `#a2883b` |
 | Fundo de Investimento | ![#e3ad0c](https://via.placeholder.com/15/e3ad0c/000000?text=+) | `#e3ad0c` |
-| Renda Variável | ![#776a41](https://via.placeholder.com/15/776a41/000000?text=+) | `#776a41` |
+| Renda Variável | ![#5d4e2a](https://via.placeholder.com/15/5d4e2a/000000?text=+) | `#5d4e2a` |
 | Internacional | ![#bdaa6f](https://via.placeholder.com/15/bdaa6f/000000?text=+) | `#bdaa6f` |
 | COE | ![#d17d00](https://via.placeholder.com/15/d17d00/000000?text=+) | `#d17d00` |
 | Previdência | ![#8c5e00](https://via.placeholder.com/15/8c5e00/000000?text=+) | `#8c5e00` |
@@ -56,6 +56,7 @@ The CSS uses attribute selectors to target checkboxes based on their parent elem
 ### Fallback Behavior
 
 The original golden color (`#d4ab07`) is maintained as a fallback for:
+
 - Unmapped categories
 - Elements without `ativo-category` attributes
 - Backward compatibility
@@ -63,22 +64,27 @@ The original golden color (`#d4ab07`) is maintained as a fallback for:
 ## Technical Details
 
 ### File Modified
+
 - `src/css/asset-selection-filter.css` - Added category-specific checkbox styling
 
 ### CSS Specificity
+
 The category-specific rules have higher specificity than the general fallback rules, ensuring proper color application.
 
 ### Responsive Design
+
 The color changes are applied consistently across all device sizes, maintaining the existing responsive behavior.
 
 ## Integration Points
 
 ### Existing Systems
+
 - **D3.js Donut Chart**: Source of color palette (`src/modules/d3-donut-chart-section5.js`)
 - **Asset Selection Filter**: Checkbox creation and management (`src/modules/asset-selection-filter.js`)
 - **Category Color System**: Existing color documentation (`.augment/rules/cor-sistema.md`)
 
 ### Bundle Integration
+
 The CSS file is already imported in `src/index.ts`, ensuring the styles are included in the build.
 
 ## Testing Checklist

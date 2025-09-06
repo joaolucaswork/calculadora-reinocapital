@@ -15,7 +15,7 @@
       this.categoryColors = {
         'Renda Fixa': '#a2883b',
         'Fundo de Investimento': '#e3ad0c',
-        'Renda Variável': '#776a41',
+        'Renda Variável': '#5d4e2a',
         Internacional: '#bdaa6f',
         COE: '#d17d00',
         Previdência: '#8c5e00',
