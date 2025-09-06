@@ -21,6 +21,7 @@
   overflow: hidden;
 }
 
+/* Default checkbox colors (fallback for unmapped categories) */
 .asset-checkbox:hover {
   border-color: #d4ab07;
 }
@@ -80,7 +81,7 @@
 /* Counter styling enhancement */
 .counter_ativos {
   font-weight: bold;
-  color: #000;
+  color: #7a7978;
 }
 
 /* Section 3 filtered states */
@@ -105,6 +106,92 @@
 .ativos_clean-button:hover {
   transform: scale(1.05);
   background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* Category-specific checkbox colors - matching donut chart palette */
+
+/* Renda Fixa */
+.ativos_item[ativo-category='Renda Fixa'] .asset-checkbox:hover,
+.ativo-item-subcategory[ativo-category='Renda Fixa'] .asset-checkbox:hover {
+  border-color: #a2883b;
+}
+
+.ativos_item[ativo-category='Renda Fixa'] .asset-checkbox:checked,
+.ativo-item-subcategory[ativo-category='Renda Fixa'] .asset-checkbox:checked {
+  background-color: #a2883b;
+  border-color: #a2883b;
+}
+
+/* Fundo de Investimento */
+.ativos_item[ativo-category='Fundo de Investimento'] .asset-checkbox:hover,
+.ativo-item-subcategory[ativo-category='Fundo de Investimento'] .asset-checkbox:hover {
+  border-color: #e3ad0c;
+}
+
+.ativos_item[ativo-category='Fundo de Investimento'] .asset-checkbox:checked,
+.ativo-item-subcategory[ativo-category='Fundo de Investimento'] .asset-checkbox:checked {
+  background-color: #e3ad0c;
+  border-color: #e3ad0c;
+}
+
+/* Renda Variável */
+.ativos_item[ativo-category='Renda Variável'] .asset-checkbox:hover,
+.ativo-item-subcategory[ativo-category='Renda Variável'] .asset-checkbox:hover {
+  border-color: #776a41;
+}
+
+.ativos_item[ativo-category='Renda Variável'] .asset-checkbox:checked,
+.ativo-item-subcategory[ativo-category='Renda Variável'] .asset-checkbox:checked {
+  background-color: #776a41;
+  border-color: #776a41;
+}
+
+/* Internacional */
+.ativos_item[ativo-category='Internacional'] .asset-checkbox:hover,
+.ativo-item-subcategory[ativo-category='Internacional'] .asset-checkbox:hover {
+  border-color: #bdaa6f;
+}
+
+.ativos_item[ativo-category='Internacional'] .asset-checkbox:checked,
+.ativo-item-subcategory[ativo-category='Internacional'] .asset-checkbox:checked {
+  background-color: #bdaa6f;
+  border-color: #bdaa6f;
+}
+
+/* COE */
+.ativos_item[ativo-category='COE'] .asset-checkbox:hover,
+.ativo-item-subcategory[ativo-category='COE'] .asset-checkbox:hover {
+  border-color: #d17d00;
+}
+
+.ativos_item[ativo-category='COE'] .asset-checkbox:checked,
+.ativo-item-subcategory[ativo-category='COE'] .asset-checkbox:checked {
+  background-color: #d17d00;
+  border-color: #d17d00;
+}
+
+/* Previdência */
+.ativos_item[ativo-category='Previdência'] .asset-checkbox:hover,
+.ativo-item-subcategory[ativo-category='Previdência'] .asset-checkbox:hover {
+  border-color: #8c5e00;
+}
+
+.ativos_item[ativo-category='Previdência'] .asset-checkbox:checked,
+.ativo-item-subcategory[ativo-category='Previdência'] .asset-checkbox:checked {
+  background-color: #8c5e00;
+  border-color: #8c5e00;
+}
+
+/* Outros */
+.ativos_item[ativo-category='Outros'] .asset-checkbox:hover,
+.ativo-item-subcategory[ativo-category='Outros'] .asset-checkbox:hover {
+  border-color: #4f4f4f;
+}
+
+.ativos_item[ativo-category='Outros'] .asset-checkbox:checked,
+.ativo-item-subcategory[ativo-category='Outros'] .asset-checkbox:checked {
+  background-color: #4f4f4f;
+  border-color: #4f4f4f;
 }
 
 /* Responsive adjustments */

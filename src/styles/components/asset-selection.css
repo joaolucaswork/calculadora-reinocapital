@@ -19,7 +19,6 @@
 
 .ativos_item [ativo-product] {
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .ativos_item [ativo-product]:hover {
@@ -47,7 +46,7 @@
   align-items: center;
   justify-content: center;
   background-color: transparent;
-  color: #666;
+  color: #7a7978;
   font-size: 14px;
   font-weight: 600;
   margin-left: 8px;
@@ -62,7 +61,7 @@
 
 /* Estilo quando há produtos selecionados */
 .counter_ativos:not(:empty) {
-  color: #000;
+  color: #7a7978;
 }
 
 /* Ajuste para o dropdown-toggle */

@@ -350,7 +350,7 @@
           }
         );
 
-        createRippleEffect(element, '#9ca3af');
+        createRippleEffect(element, '#D4AB07');
         rotateArrowUp();
         resetHideTimer();
 
@@ -389,7 +389,7 @@
           }
         );
 
-        createRippleEffect(element, '#9ca3af');
+        createRippleEffect(element, '#D4AB07');
         rotateArrowDown();
         resetHideTimer();
 
