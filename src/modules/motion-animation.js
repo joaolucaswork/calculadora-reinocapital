@@ -156,7 +156,7 @@
           transform: translate(-50%, -50%);
           pointer-events: none;
           z-index: 1;
-          opacity: 0.4;
+          opacity: 0.2;
         `;
         element.style.position = 'relative';
         element.style.overflow = 'hidden';
@@ -166,7 +166,7 @@
           ripple,
           {
             scale: [0, 4],
-            opacity: [0.4, 0],
+            opacity: [0.2, 0],
           },
           {
             duration: 0.5,
@@ -350,7 +350,7 @@
           }
         );
 
-        createRippleEffect(element, '#D4AB07');
+        createRippleEffect(element, '#9ca3af');
         rotateArrowUp();
         resetHideTimer();
 
@@ -389,7 +389,7 @@
           }
         );
 
-        createRippleEffect(element, '#D4AB07');
+        createRippleEffect(element, '#9ca3af');
         rotateArrowDown();
         resetHideTimer();
 

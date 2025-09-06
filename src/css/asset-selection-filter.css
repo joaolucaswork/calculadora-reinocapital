@@ -232,6 +232,7 @@
   position: relative;
 }
 
+/* Default ripple effect (fallback for unmapped categories) */
 .asset-checkbox-container::after {
   content: '';
   position: absolute;
@@ -249,6 +250,50 @@
 
 .asset-checkbox-container.pulse-effect::after {
   animation: circularPulse 0.4s ease-out;
+}
+
+/* Category-specific ripple effects - matching category colors */
+
+/* Renda Fixa */
+.ativos_item[ativo-category='Renda Fixa'] .asset-checkbox-container::after,
+.ativo-item-subcategory[ativo-category='Renda Fixa'] .asset-checkbox-container::after {
+  background: rgba(162, 136, 59, 0.6);
+}
+
+/* Fundo de Investimento */
+.ativos_item[ativo-category='Fundo de Investimento'] .asset-checkbox-container::after,
+.ativo-item-subcategory[ativo-category='Fundo de Investimento'] .asset-checkbox-container::after {
+  background: rgba(227, 173, 12, 0.6);
+}
+
+/* Renda Variável */
+.ativos_item[ativo-category='Renda Variável'] .asset-checkbox-container::after,
+.ativo-item-subcategory[ativo-category='Renda Variável'] .asset-checkbox-container::after {
+  background: rgba(93, 78, 42, 0.6);
+}
+
+/* Internacional */
+.ativos_item[ativo-category='Internacional'] .asset-checkbox-container::after,
+.ativo-item-subcategory[ativo-category='Internacional'] .asset-checkbox-container::after {
+  background: rgba(189, 170, 111, 0.6);
+}
+
+/* COE */
+.ativos_item[ativo-category='COE'] .asset-checkbox-container::after,
+.ativo-item-subcategory[ativo-category='COE'] .asset-checkbox-container::after {
+  background: rgba(209, 125, 0, 0.6);
+}
+
+/* Previdência */
+.ativos_item[ativo-category='Previdência'] .asset-checkbox-container::after,
+.ativo-item-subcategory[ativo-category='Previdência'] .asset-checkbox-container::after {
+  background: rgba(140, 94, 0, 0.6);
+}
+
+/* Outros */
+.ativos_item[ativo-category='Outros'] .asset-checkbox-container::after,
+.ativo-item-subcategory[ativo-category='Outros'] .asset-checkbox-container::after {
+  background: rgba(79, 79, 79, 0.6);
 }
 
 @keyframes circularPulse {
