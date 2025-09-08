@@ -35,17 +35,19 @@
   pointer-events: auto;
 }
 
-/* Hover states for enabled buttons only */
+/* Hover states for enabled buttons only - DISABLED to avoid conflicts with Webflow animations */
+/*
 [element-function='next']:not(:disabled):hover,
 .step-btn.prev-btn:not(:disabled):hover {
   opacity: 0.9;
   transform: translateY(-1px);
   transition: all 0.2s ease;
 }
+*/
 
 /* Focus states for accessibility */
 [element-function='next']:not(:disabled):focus,
 .step-btn.prev-btn:not(:disabled):focus {
-  outline: 2px solid #007bff;
+  outline: 2px solid #be9326;
   outline-offset: 2px;
 }

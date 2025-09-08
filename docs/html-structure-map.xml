@@ -68,7 +68,7 @@
         <product name="Imobiliários Cetipados" display="Imobiliários Cetipados (FII/FIAGRO)"/>
         <product name="Private Equity" display="Private Equity"/>
       </category>
-      <category name="Renda Variável" color="#776a41">
+      <category name="Renda Variável" color="#5d4e2a">
         <product name="Ações e Ativos" display="Ações e Ativos Listados"/>
         <product name="Operação Estruturada" display="Operação Estruturada"/>
         <product name="Carteira administrada" display="Carteira administrada"/>

@@ -13,10 +13,10 @@
       this.selectedAssets = new Set();
       this.section2Assets = [];
       this.section3Assets = [];
+      this.categoryCounters = new Map(); // Contadores por categoria
 
       this.section2 = null;
       this.section3 = null;
-      this.counterElement = null;
     }
 
     init() {
@@ -111,6 +111,14 @@
 
       checkbox.addEventListener('change', (e) => {
         this.handleAssetSelection(e.target.checked, category, product, assetElement);
+
+        // Add pulse effect when checked
+        if (e.target.checked) {
+          checkboxContainer.classList.add('pulse-effect');
+          setTimeout(() => {
+            checkboxContainer.classList.remove('pulse-effect');
+          }, 400);
+        }
       });
 
       checkbox.addEventListener('click', (e) => {
@@ -121,6 +129,14 @@
         if (!e.target.matches('.asset-checkbox, .asset-checkbox-label')) {
           checkbox.checked = !checkbox.checked;
           checkbox.dispatchEvent(new Event('change'));
+
+          // Add pulse effect when checked via element click
+          if (checkbox.checked) {
+            checkboxContainer.classList.add('pulse-effect');
+            setTimeout(() => {
+              checkboxContainer.classList.remove('pulse-effect');
+            }, 400);
+          }
         }
       });
 
@@ -177,16 +193,92 @@
     }
 
     setupCounter() {
-      this.counterElement = this.section2.querySelector('.counter_ativos');
-      if (this.counterElement) {
-        this.updateCounter();
+      // Configura contadores para cada categoria
+      const dropdowns = this.section2.querySelectorAll('.ativos_item');
+
+      dropdowns.forEach((dropdown) => {
+        const categoryName = this.getCategoryFromDropdown(dropdown);
+        if (!categoryName) return;
+
+        // Procura por contador existente ou cria um novo
+        let counterElement = dropdown.querySelector('.counter_ativos');
+
+        if (!counterElement) {
+          // Cria o contador dinamicamente
+          counterElement = document.createElement('div');
+          counterElement.className = 'counter_ativos';
+
+          // Para dropdowns: insere dentro do dropdown-toggle, após o texto
+          const dropdownToggle = dropdown.querySelector('.dropdown-toggle');
+          if (dropdownToggle) {
+            const categoryTextDiv = dropdownToggle.querySelector('div:first-child');
+            if (categoryTextDiv) {
+              dropdownToggle.insertBefore(counterElement, categoryTextDiv.nextSibling);
+            }
+          } else {
+            // Para itens simples (como COE): insere após o texto direto
+            const directText = dropdown.querySelector('div:first-child');
+            if (directText && directText.parentNode) {
+              directText.parentNode.insertBefore(counterElement, directText.nextSibling);
+            }
+          }
+        }
+
+        // Armazena referência do contador
+        this.categoryCounters.set(categoryName, {
+          element: counterElement,
+          total: this.getProductCountForCategory(dropdown),
+          selected: 0,
+        });
+      });
+
+      this.updateAllCounters();
+    }
+
+    getCategoryFromDropdown(dropdown) {
+      // Para dropdowns: busca o texto dentro do dropdown-toggle
+      const dropdownToggle = dropdown.querySelector('.dropdown-toggle div:first-child');
+      if (dropdownToggle) {
+        return dropdownToggle.textContent.trim();
       }
+
+      // Para itens simples (como COE): busca o texto direto
+      const directText = dropdown.querySelector('div:first-child');
+      if (directText && !directText.classList.contains('dropdown-subcategory')) {
+        return directText.textContent.trim();
+      }
+
+      return null;
+    }
+
+    getProductCountForCategory(dropdown) {
+      const products = dropdown.querySelectorAll('[ativo-product]');
+      return products.length;
+    }
+
+    updateAllCounters() {
+      this.categoryCounters.forEach((counter, categoryName) => {
+        const selectedCount = this.getSelectedCountForCategory(categoryName);
+        counter.selected = selectedCount;
+        counter.element.textContent = `${selectedCount}/${counter.total}`;
+      });
+    }
+
+    getSelectedCountForCategory(categoryName) {
+      let count = 0;
+      const normalizedCategoryName = this.normalizeString(categoryName);
+
+      this.selectedAssets.forEach((assetKey) => {
+        const [category] = assetKey.split('|');
+        if (category === normalizedCategoryName) {
+          count += 1;
+        }
+      });
+      return count;
     }
 
     updateCounter() {
-      if (this.counterElement) {
-        this.counterElement.textContent = `(${this.selectedAssets.size})`;
-      }
+      this.updateAllCounters();
     }
 
     setupClearButton() {

@@ -15,7 +15,7 @@
       this.categoryColors = {
         'Renda Fixa': '#a2883b',
         'Fundo de Investimento': '#e3ad0c',
-        'Renda Variável': '#776a41',
+        'Renda Variável': '#5d4e2a',
         Internacional: '#bdaa6f',
         COE: '#d17d00',
         Previdência: '#8c5e00',
@@ -25,6 +25,14 @@
 
       // Initialize Simple Hover Module (will be set up in init method)
       this.hoverModule = null;
+
+      // Track currently pinned slice data for toggle behavior
+      this.currentPinnedSliceData = null;
+      this.currentChart = null;
+
+      // Animation state tracking
+      this.hasPlayedEntranceAnimation = false;
+      this.currentStep = -1;
 
       this.setupColorScale();
     }
@@ -45,6 +53,30 @@
       }
     }
 
+    handleStepChange(newStep, previousStep) {
+      console.log(`🎬 D3DonutChartSection5: Step change ${previousStep} → ${newStep}`);
+      this.currentStep = newStep;
+
+      // Reset animation state when navigating to step 4 (results section)
+      if (newStep === 4 && previousStep !== 4) {
+        console.log('🎬 Preparing entrance animations for step 4');
+        this.hasPlayedEntranceAnimation = false;
+
+        // Clear existing charts to force re-render with entrance animations
+        this.charts.forEach((chart) => {
+          if (chart.g) {
+            chart.g.selectAll('.arc').remove();
+          }
+        });
+
+        // Trigger chart update after a brief delay to ensure DOM is ready
+        setTimeout(() => {
+          console.log('🎬 Triggering chart update with entrance animations');
+          this.updateAllCharts();
+        }, 100);
+      }
+    }
+
     initializeEnhancedHover() {
       // Initialize Simple Hover Module if available
       if (window.SimpleHoverModule) {
@@ -53,6 +85,14 @@
           animationDuration: 80,
           className: 'd3-donut-tooltip-section5',
         });
+
+        // Set callback for when tooltip is unpinned
+        this.hoverModule.onUnpinCallback = () => {
+          this.resetAllSliceEffects();
+          this.hideCenterText(this.currentChart);
+          this.clearCategoryHover();
+          this.currentPinnedSliceData = null;
+        };
 
         // Override the updateTooltipPosition method for intelligent positioning
         this.hoverModule.updateTooltipPosition = (event) => {
@@ -123,8 +163,25 @@
           document.querySelector('.section-resultado') ||
           document.querySelector('[chart-content]')?.closest('section');
 
+        // Check if click is outside section 5 or on a chart element
         if (section5 && !section5.contains(e.target)) {
           this.cleanupTooltips();
+        } else if (section5 && section5.contains(e.target)) {
+          // Check if click is on chart area but not on a slice or tooltip
+          const isChartClick = e.target.closest('svg') || e.target.closest('[chart-content]');
+          const isSliceClick = e.target.tagName === 'path' && e.target.closest('.arc');
+          const isTooltipClick = e.target.closest('.d3-donut-tooltip-section5');
+
+          // Only close tooltip if clicking on chart area, not on slice or tooltip
+          if (isChartClick && !isSliceClick && !isTooltipClick) {
+            if (this.hoverModule && this.hoverModule.unpinTooltip) {
+              this.hoverModule.unpinTooltip();
+              this.resetAllSliceEffects();
+              this.hideCenterText(this.currentChart);
+              this.clearCategoryHover();
+              this.currentPinnedSliceData = null;
+            }
+          }
         }
       });
 
@@ -160,7 +217,8 @@
         .select(container)
         .append('svg')
         .attr('width', width)
-        .attr('height', height);
+        .attr('height', height)
+        .style('overflow', 'visible');
 
       const g = svg.append('g').attr('transform', `translate(${width / 2}, ${height / 2})`);
 
@@ -210,6 +268,9 @@
         height,
         radius,
       };
+
+      // Store chart reference for callbacks
+      this.currentChart = chart;
 
       this.charts.set(type, chart);
       this.updateChart(type);
@@ -261,11 +322,6 @@
         existingMessage.remove();
       }
 
-      const hoverArc = window.d3
-        .arc()
-        .innerRadius(chart.radius * 0.65)
-        .outerRadius(chart.radius + 10);
-
       // Verificar se há dados válidos antes de renderizar
       const validData = data.filter((d) => d.value > 0 && isFinite(d.value));
       if (validData.length === 0) return;
@@ -276,6 +332,10 @@
 
       const arcEnter = arcs.enter().append('g').attr('class', 'arc');
 
+      // Check if this is the first render and we're on step 4 (entrance animation)
+      const isFirstRender =
+        !this.hasPlayedEntranceAnimation && this.currentStep === 4 && arcEnter.size() > 0;
+
       arcEnter
         .append('path')
         .attr('fill', (d) => this.colorScale(d.data.category))
@@ -285,25 +345,40 @@
 
       const arcUpdate = arcEnter.merge(arcs);
 
+      // Apply entrance animations if this is the first render
+      if (isFirstRender) {
+        this.applyEntranceAnimations(chart, arcUpdate, validData);
+      } else {
+        // Standard update animation for subsequent renders
+        this.applyStandardAnimation(arcUpdate, arc);
+        // Setup interactions immediately for standard updates
+        this.setupInteractions(arcUpdate, chart);
+      }
+    }
+
+    setupInteractions(arcUpdate, chart) {
       // Use Simple Hover Module instead of direct event handlers
       this.hoverModule.attachHoverEvents(arcUpdate.select('path'), {
         onHover: (event, d) => {
-          // Reset ALL slices to original state first (size, opacity, filter)
+          // Completely disable hover tooltips when any tooltip is pinned
+          if (this.hoverModule && this.hoverModule.state.isPinned) {
+            return;
+          }
+
+          // Reset ALL slices to original state first (opacity, filter) - no size change
           window.d3
             .selectAll('.arc path')
             .transition()
             .duration(80)
             .style('opacity', 0.3)
-            .attr('d', (sliceData) => arc(sliceData))
             .style('filter', 'brightness(1)');
 
-          // Then apply hover effect to current slice
+          // Then apply hover effect to current slice - no size change
           window.d3
             .select(event.target)
             .transition()
             .duration(80)
             .style('opacity', 1)
-            .attr('d', hoverArc(d))
             .style('filter', 'brightness(1.1)');
 
           // Show center text with category info
@@ -313,16 +388,16 @@
           this.triggerCategoryHover(d.data.category || d.data.name);
         },
         onOut: (event, d) => {
+          // Completely disable hover out effects when any tooltip is pinned
+          if (this.hoverModule && this.hoverModule.state.isPinned) {
+            return;
+          }
+
           // Restore all slices to full opacity with faster transition
           window.d3.selectAll('.arc path').transition().duration(80).style('opacity', 1);
 
-          // Remove visual hover effect and reset arc size
-          window.d3
-            .select(event.target)
-            .transition()
-            .duration(80)
-            .attr('d', arc(d))
-            .style('filter', 'brightness(1)');
+          // Remove visual hover effect - no size reset needed
+          window.d3.select(event.target).transition().duration(80).style('filter', 'brightness(1)');
 
           // Hide center text
           this.hideCenterText(chart);
@@ -334,10 +409,76 @@
         className: 'd3-donut-tooltip-section5',
       });
 
+      // Add click handlers for pinning tooltips
+      arcUpdate.select('path').on('click', (event, d) => {
+        this.handleSliceClick(event, d, chart);
+      });
+    }
+
+    applyEntranceAnimations(chart, arcUpdate, validData) {
+      const { g, pie, arc } = chart;
+
+      // Mark that entrance animation is being played
+      this.hasPlayedEntranceAnimation = true;
+
+      // Step 1: Apply 360-degree rotation to the entire chart group using SVG transform
+      const { width, height } = chart;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      g.transition()
+        .duration(800)
+        .ease(window.d3.easeCubicOut)
+        .attrTween('transform', function () {
+          const interpolateRotation = window.d3.interpolate(360, 0);
+          return function (t) {
+            const rotation = interpolateRotation(t);
+            return `translate(${centerX}, ${centerY}) rotate(${rotation})`;
+          };
+        });
+
+      // Step 2: Sequential segment growth animation
+      const pieData = pie(validData);
+
+      arcUpdate
+        .select('path')
+        .each(function (d, i) {
+          // Store original angles for later use
+          d.originalStartAngle = d.startAngle;
+          d.originalEndAngle = d.endAngle;
+
+          // Start with zero-size segments
+          d.startAngle = d.originalStartAngle;
+          d.endAngle = d.originalStartAngle;
+        })
+        .attr('d', arc)
+        .transition()
+        .delay((d, i) => 400 + i * 200) // Staggered delay for sequential appearance
+        .duration(600)
+        .ease(window.d3.easeBackOut.overshoot(1.2))
+        .attrTween('d', function (d) {
+          const interpolateEnd = window.d3.interpolate(d.originalStartAngle, d.originalEndAngle);
+          return function (t) {
+            d.endAngle = interpolateEnd(t);
+            return arc(d);
+          };
+        })
+        .attr('fill', (d) => this.colorScale(d.data.category))
+        .on('end', (d, i, nodes) => {
+          // Setup interactions after animation completes
+          if (i === nodes.length - 1) {
+            this.setupInteractions(arcUpdate, chart);
+          }
+        });
+    }
+
+    applyStandardAnimation(arcUpdate, arc) {
+      // Standard update animation for subsequent renders
       arcUpdate
         .select('path')
         .transition()
         .duration(750)
+        .ease(window.d3.easeCubicInOut)
         .attr('d', (d) => {
           try {
             return arc(d);
@@ -521,30 +662,22 @@
 
       let detailsHtml = '';
 
-      // Main content section with category info
+      // Main content section with category info - increased font sizes
       let mainSection = `
         <div style="display: flex; align-items: center; margin: 8px 0;">
           <div style="width: 4px; height: 40px; background-color: ${categoryColor}; border-radius: 2px; margin-right: 12px;"></div>
           <div style="flex: 1;">
-            <div style="font-weight: 600; color: #1f2937; margin-bottom: 2px;">${d.data.name}</div>
-            <div style="font-size: 1.5em; font-weight: 700; color: #111827; line-height: 1;">${formatValue}</div>
-            <div style="font-size: 0.6875em; color: #6b7280; margin-top: 2px;">Custo de Comissão</div>
+            <div style="font-size: 1.1em; font-weight: 600; color: #1f2937; margin-bottom: 2px;">${d.data.name}</div>
+            <div style="font-size: 1.7em; font-weight: 700; color: #111827; line-height: 1;">${formatValue}</div>
+            <div style="font-size: 0.9em; color: #6b7280; margin-top: 2px;">Custo de Comissão</div>
           </div>
-        </div>
-      `;
-
-      // Add percentage in highlighted box
-      mainSection += `
-        <div style="margin-top: 8px; padding: 8px; background-color: #f9fafb; border-radius: 6px;">
-          <div style="font-size: 0.75em; color: #6b7280; margin-bottom: 2px;">Percentual do Total</div>
-          <div style="font-weight: 600; color: #111827; font-size: 1em;">${d.data.percentage.toFixed(1)}%</div>
         </div>
       `;
 
       // Build details section with enhanced product display
       if (d.data.details && d.data.details.length > 0) {
         detailsHtml =
-          '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;"><div style="font-size: 0.8125em; font-weight: 600; color: #374151; margin-bottom: 10px;">Produtos desta categoria:</div>';
+          '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">';
 
         d.data.details.forEach((detail, index) => {
           if (index < 4) {
@@ -612,15 +745,8 @@
       }
 
       return `
-        <div style="min-width: 200px;">
+        <div style="min-width: 200px; font-size: 1.1em;">
           ${mainSection}
-
-          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-            <div style="font-size: 0.75em; color: #6b7280; line-height: 1.4;">
-              Baseado em <strong>${d.data.details ? d.data.details.length : 0} ativo${d.data.details && d.data.details.length !== 1 ? 's' : ''}</strong> desta categoria
-            </div>
-          </div>
-
           ${detailsHtml}
         </div>
       `;
@@ -758,6 +884,9 @@
     }
 
     cleanupTooltips() {
+      // Reset pinned slice tracking
+      this.currentPinnedSliceData = null;
+
       // Use Simple Hover Module cleanup
       if (this.hoverModule && typeof this.hoverModule.destroy === 'function') {
         this.hoverModule.destroy();
@@ -816,6 +945,110 @@
       centerValue.transition().duration(80).style('opacity', 0);
 
       centerCategory.transition().duration(80).style('opacity', 0);
+    }
+
+    handleSliceClick(event, d, chart) {
+      event.stopPropagation();
+
+      // Check if clicking on the same slice that's already pinned (toggle behavior)
+      if (
+        this.currentPinnedSliceData &&
+        this.currentPinnedSliceData.name === d.data.name &&
+        this.hoverModule.state.isPinned
+      ) {
+        // Unpin the current tooltip and reset visual effects
+        this.hoverModule.unpinTooltip();
+        this.resetAllSliceEffects();
+        this.hideCenterText(chart);
+        this.clearCategoryHover();
+        this.currentPinnedSliceData = null;
+        return;
+      }
+
+      // Pin the new slice tooltip (replaces any existing pinned tooltip)
+      if (this.hoverModule && this.hoverModule.togglePinnedTooltip) {
+        this.hoverModule.togglePinnedTooltip(
+          event,
+          d,
+          (data) => this.generateTooltipContent(data),
+          'd3-donut-tooltip-section5'
+        );
+
+        // Apply pinned state visual effects
+        this.applyPinnedStateEffects(event.target, d);
+
+        // Show center text for pinned slice
+        this.showCenterText(chart, d.data);
+
+        // Trigger cross-component interaction for pinned slice
+        this.triggerCategoryHover(d.data.category || d.data.name);
+
+        // Track the currently pinned slice
+        this.currentPinnedSliceData = d.data;
+      }
+    }
+
+    resetAllSliceEffects() {
+      // Reset all slices to normal state
+      window.d3
+        .selectAll('.arc path')
+        .style('opacity', 1)
+        .style('filter', 'brightness(1)')
+        .style('stroke', 'none')
+        .style('stroke-width', null);
+
+      // Reset all slice transforms (explode effect)
+      window.d3
+        .selectAll('.arc')
+        .transition()
+        .duration(250)
+        .ease(window.d3.easeBackIn)
+        .attr('transform', 'translate(0, 0)');
+    }
+
+    applyPinnedStateEffects(selectedElement, selectedData) {
+      // First, reset all transforms
+      window.d3.selectAll('.arc').transition().duration(250).attr('transform', 'translate(0, 0)');
+
+      // Set all slices to reduced opacity
+      window.d3
+        .selectAll('.arc path')
+        .style('opacity', 0.3)
+        .style('filter', 'brightness(1)')
+        .style('stroke', 'none')
+        .style('stroke-width', null);
+
+      // Highlight the selected slice (no border, just opacity and brightness)
+      window.d3
+        .select(selectedElement)
+        .style('opacity', 1)
+        .style('filter', 'brightness(1.1)')
+        .style('stroke', 'none')
+        .style('stroke-width', null);
+
+      // Apply explode effect to selected slice
+      this.explodeSlice(selectedElement, selectedData);
+    }
+
+    explodeSlice(element, sliceData) {
+      if (!this.currentChart || !sliceData) return;
+
+      const explodeDistance = 12; // Distance to move the slice outward
+
+      // Calculate the angle to determine direction
+      const angle = (sliceData.startAngle + sliceData.endAngle) / 2;
+
+      // Calculate explode offset
+      const explodeX = Math.sin(angle) * explodeDistance;
+      const explodeY = -Math.cos(angle) * explodeDistance;
+
+      // Apply transform to move the slice group
+      window.d3
+        .select(element.parentNode)
+        .transition()
+        .duration(300)
+        .ease(window.d3.easeBackOut.overshoot(1.2))
+        .attr('transform', `translate(${explodeX}, ${explodeY})`);
     }
 
     updateIntelligentTooltipPosition(event) {

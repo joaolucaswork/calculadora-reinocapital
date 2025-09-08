@@ -88,6 +88,12 @@
     }
 
     createTooltipWrapper(button) {
+      // Check if button has a parent node
+      if (!button.parentNode) {
+        console.warn('Send button has no parent node, skipping tooltip creation');
+        return;
+      }
+
       // Check if wrapper already exists
       if (
         button.parentElement &&

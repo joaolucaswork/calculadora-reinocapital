@@ -104,16 +104,26 @@
         );
       });
 
+      // Listen for debug mode activation
+      document.addEventListener('debugModeActivated', (e) => {
+        this.log('🐛 Debug mode activated - updating send button state');
+        this.updateSendButtonState();
+      });
+
       this.updateSendButtonState();
       this.log('✅ Allocation validation setup complete');
     }
 
     updateSendButtonState() {
       const sendButtons = document.querySelectorAll('[element-function="send"]');
-      sendButtons.forEach((button) => {
-        button.disabled = !this.isFullyAllocated;
+      const isDebugActive = window.ReinoDebugModule && window.ReinoDebugModule.isDebugActive();
 
-        if (this.isFullyAllocated) {
+      sendButtons.forEach((button) => {
+        // Enable button if fully allocated OR debug mode is active
+        const shouldEnable = this.isFullyAllocated || isDebugActive;
+        button.disabled = !shouldEnable;
+
+        if (shouldEnable) {
           button.classList.remove('disabled');
           button.style.opacity = '';
           button.style.pointerEvents = '';
@@ -139,6 +149,41 @@
     handleSendButtonClick(button) {
       try {
         this.log('📤 Processing send button click');
+
+        // Check if debug mode is active and handle navigation directly
+        if (window.ReinoDebugModule && window.ReinoDebugModule.isDebugActive()) {
+          this.log('🐛 Debug mode active - navigating to step 5');
+
+          // Navigate directly to step 5
+          if (window.ReinoProgressBarSystem && window.ReinoProgressBarSystem.showStep) {
+            window.ReinoProgressBarSystem.showStep(5);
+            console.log('🐛 Debug navigation: Used progress bar system to navigate to step 5');
+          } else {
+            // Fallback direct navigation
+            const currentSections = document.querySelectorAll('.step-section');
+            const targetSection = document.querySelector('[data-step="5"]');
+
+            if (targetSection) {
+              currentSections.forEach((section) => {
+                section.style.display = 'none';
+                section.style.visibility = 'hidden';
+                section.style.opacity = '0';
+                section.style.pointerEvents = 'none';
+              });
+
+              targetSection.style.display = 'block';
+              targetSection.style.visibility = 'visible';
+              targetSection.style.opacity = '1';
+              targetSection.style.pointerEvents = 'auto';
+              targetSection.style.position = 'relative';
+              targetSection.style.zIndex = '10000';
+
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              console.log('🐛 Debug navigation: Direct DOM manipulation to show step 5');
+            }
+          }
+          return;
+        }
 
         if (!this.isFullyAllocated) {
           this.log('⚠️ Cannot send - patrimony not fully allocated');
@@ -217,24 +262,6 @@
       data.percentualAlocado =
         data.patrimonioNumeric > 0 ? (data.totalAlocado / data.patrimonioNumeric) * 100 : 0;
       data.patrimonioRestante = data.patrimonioNumeric - data.totalAlocado;
-
-      // Get economia value
-      if (window.ReinoResultadoComparativoCalculator) {
-        try {
-          const comparison = window.ReinoResultadoComparativoCalculator.getComparison();
-          if (comparison && comparison.economia) {
-            data.economia_anual = new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-              minimumFractionDigits: 0,
-            }).format(comparison.economia);
-          }
-        } catch (error) {
-          data.economia_anual = 'Calculando...';
-        }
-      } else {
-        data.economia_anual = 'Calculando...';
-      }
 
       return data;
     }

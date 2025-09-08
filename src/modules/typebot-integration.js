@@ -11,7 +11,8 @@ class ReinoTypebotIntegrationSystem {
     this.currentFormData = null;
     this.isTypebotActive = false;
     this.typebotLibrary = null;
-    this.isProcessingCompletion = false; // Add flag to prevent duplicate processing
+    this.isProcessingCompletion = false; // Flag to prevent duplicate processing
+    this.lastProcessedCompletion = null; // Track last processed completion ID
 
     // Config
     this.config = {
@@ -159,7 +160,7 @@ class ReinoTypebotIntegrationSystem {
       telefone: '',
       patrimonio: this.getPatrimonioValue(),
       ativos_selecionados: this.getSelectedAssets(),
-      economia_anual: this.getEconomiaValue(),
+
       // Add detailed calculator data - use DOM as source of truth
       ativosEscolhidos: this.getSelectedAssetsDetailed(),
       alocacao: this.getAllocationData(),
@@ -350,62 +351,29 @@ class ReinoTypebotIntegrationSystem {
     return selectedAssets.join(', ') || 'Nenhum ativo selecionado';
   }
 
-  getEconomiaValue() {
-    // Try to get from resultado calculator
-    try {
-      // Check if calculator exists and has cache
-      if (
-        window.ReinoResultadoComparativoCalculator &&
-        window.ReinoResultadoComparativoCalculator.cache &&
-        window.ReinoResultadoComparativoCalculator.cache.economia
-      ) {
-        const { economia } = window.ReinoResultadoComparativoCalculator.cache;
-        return new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-          minimumFractionDigits: 0,
-        }).format(economia);
-      }
-
-      // Fallback: try to calculate economia manually
-      const patrimonioInput = document.querySelector('#currency');
-      if (patrimonioInput && patrimonioInput.value) {
-        const patrimonio =
-          parseFloat(
-            patrimonioInput.value
-              .toString()
-              .replace(/[^\d,]/g, '')
-              .replace(',', '.')
-          ) || 0;
-        if (patrimonio > 0) {
-          // Simple estimation: 2-3% economy
-          const estimatedEconomy = patrimonio * 0.025;
-          return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            minimumFractionDigits: 0,
-          }).format(estimatedEconomy);
-        }
-      }
-    } catch (error) {
-      console.warn('Could not get economia from calculator:', error);
-    }
-    return 'Calculando...';
-  }
-
   async handleTypebotCompletion(typebotData = {}) {
     try {
-      // Prevent duplicate processing
-      if (this.isProcessingCompletion) {
+      // Prevent duplicate processing with unique identifier
+      const completionId = typebotData.timestamp || Date.now();
+      if (this.isProcessingCompletion || this.lastProcessedCompletion === completionId) {
+        console.log('🚫 Duplicate completion detected, skipping:', completionId);
         return;
       }
 
-      // Only process if we have valid data (not empty object)
+      // Only process if we have valid data with required fields
       if (!typebotData || Object.keys(typebotData).length === 0) {
+        console.log('🚫 Empty typebot data, skipping completion');
+        return;
+      }
+
+      // Validate required fields
+      if (!typebotData.nome && !typebotData.email) {
+        console.log('🚫 Missing required fields (nome/email), skipping completion');
         return;
       }
 
       this.isProcessingCompletion = true;
+      this.lastProcessedCompletion = completionId;
 
       if (!this.currentFormData) {
         // Try to collect form data now
@@ -417,6 +385,7 @@ class ReinoTypebotIntegrationSystem {
       }
 
       // Extract nome, email and telefone from typebot data
+      console.log('🔍 Raw typebot data received:', typebotData);
       let nome = null;
       let email = null;
       let telefone = null;
@@ -443,7 +412,12 @@ class ReinoTypebotIntegrationSystem {
       }
       if (!telefone) {
         telefone =
-          typebotData.phone || typebotData.telefone_usuario || typebotData.userPhone || null;
+          typebotData.phone ||
+          typebotData.telefone_usuario ||
+          typebotData.userPhone ||
+          typebotData.celular ||
+          typebotData.whatsapp ||
+          null;
         if (telefone && this.isEncryptedValue(telefone)) telefone = null;
       }
 
@@ -471,6 +445,13 @@ class ReinoTypebotIntegrationSystem {
           telefone = typebotData.variables.telefone;
         }
       }
+
+      // Log extracted data for debugging
+      console.log('📞 Extracted contact info:', {
+        nome: nome || 'EMPTY',
+        email: email || 'EMPTY',
+        telefone: telefone || 'EMPTY',
+      });
 
       // Apply nome to DOM elements if extracted from Typebot
       if (nome) {
@@ -517,17 +498,67 @@ class ReinoTypebotIntegrationSystem {
           detail: {
             formData: enhancedFormData,
             typebotData: typebotData,
-            userInfo: { nome, email },
+            userInfo: { nome, email, telefone },
             timestamp: new Date().toISOString(),
           },
         })
       );
+
+      // ✅ NAVIGATE TO SECTION 5 after successful completion
+      console.log('🚀 Navigating to section 5 after Typebot completion...');
+      setTimeout(() => {
+        this.navigateToSection5();
+      }, 1000);
     } catch (error) {
       console.error('❌ Error handling Typebot completion:', error);
       await this.handleTypebotError(error);
     } finally {
       // Reset processing flag
       this.isProcessingCompletion = false;
+    }
+  }
+
+  navigateToSection5() {
+    try {
+      console.log('🎯 Attempting navigation to section 5...');
+
+      // Method 1: Use progress bar system (preferred)
+      if (window.ReinoProgressBarSystem && window.ReinoProgressBarSystem.showStep) {
+        console.log('✅ Using progress bar system for navigation');
+        window.ReinoProgressBarSystem.showStep(5);
+        return;
+      }
+
+      // Method 2: Direct DOM manipulation (fallback)
+      console.warn('⚠️ Progress bar system not available, using direct DOM manipulation');
+      const currentSections = document.querySelectorAll('.step-section');
+      const targetSection = document.querySelector('[data-step="5"]');
+
+      if (targetSection) {
+        // Hide all sections
+        currentSections.forEach((section) => {
+          section.style.display = 'none';
+          section.style.visibility = 'hidden';
+          section.style.opacity = '0';
+          section.style.pointerEvents = 'none';
+        });
+
+        // Show target section
+        targetSection.style.display = 'block';
+        targetSection.style.visibility = 'visible';
+        targetSection.style.opacity = '1';
+        targetSection.style.pointerEvents = 'auto';
+        targetSection.style.position = 'relative';
+        targetSection.style.zIndex = '1';
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        console.log('✅ Direct DOM navigation to section 5 completed');
+      } else {
+        console.error('❌ Section 5 not found in DOM');
+      }
+    } catch (error) {
+      console.error('❌ Navigation to section 5 failed:', error);
     }
   }
 
@@ -723,17 +754,27 @@ class ReinoTypebotIntegrationSystem {
       const { step, data } = event.detail;
 
       try {
-        // Navigate to section 5
-        const currentSection = document.querySelector(
-          '.step-section[style*="display: block"], .step-section:not([style*="display: none"])'
-        );
-        const targetSection = document.querySelector('[data-step="' + step + '"]');
+        // Use the proper progress bar system instead of direct DOM manipulation
+        if (window.ReinoProgressBarSystem && window.ReinoProgressBarSystem.showStep) {
+          console.log('🤖 Using progress bar system to navigate to step', step);
+          window.ReinoProgressBarSystem.showStep(step);
+        } else {
+          // Fallback to direct DOM manipulation if progress bar system is not available
+          console.warn('⚠️ Progress bar system not available, using direct DOM manipulation');
+          const currentSection = document.querySelector(
+            '.step-section[style*="display: block"], .step-section:not([style*="display: none"])'
+          );
+          const targetSection = document.querySelector('[data-step="' + step + '"]');
 
-        if (currentSection) {
-          currentSection.style.display = 'none';
-        }
-        if (targetSection) {
-          targetSection.style.display = 'block';
+          if (currentSection) {
+            currentSection.style.display = 'none';
+            currentSection.style.pointerEvents = 'none';
+          }
+          if (targetSection) {
+            targetSection.style.display = 'block';
+            targetSection.style.pointerEvents = 'auto';
+            targetSection.style.opacity = '1';
+          }
         }
 
         // Apply user data
@@ -750,29 +791,20 @@ class ReinoTypebotIntegrationSystem {
       }
     });
 
-    // Listen for postMessage from Typebot
+    // Listen for postMessage from Typebot (PRIMARY METHOD)
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'typebot-completion') {
+        console.log('📨 PostMessage received from Typebot:', event.data.data);
+
         // Call handleTypebotCompletion directly with the data
         this.handleTypebotCompletion(event.data.data);
 
-        // Also dispatch navigation event
-        document.dispatchEvent(
-          new CustomEvent('forceNavigateToResults', {
-            detail: {
-              step: 5,
-              source: 'postmessage',
-              data: event.data.data,
-            },
-          })
-        );
+        // Navigation is handled inside handleTypebotCompletion
       }
     });
 
-    // Also listen for the enhanced script completion event
-    document.addEventListener('typebotEnhancedCompletion', (event) => {
-      this.handleTypebotCompletion(event.detail);
-    });
+    // REMOVED: typebotEnhancedCompletion listener to prevent duplicates
+    // The postMessage method above is the primary communication channel
   }
 
   setupEmbedContainer() {

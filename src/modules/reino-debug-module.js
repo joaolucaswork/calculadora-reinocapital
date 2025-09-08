@@ -3,7 +3,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class ReinoDebugModule {
@@ -13,6 +13,7 @@
       this.targetSequence = 'reinodebug';
       this.sequenceTimeout = null;
       this.debugValue = 1000000;
+      this.isDebugModeActive = false;
     }
 
     init() {
@@ -54,9 +55,20 @@
 
     activateDebugMode() {
       try {
+        this.isDebugModeActive = true;
         this.setMainCurrencyInput();
         this.selectAllAssets();
         this.distributePortfolio();
+        this.setupDebugSendButtonBehavior();
+
+        // Notify button coordinator to update send button state
+        document.dispatchEvent(
+          new CustomEvent('debugModeActivated', {
+            detail: { isActive: true },
+          })
+        );
+
+        console.log('🐛 Debug mode activated - send button bypass enabled');
       } catch (error) {
         console.error('Debug mode activation failed:', error);
       }
@@ -78,24 +90,28 @@
       } else {
         mainInput.value = formattedValue;
         mainInput.dispatchEvent(new Event('input', { bubbles: true }));
-        mainInput.dispatchEvent(new CustomEvent('currencyChange', {
-          detail: { value: this.debugValue },
-          bubbles: true,
-        }));
+        mainInput.dispatchEvent(
+          new CustomEvent('currencyChange', {
+            detail: { value: this.debugValue },
+            bubbles: true,
+          })
+        );
       }
     }
 
     selectAllAssets() {
       const assetItems = document.querySelectorAll('.ativo-item-subcategory');
-      
-      assetItems.forEach(item => {
+
+      assetItems.forEach((item) => {
         if (!item.classList.contains('selected-asset')) {
           item.click();
         }
       });
 
-      const standaloneAssets = document.querySelectorAll('.ativos_item[ativo-product][ativo-category]:not(.dropdown)');
-      standaloneAssets.forEach(item => {
+      const standaloneAssets = document.querySelectorAll(
+        '.ativos_item[ativo-product][ativo-category]:not(.dropdown)'
+      );
+      standaloneAssets.forEach((item) => {
         if (!item.classList.contains('selected-asset')) {
           item.click();
         }
@@ -105,10 +121,12 @@
     distributePortfolio() {
       setTimeout(() => {
         const portfolioItems = document.querySelectorAll('.patrimonio_interactive_item');
-        const visibleItems = Array.from(portfolioItems).filter(item => {
-          return item.style.display !== 'none' && 
-                 !item.closest('[style*="display: none"]') &&
-                 item.offsetParent !== null;
+        const visibleItems = Array.from(portfolioItems).filter((item) => {
+          return (
+            item.style.display !== 'none' &&
+            !item.closest('[style*="display: none"]') &&
+            item.offsetParent !== null
+          );
         });
 
         if (visibleItems.length === 0) {
@@ -118,7 +136,7 @@
         const valuePerItem = this.debugValue / visibleItems.length;
         const percentagePerItem = 1 / visibleItems.length;
 
-        visibleItems.forEach(item => {
+        visibleItems.forEach((item) => {
           this.setPortfolioItemValue(item, valuePerItem, percentagePerItem);
         });
       }, 500);
@@ -138,10 +156,12 @@
 
           currencyInput.value = formattedValue;
           currencyInput.dispatchEvent(new Event('input', { bubbles: true }));
-          currencyInput.dispatchEvent(new CustomEvent('currencyChange', {
-            detail: { value: value },
-            bubbles: true,
-          }));
+          currencyInput.dispatchEvent(
+            new CustomEvent('currencyChange', {
+              detail: { value: value },
+              bubbles: true,
+            })
+          );
         }
 
         if (rangeSlider) {
@@ -158,9 +178,31 @@
       }
     }
 
+    setupDebugSendButtonBehavior() {
+      // Instead of a global listener, we'll modify the button coordinator's behavior
+      // This is much less invasive and won't interfere with tooltips
+      console.log('🐛 Debug send button behavior ready (handled by button coordinator)');
+    }
+
+    isDebugActive() {
+      return this.isDebugModeActive;
+    }
+
+    // Method to check debug status from console
+    getDebugStatus() {
+      console.log('🐛 Debug Status:', {
+        isActive: this.isDebugModeActive,
+        isInitialized: this.isInitialized,
+        targetSequence: this.targetSequence,
+        currentSequence: this.keySequence,
+      });
+      return this.isDebugModeActive;
+    }
+
     destroy() {
       this.isInitialized = false;
       this.keySequence = '';
+      this.isDebugModeActive = false;
       clearTimeout(this.sequenceTimeout);
     }
   }
@@ -174,5 +216,4 @@
   } else {
     window.ReinoDebugModule.init();
   }
-
 })();

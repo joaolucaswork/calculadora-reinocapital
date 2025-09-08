@@ -70,6 +70,40 @@
       this.debouncedValidation = this.debounce(() => {
         this.updateNavigationState();
       }, 300);
+
+      // Focus management state
+      this.userIsUsingKeyboard = false;
+      this.lastInteractionWasKeyboard = false;
+      this.setupFocusDetection();
+    }
+
+    setupFocusDetection() {
+      // Track keyboard usage to determine when to apply automatic focus
+      document.addEventListener('keydown', (e) => {
+        // Tab, Shift+Tab, Arrow keys, Enter, Space indicate keyboard navigation
+        if (
+          e.key === 'Tab' ||
+          e.key === 'ArrowUp' ||
+          e.key === 'ArrowDown' ||
+          e.key === 'ArrowLeft' ||
+          e.key === 'ArrowRight' ||
+          e.key === 'Enter' ||
+          e.key === ' '
+        ) {
+          this.userIsUsingKeyboard = true;
+          this.lastInteractionWasKeyboard = true;
+        }
+      });
+
+      // Track mouse usage to reset keyboard flag
+      document.addEventListener('mousedown', () => {
+        this.lastInteractionWasKeyboard = false;
+      });
+
+      // Track touch usage to reset keyboard flag
+      document.addEventListener('touchstart', () => {
+        this.lastInteractionWasKeyboard = false;
+      });
     }
 
     async init(config = {}) {
@@ -283,9 +317,10 @@
           }
         }
       } else {
-        // Seções 1 e 2: sem classe especial
+        // Seções 1 e 2: sem classe especial - deve estar visível com position: fixed
         if (this.config.enableLogging) {
-          console.warn('🎯 Progress bar sem classe especial (seções 1-2)');
+          console.warn('🎯 Progress bar sem classe especial (seções 1-2) - deve estar visível');
+          this.debugProgressBarVisibility(stepIndex);
         }
       }
 
@@ -485,6 +520,42 @@
     }
 
     /**
+     * Debug progress bar visibility issues
+     */
+    debugProgressBarVisibility(stepIndex) {
+      if (!this.progressBar) {
+        console.error('❌ Progress bar element not found');
+        return;
+      }
+
+      const computedStyle = window.getComputedStyle(this.progressBar);
+      const rect = this.progressBar.getBoundingClientRect();
+
+      console.group(`🔍 Progress Bar Debug - Step ${stepIndex}`);
+      console.log('Element:', this.progressBar);
+      console.log('Classes:', Array.from(this.progressBar.classList));
+      console.log('Computed styles:', {
+        position: computedStyle.position,
+        display: computedStyle.display,
+        opacity: computedStyle.opacity,
+        visibility: computedStyle.visibility,
+        zIndex: computedStyle.zIndex,
+        bottom: computedStyle.bottom,
+        left: computedStyle.left,
+        transform: computedStyle.transform,
+      });
+      console.log('Bounding rect:', {
+        width: rect.width,
+        height: rect.height,
+        top: rect.top,
+        left: rect.left,
+        visible: rect.width > 0 && rect.height > 0,
+      });
+      console.log('Parent container:', this.progressBar.parentElement);
+      console.groupEnd();
+    }
+
+    /**
      * Retorna o estado atual da progress bar
      */
     getProgressBarState() {
@@ -577,6 +648,11 @@
       // Notifica o Lottie Lifecycle Manager sobre mudança de step
       if (window.ReinoLottieLifecycleManager) {
         window.ReinoLottieLifecycleManager.handleStepChange(stepIndex, previousStep);
+      }
+
+      // Notifica o D3 Donut Chart Section 5 sobre mudança de step
+      if (window.ReinoD3DonutChartSection5System) {
+        window.ReinoD3DonutChartSection5System.handleStepChange(stepIndex, previousStep);
       }
 
       // Scroll para o topo
@@ -801,7 +877,12 @@
     }
 
     focusManagement(stepIndex) {
-      // Gerencia foco entre steps
+      // Only apply automatic focus if user is actively using keyboard navigation
+      if (!this.lastInteractionWasKeyboard) {
+        return;
+      }
+
+      // Gerencia foco entre steps para usuários de teclado
       const currentSection = this.sectionCache.get(this.steps[stepIndex].id);
       if (currentSection) {
         const focusableElement = currentSection.querySelector(

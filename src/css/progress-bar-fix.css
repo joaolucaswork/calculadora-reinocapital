@@ -1,0 +1,90 @@
+/**
+ * Progress Bar Visibility Fix
+ * Provides missing CSS rules for progress bar positioning across all sections
+ */
+
+/* Base progress bar positioning - visible in sections 1-2 */
+.progress-bar {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Section 0: progress bar stays within the interactive-cards-wrapper */
+.progress-bar.first-section {
+  position: relative;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  display: flex !important;
+}
+
+/* Sections 3, 4, 5: progress bar with special positioning */
+.progress-bar.aloca-section {
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  bottom: -13.6vh;
+  transform: translateX(-50%) translateY(100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .progress-bar {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    width: auto;
+  }
+  
+  .progress-bar.aloca-section {
+    bottom: -10vh;
+    transform: translateY(100%);
+  }
+}
+
+/* Ensure progress bar is always above other content */
+.progress-bar {
+  z-index: 9999;
+}
+
+/* Animation for smooth transitions */
+.progress-bar {
+  transition: 
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    bottom 0.3s ease,
+    background 0.3s ease;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .progress-bar {
+    background: rgba(255, 255, 255, 1);
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar {
+    transition: none;
+  }
+}

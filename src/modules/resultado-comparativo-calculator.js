@@ -97,8 +97,6 @@
       const elements = {
         tradicional: document.querySelector('[data-resultado="tradicional"]'),
         reino: document.querySelector('[data-resultado="reino"]'),
-        economia: document.querySelector('[data-resultado="economia-valor"]'),
-        economiaPercent: document.querySelector('[data-resultado="economia-percentual"]'),
       };
 
       this.elements = elements;
@@ -193,13 +191,6 @@
         const formattedPatrimony = this.formatCurrency(reinoValues.patrimony);
         patrimonioTotalElement.textContent = formattedPatrimony;
       }
-
-      // Calcula e atualiza economia
-      const savings = traditionalValues.total - reinoValues.annual;
-      const savingsPercent =
-        traditionalValues.total > 0 ? (savings / traditionalValues.total) * 100 : 0;
-
-      this.updateEconomiaDisplay(savings, savingsPercent);
     }
 
     hasValidData() {
@@ -370,37 +361,7 @@
       return this.cache.lastPatrimony || 0;
     }
 
-    updateEconomiaDisplay(economia, economiaPercent) {
-      if (this.elements.economia) {
-        this.elements.economia.textContent = this.formatCurrency(Math.abs(economia));
-
-        if (economia > 0) {
-          this.elements.economia.style.color = '#22c55e';
-        } else if (economia < 0) {
-          this.elements.economia.style.color = '#ef4444';
-        } else {
-          this.elements.economia.style.color = '#6b7280';
-        }
-      }
-
-      if (this.elements.economiaPercent) {
-        this.elements.economiaPercent.textContent = `${Math.abs(economiaPercent).toFixed(1)}%`;
-
-        if (economia > 0) {
-          this.elements.economiaPercent.style.color = '#22c55e';
-        } else if (economia < 0) {
-          this.elements.economiaPercent.style.color = '#ef4444';
-        } else {
-          this.elements.economiaPercent.style.color = '#6b7280';
-        }
-      }
-    }
-
     dispatchCalculationUpdate(tradicionalResult, reinoValue, patrimony) {
-      const economia = tradicionalResult.total - reinoValue;
-      const economiaPercent =
-        tradicionalResult.total > 0 ? (economia / tradicionalResult.total) * 100 : 0;
-
       document.dispatchEvent(
         new CustomEvent('resultadoComparativoUpdated', {
           detail: {
@@ -413,12 +374,6 @@
               },
             },
             tradicional: tradicionalResult,
-            economia: {
-              valor: economia,
-              percentual: economiaPercent,
-              formatted: this.formatCurrency(economia),
-              reinoMaisVantajoso: economia > 0,
-            },
             timestamp: new Date().toISOString(),
           },
         })
@@ -470,13 +425,6 @@
         patrimony: this.cache.lastPatrimony,
         tradicional: this.cache.lastTradicionalValue,
         reino: this.cache.lastReinoValue,
-        economia: this.cache.lastTradicionalValue - this.cache.lastReinoValue,
-        economiaPercent:
-          this.cache.lastTradicionalValue > 0
-            ? ((this.cache.lastTradicionalValue - this.cache.lastReinoValue) /
-                this.cache.lastTradicionalValue) *
-              100
-            : 0,
       };
     }
 
@@ -496,8 +444,6 @@
       if (tradicionalElement) {
         tradicionalElement.textContent = this.formatCurrencyForDisplay(0);
       }
-
-      this.updateEconomiaDisplay(0, 0);
     }
   }
 

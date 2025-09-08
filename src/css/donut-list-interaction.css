@@ -5,7 +5,16 @@
 
 /* Base transition for lista-resultado-item elements */
 .lista-resultado-item {
-  transition: opacity 0.3s ease, transform 0.2s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease;
+}
+
+/* Color ball scale animation setup */
+.lista-resultado-item .color-ball {
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform 0.3s ease;
 }
 
 /* Enhanced hover state for lista-resultado-item */
@@ -45,11 +54,18 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .lista-resultado-item {
-    transition: opacity 0.2s ease, transform 0.15s ease;
+    transition:
+      opacity 0.2s ease,
+      transform 0.15s ease;
   }
-  
+
   .lista-resultado-item:hover {
     transform: translateY(-0.5px);
+  }
+
+  /* Slightly reduced scale effect on mobile for better touch experience */
+  .lista-resultado-item .color-ball {
+    transition: transform 0.2s ease;
   }
 }
 
@@ -58,9 +74,15 @@
   .lista-resultado-item {
     transition: none;
   }
-  
+
   .lista-resultado-item:hover {
     transform: none;
+  }
+
+  /* Disable color ball scale animations for reduced motion */
+  .lista-resultado-item .color-ball {
+    transition: none;
+    transform: none !important;
   }
 }
 
