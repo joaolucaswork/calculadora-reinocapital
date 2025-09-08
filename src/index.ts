@@ -3,6 +3,7 @@ import './modules/asset-selection-filter.js';
 import './modules/currency-control.js';
 import './modules/currency-formatting.js';
 import './modules/d3-donut-chart-section5.js';
+import './modules/lista-resultado-chart-bridge.js';
 import './modules/donut-list-interaction.js';
 // import './modules/d3-pie-chart-webflow.js'; // COMENTADO - Gráfico de pizza da seção 4 desabilitado
 import './modules/event-coordinator.js';
@@ -57,6 +58,8 @@ import './css/simple-button.css';
 import './css/asset-selection-filter.css';
 import './css/range-slider.css';
 import './css/donut-list-interaction.css';
+import './css/lista-resultado-click-enhancement.css';
+import './css/lista-resultado-toggle.css';
 import './css/category-hover-effects.css';
 import './css/settings-reset-button.css';
 import './css/send-button-tooltip.css';

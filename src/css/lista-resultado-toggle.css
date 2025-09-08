@@ -1,0 +1,89 @@
+/**
+ * Lista Resultado Toggle Animation
+ * Smooth toggle between .color-ball and .icone-toggle elements
+ */
+
+/* Base styles for both elements */
+.lista-resultado-item .color-ball,
+.lista-resultado-item .icone-toggle {
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+  transform-origin: center center;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Default state: color-ball visible, icone-toggle hidden */
+.lista-resultado-item .color-ball {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.lista-resultado-item .icone-toggle {
+  transform: scale(0);
+  opacity: 0;
+}
+
+/* Active state: color-ball hidden, icone-toggle visible */
+.lista-resultado-item.ativo .color-ball,
+.lista-resultado-item:hover .color-ball {
+  transform: scale(0);
+  opacity: 0;
+}
+
+.lista-resultado-item.ativo .icone-toggle,
+.lista-resultado-item:hover .icone-toggle {
+  transform: scale(1);
+  opacity: 1;
+  width: auto;
+}
+
+/* Ensure smooth transitions on mobile */
+@media (max-width: 768px) {
+  .lista-resultado-item .color-ball,
+  .lista-resultado-item .icone-toggle {
+    transition:
+      transform 0.25s ease,
+      opacity 0.25s ease;
+  }
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .lista-resultado-item .color-ball,
+  .lista-resultado-item .icone-toggle {
+    transition: none;
+  }
+
+  .lista-resultado-item .color-ball {
+    transform: none;
+  }
+
+  .lista-resultado-item .icone-toggle {
+    transform: none;
+  }
+
+  .lista-resultado-item.ativo .color-ball {
+    transform: none;
+    display: none;
+  }
+
+  .lista-resultado-item.ativo .icone-toggle {
+    transform: none;
+    display: inline-block;
+  }
+}
+
+/* Ensure elements don't interfere with layout */
+.lista-resultado-item .color-ball,
+.lista-resultado-item .icone-toggle {
+  flex-shrink: 0;
+}
+
+/* Prevent layout shifts during animation */
+
+/* Optional: Add subtle hover effect on icone-toggle when active */
+.lista-resultado-item.ativo .icone-toggle:hover {
+  transform: scale(1.1);
+}

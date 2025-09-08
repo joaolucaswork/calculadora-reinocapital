@@ -398,6 +398,9 @@
 
           // Trigger cross-component interaction
           this.triggerCategoryHover(d.data.category || d.data.name);
+
+          // Set active state on corresponding lista-resultado-item for hover
+          this.setActiveListaResultadoItem(d.data.category || d.data.name);
         },
         onOut: (event, d) => {
           // Completely disable hover out effects when any tooltip is pinned
@@ -416,6 +419,11 @@
 
           // Clear cross-component interaction
           this.clearCategoryHover();
+
+          // Clear active state from lista-resultado-item when hover ends (only if no tooltip is pinned)
+          if (!this.hoverModule.state.isPinned) {
+            this.clearActiveListaResultadoItem();
+          }
         },
         tooltipContent: (d) => this.generateTooltipContent(d),
         className: 'd3-donut-tooltip-section5',
@@ -903,6 +911,9 @@
       this.hideCenterText(this.currentChart);
       this.clearCategoryHover();
       this.currentPinnedSliceData = null;
+
+      // Dispatch event for other modules to listen
+      document.dispatchEvent(new CustomEvent('tooltipUnpinned'));
     }
 
     cleanupTooltips() {
@@ -940,9 +951,37 @@
       document.dispatchEvent(new CustomEvent('donutCategoryHoverEnd'));
     }
 
+    setActiveListaResultadoItem(category) {
+      // Clear any existing active items
+      document.querySelectorAll('.lista-resultado-item.ativo').forEach((item) => {
+        item.classList.remove('ativo');
+      });
+
+      // Set active on matching category
+      const listaItem = document.querySelector(
+        `.lista-resultado-item[ativo-category="${category}"]`
+      );
+      if (listaItem) {
+        listaItem.classList.add('ativo');
+      }
+    }
+
+    clearActiveListaResultadoItem() {
+      // Clear all active items
+      document.querySelectorAll('.lista-resultado-item.ativo').forEach((item) => {
+        item.classList.remove('ativo');
+      });
+    }
+
     showCenterText(chart, data) {
+      console.log('🔧 D3 showCenterText called with data:', data);
       const centerValue = chart.g.select('.center-value');
       const centerCategory = chart.g.select('.center-category');
+
+      console.log('🔧 Center elements found:', {
+        centerValue: !centerValue.empty(),
+        centerCategory: !centerCategory.empty(),
+      });
 
       if (centerValue.empty() || centerCategory.empty()) return;
 
@@ -954,7 +993,7 @@
       centerValue.text(formattedValue).transition().duration(80).style('opacity', 1);
 
       // Show category text
-      centerCategory.text(categoryName).transition().duration(80).style('opacity', 0.7);
+      centerCategory.text('Custo de comissão').transition().duration(80).style('opacity', 0.7);
     }
 
     hideCenterText(chart) {
@@ -1000,6 +1039,9 @@
 
         // Trigger cross-component interaction for pinned slice
         this.triggerCategoryHover(d.data.category || d.data.name);
+
+        // Set active state on corresponding lista-resultado-item
+        this.setActiveListaResultadoItem(d.data.category || d.data.name);
 
         // Track the currently pinned slice
         this.currentPinnedSliceData = d.data;
