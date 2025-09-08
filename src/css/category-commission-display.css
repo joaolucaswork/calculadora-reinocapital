@@ -1,0 +1,73 @@
+/**
+ * Category Commission Display Styles
+ * Estilos básicos para o componente de exibição de comissões por categoria
+ */
+
+/* Container with smooth scrolling support */
+.valores-categorias-grafico {
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  max-height: 400px; /* Adjust based on design needs */
+}
+
+/* Base transition for valores-categoria-item elements */
+.valores-categoria-item {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  cursor: pointer;
+}
+
+/* Estados especiais */
+.valores-categoria-item.hidden {
+  display: none;
+}
+
+/* Hover effects matching lista-resultado-item behavior */
+.valores-categoria-item:hover {
+  transform: translateY(-2px);
+}
+
+/* Enhanced visual feedback during cross-component hover */
+.valores-categoria-item.highlighted {
+  opacity: 1;
+  transform: translateY(-2px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.valores-categoria-item.faded {
+  opacity: 0.3;
+  transform: translateY(0);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Active state for clicked valores-categoria-item (matching lista-resultado-item.ativo) */
+.valores-categoria-item.ativo {
+  background-color: rgba(162, 136, 59, 0.05);
+  border: 1px solid rgba(162, 136, 59, 0.2);
+  transform: translateY(-2px);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .valores-categorias-grafico {
+    scroll-behavior: auto;
+  }
+
+  .valores-categoria-item {
+    transition: none;
+  }
+
+  .valores-categoria-item:hover,
+  .valores-categoria-item.highlighted {
+    transform: none;
+  }
+}
