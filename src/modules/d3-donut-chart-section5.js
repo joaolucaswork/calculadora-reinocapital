@@ -54,12 +54,10 @@
     }
 
     handleStepChange(newStep, previousStep) {
-      console.log(`🎬 D3DonutChartSection5: Step change ${previousStep} → ${newStep}`);
       this.currentStep = newStep;
 
       // Reset animation state when navigating to step 4 (results section)
       if (newStep === 4 && previousStep !== 4) {
-        console.log('🎬 Preparing entrance animations for step 4');
         this.hasPlayedEntranceAnimation = false;
 
         // Clear existing charts to force re-render with entrance animations
@@ -71,7 +69,6 @@
 
         // Trigger chart update after a brief delay to ensure DOM is ready
         setTimeout(() => {
-          console.log('🎬 Triggering chart update with entrance animations');
           this.updateAllCharts();
         }, 100);
       }
@@ -98,6 +95,9 @@
         this.hoverModule.updateTooltipPosition = (event) => {
           this.updateIntelligentTooltipPosition(event);
         };
+
+        // Setup tooltip accordion event handlers
+        this.setupTooltipAccordionHandlers();
       } else {
         console.warn('Simple Hover Module not available, using fallback');
         // Create a comprehensive fallback
@@ -114,6 +114,150 @@
           destroy: () => {},
           createTooltip: () => null,
         };
+      }
+    }
+
+    setupTooltipAccordionHandlers() {
+      // Use event delegation to handle dynamically created tooltip modal buttons
+      document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('tooltip-modal-btn')) {
+          event.preventDefault();
+          event.stopPropagation();
+          this.openProductModal(event.target);
+        }
+      });
+
+      // Handle modal close events
+      document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('product-modal-overlay')) {
+          this.closeProductModal();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && this.activeModal) {
+          this.closeProductModal();
+        }
+      });
+    }
+
+    openProductModal(button) {
+      const category = button.getAttribute('data-category');
+      const chartType = button.getAttribute('data-chart-type');
+      const isTraditional = chartType === 'tradicional';
+
+      // Get all products for this category
+      const categoryData = this.getCategoryData(chartType).find((cat) => cat.name === category);
+      if (!categoryData || !categoryData.details) return;
+
+      // Create modal
+      this.createProductModal(categoryData.details, category, isTraditional);
+    }
+
+    createProductModal(products, categoryName, isTraditional) {
+      // Remove existing modal if any
+      this.closeProductModal();
+
+      const modalOverlay = document.createElement('div');
+      modalOverlay.className = 'product-modal-overlay';
+      modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 10002;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+        animation: fadeIn 0.2s ease;
+      `;
+
+      const modal = document.createElement('div');
+      modal.className = 'product-modal';
+      modal.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+        margin: 20px;
+        animation: slideIn 0.2s ease;
+        font-family: 'Satoshi Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      `;
+
+      const modalContent = this.generateModalContent(products, categoryName, isTraditional);
+      modal.innerHTML = modalContent;
+
+      modalOverlay.appendChild(modal);
+      document.body.appendChild(modalOverlay);
+
+      this.activeModal = modalOverlay;
+
+      // Prevent modal content clicks from closing modal
+      modal.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    generateModalContent(products, categoryName, isTraditional) {
+      const categoryColor = this.categoryColors[categoryName] || '#c0c0c0';
+
+      let productsHtml = products
+        .map((product) => {
+          const commissionValue = isTraditional
+            ? product.cost
+              ? this.formatCurrency(product.cost)
+              : 'Sem custo'
+            : product.custoAnualReino
+              ? this.formatCurrency(product.custoAnualReino)
+              : 'Sem custo';
+
+          return `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+            <span style="font-size: 0.875em; color: #374151; font-weight: 500;">${product.product}</span>
+            <span style="font-size: 0.875em; color: #111827; font-weight: 600;">${commissionValue}</span>
+          </div>
+        `;
+        })
+        .join('');
+
+      return `
+        <div style="padding: 20px;">
+          <div style="display: flex; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;">
+            <div style="width: 4px; height: 24px; background-color: ${categoryColor}; border-radius: 2px; margin-right: 12px;"></div>
+            <h3 style="margin: 0; font-size: 1.1em; font-weight: 600; color: #111827;">${categoryName}</h3>
+          </div>
+          <div style="margin-bottom: 12px;">
+            ${productsHtml}
+          </div>
+          <button
+            onclick="window.ReinoD3DonutChartSection5?.closeProductModal()"
+            style="
+              width: 100%;
+              padding: 8px 16px;
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 6px;
+              color: #64748b;
+              font-size: 0.8em;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            "
+            onmouseover="this.style.background='#f1f5f9'"
+            onmouseout="this.style.background='#f8fafc'"
+          >
+            Fechar
+          </button>
+        </div>
+      `;
+    }
+
+    closeProductModal() {
+      if (this.activeModal) {
+        this.activeModal.remove();
+        this.activeModal = null;
       }
     }
 
@@ -674,11 +818,12 @@
       return this.getCategoryData(type);
     }
 
-    // Generate tooltip content for Simple Hover Module
+    // Generate tooltip content for Simple Hover Module with expandable accordion
     generateTooltipContent(d) {
       const formatValue = this.formatCurrency(d.data.value);
       const isTraditional = d.data.chartType === 'tradicional';
       const categoryColor = this.categoryColors[d.data.name] || '#c0c0c0';
+      const tooltipId = `tooltip-${d.data.name.replace(/\s+/g, '-').toLowerCase()}`;
 
       let detailsHtml = '';
 
@@ -694,80 +839,126 @@
         </div>
       `;
 
-      // Build details section with enhanced product display
+      // Build details section with expandable accordion
       if (d.data.details && d.data.details.length > 0) {
         detailsHtml =
           '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">';
 
-        d.data.details.forEach((detail, index) => {
-          if (index < 4) {
-            // Show up to 4 details with better formatting
-            const detailValue = this.formatCurrency(detail.value);
+        // Show first 3 products by default
+        const visibleProducts = d.data.details.slice(0, 3);
+        const hiddenProducts = d.data.details.slice(3);
 
-            // Get commission info with both percentage and value
-            let commissionDisplay = '';
-            let commissionValue = '';
-            let giroInfo = '';
-
-            if (isTraditional && detail.taxaInfo) {
-              const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
-              const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
-              commissionDisplay = `${mediaCorretagem}% média de corretagem`;
-              giroInfo = `Índice de Giro: ${indiceGiro}`;
-              if (detail.cost) {
-                commissionValue = this.formatCurrency(detail.cost);
-              }
-            } else if (isTraditional && detail.cost) {
-              const custoAnual = this.formatCurrency(detail.cost);
-              commissionDisplay = 'Custo tradicional';
-              commissionValue = custoAnual;
-            } else if (!isTraditional && detail.custoAnualReino) {
-              const custoReino = this.formatCurrency(detail.custoAnualReino);
-              commissionDisplay = 'Custo Reino';
-              commissionValue = custoReino;
-            } else {
-              commissionDisplay = 'Sem custo adicional';
-              commissionValue = '';
-            }
-
-            detailsHtml += `
-              <div style="padding: 10px 0; ${index < 3 && index < d.data.details.length - 1 ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-                  <div style="flex: 1;">
-                    <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
-                    <div style="font-size: 0.75em; color: #6b7280;">${commissionDisplay}</div>
-                    ${giroInfo ? `<div style="font-size: 0.6875em; color: #9ca3af; margin-top: 2px;">${giroInfo}</div>` : ''}
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="font-size: 0.8125em; font-weight: 600; color: #111827;">${detailValue}</div>
-                  </div>
-                </div>
-                ${
-                  commissionValue
-                    ? `
-                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f3f4f6;">
-                    <span style="font-size: 0.6875em; color: #6b7280;">Comissão média anual:</span>
-                    <span style="font-size: 0.75em; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
-                  </div>
-                `
-                    : ''
-                }
-              </div>
-            `;
-          }
+        // Render visible products
+        visibleProducts.forEach((detail, index) => {
+          detailsHtml += this.generateProductHtml(
+            detail,
+            index,
+            visibleProducts.length - 1,
+            isTraditional
+          );
         });
 
-        if (d.data.details.length > 4) {
-          detailsHtml += `<div style="font-size: 0.75em; color: #9ca3af; margin-top: 8px; text-align: center; font-style: italic; padding: 6px; background-color: #f9fafb; border-radius: 6px;">+${d.data.details.length - 4} outros produtos nesta categoria</div>`;
+        // Add button to open mini-modal if there are more products
+        if (hiddenProducts.length > 0) {
+          detailsHtml += `
+            <div class="tooltip-expand-section" style="margin-top: 8px;">
+              <button
+                class="tooltip-modal-btn"
+                data-tooltip-id="${tooltipId}"
+                data-category="${d.data.name}"
+                data-chart-type="${isTraditional ? 'tradicional' : 'reino'}"
+                style="
+                  width: 100%;
+                  padding: 8px 12px;
+                  background: #f8fafc;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 6px;
+                  color: #475569;
+                  font-size: 0.75em;
+                  font-weight: 500;
+                  cursor: pointer;
+                  transition: all 0.2s ease;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 4px;
+                "
+                onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1';"
+                onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0';"
+              >
+                <span>Ver todos os produtos (${hiddenProducts.length} restantes)</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M7 7h10v10"></path>
+                  <path d="M7 17 17 7"></path>
+                </svg>
+              </button>
+            </div>
+          `;
         }
 
         detailsHtml += '</div>';
       }
 
       return `
-        <div style="min-width: 200px; font-size: 1.1em;">
+        <div style="min-width: 200px; font-size: 1.1em;" data-tooltip-id="${tooltipId}">
           ${mainSection}
           ${detailsHtml}
+        </div>
+      `;
+    }
+
+    // Helper method to generate individual product HTML
+    generateProductHtml(detail, index, lastIndex, isTraditional) {
+      const detailValue = this.formatCurrency(detail.value);
+
+      // Get commission info with both percentage and value
+      let commissionDisplay = '';
+      let commissionValue = '';
+      let giroInfo = '';
+
+      if (isTraditional && detail.taxaInfo) {
+        const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
+        const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
+        commissionDisplay = `${mediaCorretagem}% média de corretagem`;
+        giroInfo = `Índice de Giro: ${indiceGiro}`;
+        if (detail.cost) {
+          commissionValue = this.formatCurrency(detail.cost);
+        }
+      } else if (isTraditional && detail.cost) {
+        const custoAnual = this.formatCurrency(detail.cost);
+        commissionDisplay = 'Custo tradicional';
+        commissionValue = custoAnual;
+      } else if (!isTraditional && detail.custoAnualReino) {
+        const custoReino = this.formatCurrency(detail.custoAnualReino);
+        commissionDisplay = 'Custo Reino';
+        commissionValue = custoReino;
+      } else {
+        commissionDisplay = 'Sem custo adicional';
+        commissionValue = '';
+      }
+
+      return `
+        <div style="padding: 10px 0; ${index < lastIndex ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+            <div style="flex: 1;">
+              <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
+              <div style="font-size: 0.75em; color: #6b7280;">${commissionDisplay}</div>
+              ${giroInfo ? `<div style="font-size: 0.6875em; color: #9ca3af; margin-top: 2px;">${giroInfo}</div>` : ''}
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.8125em; font-weight: 600; color: #111827;">${detailValue}</div>
+            </div>
+          </div>
+          ${
+            commissionValue
+              ? `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f3f4f6;">
+              <span style="font-size: 0.6875em; color: #6b7280;">Comissão média anual:</span>
+              <span style="font-size: 0.75em; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
+            </div>
+          `
+              : ''
+          }
         </div>
       `;
     }
@@ -974,14 +1165,8 @@
     }
 
     showCenterText(chart, data) {
-      console.log('🔧 D3 showCenterText called with data:', data);
       const centerValue = chart.g.select('.center-value');
       const centerCategory = chart.g.select('.center-category');
-
-      console.log('🔧 Center elements found:', {
-        centerValue: !centerValue.empty(),
-        centerCategory: !centerCategory.empty(),
-      });
 
       if (centerValue.empty() || centerCategory.empty()) return;
 

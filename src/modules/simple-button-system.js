@@ -21,7 +21,7 @@
       this.updateAllButtons();
 
       if (this.debugMode) {
-        console.log('✅ SimpleButtonSystem initialized');
+        // Debug logging removed for production
       }
     }
 

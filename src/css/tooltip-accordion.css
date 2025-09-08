@@ -1,0 +1,159 @@
+/**
+ * Tooltip Product Modal
+ * Styles for compact mini-modal that displays all products from donut chart tooltips
+ */
+
+/* Tooltip modal button enhancements */
+.tooltip-modal-btn {
+  transition: all 0.2s ease !important;
+  font-family:
+    'Satoshi Variable',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif !important;
+}
+
+.tooltip-modal-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-modal-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Product modal overlay */
+.product-modal-overlay {
+  animation: fadeIn 0.2s ease;
+}
+
+/* Product modal */
+.product-modal {
+  animation: slideIn 0.2s ease;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .tooltip-modal-btn {
+    padding: 6px 10px !important;
+    font-size: 0.7em !important;
+  }
+
+  .tooltip-modal-btn svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  .product-modal {
+    max-width: 90vw !important;
+    margin: 10px !important;
+  }
+}
+
+/* Accessibility improvements */
+.tooltip-modal-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Smooth animation for reduced motion users */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-modal-btn,
+  .product-modal-overlay,
+  .product-modal {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Enhanced visual feedback */
+.tooltip-modal-btn:focus-visible {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px #3b82f6;
+}
+
+/* Ensure proper z-index for interactive tooltips and modals */
+.d3-donut-tooltip-section5 {
+  z-index: 10001 !important;
+}
+
+.product-modal-overlay {
+  z-index: 10002 !important;
+}
+
+/* Prevent text selection on button */
+.tooltip-modal-btn {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Modal content styling */
+.product-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.product-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product-modal::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 3px;
+}
+
+.product-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.product-modal::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Tooltip container adjustments for interactive content */
+.simple-tooltip.interactive {
+  pointer-events: auto !important;
+  user-select: text !important;
+}
+
+/* Prevent tooltip from being too wide on mobile */
+@media (max-width: 480px) {
+  .d3-donut-tooltip-section5 {
+    max-width: 280px !important;
+  }
+
+  .product-modal {
+    max-width: 95vw !important;
+    margin: 5px !important;
+  }
+}

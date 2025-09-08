@@ -207,7 +207,6 @@
 
       // Show center text and trigger category hover
       if (this.chartSystem.currentChart) {
-        console.log('🔧 Bridge showCenterText - sliceData:', sliceData);
         this.chartSystem.showCenterText(this.chartSystem.currentChart, sliceData);
       }
       this.chartSystem.triggerCategoryHover(sliceData.category || sliceData.name);

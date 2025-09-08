@@ -24,8 +24,6 @@ window.ReinoNavigationButtons = (function () {
     this.setupButtons();
     this.setupListeners();
     this.updateButtons();
-
-    this.log('✅ Navigation buttons initialized');
   };
 
   NavigationButtons.prototype.setupButtons = function () {
@@ -176,7 +174,7 @@ window.ReinoNavigationButtons = (function () {
 
   NavigationButtons.prototype.log = function (message) {
     if (this.debugMode) {
-      console.log('🔘 [NavigationButtons] ' + message);
+      // Debug logging removed for production
     }
   };
 
@@ -198,7 +196,6 @@ window.ReinoNavigationButtons = (function () {
     ) {
       if (!window.ReinoNavigationButtons.stepNavigationSystem) {
         window.ReinoNavigationButtons.init(window.ReinoStepNavigationProgressSystem);
-        console.log('✅ NavigationButtons initialized standalone');
       }
     } else {
       setTimeout(initializeNavigationButtons, 200);

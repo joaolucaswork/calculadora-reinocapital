@@ -215,9 +215,6 @@
         dashboard.style.transform = isCollapsed ? 'scale(1)' : 'scale(0.8)';
       }
     });
-
-    // eslint-disable-next-line no-console
-    console.log('🎛️ Salesforce debug dashboard created');
   }
 
   // Export globally
