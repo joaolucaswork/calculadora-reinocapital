@@ -156,31 +156,43 @@
         this.handleRotationIndexChange();
       });
 
-      // Limpar tooltips quando o usuário sair da seção
+      // Enhanced click-outside behavior for pinned tooltips
       document.addEventListener('click', (e) => {
+        // Only handle clicks when there's a pinned tooltip
+        if (!this.hoverModule || !this.hoverModule.state.isPinned) {
+          return;
+        }
+
         const section5 =
           document.querySelector('[data-section="5"]') ||
           document.querySelector('.section-resultado') ||
           document.querySelector('[chart-content]')?.closest('section');
 
-        // Check if click is outside section 5 or on a chart element
+        // Check if click is outside section 5 entirely
         if (section5 && !section5.contains(e.target)) {
-          this.cleanupTooltips();
-        } else if (section5 && section5.contains(e.target)) {
-          // Check if click is on chart area but not on a slice or tooltip
-          const isChartClick = e.target.closest('svg') || e.target.closest('[chart-content]');
-          const isSliceClick = e.target.tagName === 'path' && e.target.closest('.arc');
-          const isTooltipClick = e.target.closest('.d3-donut-tooltip-section5');
+          this.unpinTooltipAndCleanup();
+          return;
+        }
 
-          // Only close tooltip if clicking on chart area, not on slice or tooltip
-          if (isChartClick && !isSliceClick && !isTooltipClick) {
-            if (this.hoverModule && this.hoverModule.unpinTooltip) {
-              this.hoverModule.unpinTooltip();
-              this.resetAllSliceEffects();
-              this.hideCenterText(this.currentChart);
-              this.clearCategoryHover();
-              this.currentPinnedSliceData = null;
-            }
+        // If we're inside section 5, check for specific click targets
+        if (section5 && section5.contains(e.target)) {
+          const isTooltipClick = e.target.closest('.d3-donut-tooltip-section5');
+          const isSliceClick = e.target.tagName === 'path' && e.target.closest('.arc');
+          const isChartAreaClick = e.target.closest('svg') || e.target.closest('[chart-content]');
+
+          // Don't close tooltip if clicking on the tooltip itself (allows text selection)
+          if (isTooltipClick) {
+            return;
+          }
+
+          // Don't close tooltip if clicking on a slice (handled by slice click handler)
+          if (isSliceClick) {
+            return;
+          }
+
+          // Close tooltip if clicking on empty chart areas or anywhere else in section 5
+          if (isChartAreaClick || !isSliceClick) {
+            this.unpinTooltipAndCleanup();
           }
         }
       });
@@ -883,6 +895,16 @@
       this.cleanupTooltips();
     }
 
+    unpinTooltipAndCleanup() {
+      if (this.hoverModule && this.hoverModule.unpinTooltip) {
+        this.hoverModule.unpinTooltip();
+      }
+      this.resetAllSliceEffects();
+      this.hideCenterText(this.currentChart);
+      this.clearCategoryHover();
+      this.currentPinnedSliceData = null;
+    }
+
     cleanupTooltips() {
       // Reset pinned slice tracking
       this.currentPinnedSliceData = null;
@@ -956,12 +978,8 @@
         this.currentPinnedSliceData.name === d.data.name &&
         this.hoverModule.state.isPinned
       ) {
-        // Unpin the current tooltip and reset visual effects
-        this.hoverModule.unpinTooltip();
-        this.resetAllSliceEffects();
-        this.hideCenterText(chart);
-        this.clearCategoryHover();
-        this.currentPinnedSliceData = null;
+        // Unpin the current tooltip and reset visual effects using helper method
+        this.unpinTooltipAndCleanup();
         return;
       }
 
