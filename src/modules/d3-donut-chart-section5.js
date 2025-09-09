@@ -545,6 +545,13 @@
 
           // Set active state on corresponding lista-resultado-item for hover
           this.setActiveListaResultadoItem(d.data.category || d.data.name);
+
+          // Dispatch tutorial event for hover completion
+          document.dispatchEvent(
+            new CustomEvent('donutTutorialHover', {
+              detail: { category: d.data.category || d.data.name },
+            })
+          );
         },
         onOut: (event, d) => {
           // Completely disable hover out effects when any tooltip is pinned
@@ -1230,6 +1237,13 @@
 
         // Track the currently pinned slice
         this.currentPinnedSliceData = d.data;
+
+        // Dispatch tutorial event for click completion
+        document.dispatchEvent(
+          new CustomEvent('donutTutorialClick', {
+            detail: { category: d.data.category || d.data.name },
+          })
+        );
       }
     }
 

@@ -53,6 +53,7 @@ import './modules/lottie-lifecycle-manager.js';
 import './modules/focus-visible-polyfill.js';
 import './modules/keyboard-navigation.js';
 import './modules/keyboard-navigation-test.js';
+import './modules/donut-tutorial-checkboxes.js';
 // Import CSS files
 import './css/tippy-custom.css';
 import './css/simple-button.css';
@@ -64,6 +65,7 @@ import './css/lista-resultado-toggle.css';
 import './css/category-hover-effects.css';
 import './css/category-commission-display.css';
 import './css/settings-reset-button.css';
+import './css/donut-tutorial-checkboxes.css';
 import './css/send-button-tooltip.css';
 import './css/focus-management.css';
 import './css/progress-bar-fix.css';
