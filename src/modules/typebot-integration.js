@@ -504,8 +504,7 @@ class ReinoTypebotIntegrationSystem {
         })
       );
 
-      // ✅ NAVIGATE TO SECTION 5 after successful completion
-      console.log('🚀 Navigating to section 5 after Typebot completion...');
+      // Navigate to section 5 after successful completion
       setTimeout(() => {
         this.navigateToSection5();
       }, 1000);
@@ -570,18 +569,12 @@ class ReinoTypebotIntegrationSystem {
       const elements = document.querySelectorAll('[nome-definido="typebot"]');
 
       if (elements.length === 0) {
-        console.log('🔍 [TypebotIntegration] No elements found with nome-definido="typebot"');
         return;
       }
-
-      console.log(
-        `🎯 [TypebotIntegration] Found ${elements.length} elements with nome-definido="typebot"`
-      );
 
       elements.forEach((element, index) => {
         // Apply the name to the element's text content
         element.textContent = nome;
-        console.log(`✅ [TypebotIntegration] Applied nome "${nome}" to element ${index + 1}`);
       });
 
       // Dispatch event to notify other systems
@@ -756,7 +749,6 @@ class ReinoTypebotIntegrationSystem {
       try {
         // Use the proper progress bar system instead of direct DOM manipulation
         if (window.ReinoProgressBarSystem && window.ReinoProgressBarSystem.showStep) {
-          console.log('🤖 Using progress bar system to navigate to step', step);
           window.ReinoProgressBarSystem.showStep(step);
         } else {
           // Fallback to direct DOM manipulation if progress bar system is not available
@@ -794,8 +786,6 @@ class ReinoTypebotIntegrationSystem {
     // Listen for postMessage from Typebot (PRIMARY METHOD)
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'typebot-completion') {
-        console.log('📨 PostMessage received from Typebot:', event.data.data);
-
         // Call handleTypebotCompletion directly with the data
         this.handleTypebotCompletion(event.data.data);
 

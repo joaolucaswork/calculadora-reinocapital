@@ -109,6 +109,13 @@
       const content = contentFunction(data);
       this.state.activeTooltip.html(content);
 
+      // Enable pointer events for interactive tooltips (those with buttons)
+      if (content.includes('tooltip-expand-btn')) {
+        this.state.activeTooltip.style('pointer-events', 'auto');
+      } else {
+        this.state.activeTooltip.style('pointer-events', 'none');
+      }
+
       this.updateTooltipPosition(event);
 
       this.state.activeTooltip
@@ -149,6 +156,7 @@
       this.state.isPinned = true;
       this.state.isVisible = true;
 
+      // Always enable pointer events for pinned tooltips
       this.state.activeTooltip.style('pointer-events', 'auto').style('user-select', 'text');
 
       // Prevent clicks inside tooltip from closing it

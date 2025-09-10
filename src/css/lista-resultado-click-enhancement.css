@@ -1,0 +1,16 @@
+/**
+ * Lista Resultado Click Enhancement
+ * Visual enhancements for clicking on lista-resultado-item elements to trigger donut chart tooltips
+ */
+
+/* Enhanced cursor for lista-resultado-item elements */
+.lista-resultado-item {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Tooltip connection indicator - subtle visual cue */
+.lista-resultado-item.tooltip-connected {
+  background-color: rgba(162, 136, 59, 0.05);
+  border: 1px solid rgba(162, 136, 59, 0.2);
+}

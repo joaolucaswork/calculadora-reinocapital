@@ -67,8 +67,6 @@
             detail: { isActive: true },
           })
         );
-
-        console.log('🐛 Debug mode activated - send button bypass enabled');
       } catch (error) {
         console.error('Debug mode activation failed:', error);
       }
@@ -181,7 +179,6 @@
     setupDebugSendButtonBehavior() {
       // Instead of a global listener, we'll modify the button coordinator's behavior
       // This is much less invasive and won't interfere with tooltips
-      console.log('🐛 Debug send button behavior ready (handled by button coordinator)');
     }
 
     isDebugActive() {
@@ -190,12 +187,6 @@
 
     // Method to check debug status from console
     getDebugStatus() {
-      console.log('🐛 Debug Status:', {
-        isActive: this.isDebugModeActive,
-        isInitialized: this.isInitialized,
-        targetSequence: this.targetSequence,
-        currentSequence: this.keySequence,
-      });
       return this.isDebugModeActive;
     }
 

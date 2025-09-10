@@ -38,7 +38,6 @@
         this.setupEventListeners();
         this.setupResponsiveHandling();
         this.isInitialized = true;
-        console.log('✅ CalendlyMinimalistWidget: Initialized successfully');
       } catch (error) {
         console.error('CalendlyMinimalistWidget: Initialization failed:', error);
       }
@@ -186,8 +185,6 @@
           parentElement.style.height = `${adjustedHeight}px`;
         }
 
-        console.log(`📏 Calendly height adjusted to: ${adjustedHeight}px`);
-
         // Dispara evento customizado para notificar sobre mudança de altura
         document.dispatchEvent(
           new CustomEvent('calendlyHeightChanged', {
@@ -247,7 +244,6 @@
 
       // Ensure widget is initialized before attaching
       if (!this.isInitialized || !this.container) {
-        console.log('CalendlyMinimalistWidget: Initializing before attach...');
         await this.init();
       }
 
@@ -259,7 +255,6 @@
 
       element.appendChild(this.container);
 
-      console.log('✅ CalendlyMinimalistWidget: Successfully attached to element');
       return true;
     }
 

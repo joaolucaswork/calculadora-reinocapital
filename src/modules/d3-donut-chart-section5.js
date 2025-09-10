@@ -42,6 +42,7 @@
 
       try {
         await this.loadD3();
+        this.addTooltipScrollbarStyles();
         this.initializeEnhancedHover();
         this.setupEventListeners();
         this.initializeCharts();
@@ -53,13 +54,93 @@
       }
     }
 
+    addTooltipScrollbarStyles() {
+      // Add CSS for tooltip scrollbar styling - premium elegant style
+      if (!document.getElementById('tooltip-scrollbar-styles')) {
+        const style = document.createElement('style');
+        style.id = 'tooltip-scrollbar-styles';
+        style.textContent = `
+          /* Scrollbar elegante e premium para tooltip */
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"] {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+            scroll-behavior: smooth;
+          }
+
+          /* Webkit Scrollbar Styling */
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar {
+            width: 8px;
+            background: transparent;
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            margin: 15px 0;
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.15) 0%,
+              rgba(0, 0, 0, 0.25) 50%,
+              rgba(0, 0, 0, 0.15) 100%
+            );
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.25) 0%,
+              rgba(0, 0, 0, 0.35) 50%,
+              rgba(0, 0, 0, 0.25) 100%
+            );
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scaleX(1.2);
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.3) 0%,
+              rgba(0, 0, 0, 0.4) 50%,
+              rgba(0, 0, 0, 0.3) 100%
+            );
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-corner {
+            background: transparent;
+          }
+
+          /* Scroll indicator styling */
+          .d3-donut-tooltip-section5 [id^="scroll-indicator-"] {
+            font-family: 'Satoshi Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+            z-index: 10;
+          }
+
+          .d3-donut-tooltip-section5 [id^="scroll-indicator-"] span {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+
     handleStepChange(newStep, previousStep) {
-      console.log(`🎬 D3DonutChartSection5: Step change ${previousStep} → ${newStep}`);
       this.currentStep = newStep;
 
       // Reset animation state when navigating to step 4 (results section)
       if (newStep === 4 && previousStep !== 4) {
-        console.log('🎬 Preparing entrance animations for step 4');
         this.hasPlayedEntranceAnimation = false;
 
         // Clear existing charts to force re-render with entrance animations
@@ -71,7 +152,6 @@
 
         // Trigger chart update after a brief delay to ensure DOM is ready
         setTimeout(() => {
-          console.log('🎬 Triggering chart update with entrance animations');
           this.updateAllCharts();
         }, 100);
       }
@@ -98,6 +178,9 @@
         this.hoverModule.updateTooltipPosition = (event) => {
           this.updateIntelligentTooltipPosition(event);
         };
+
+        // Setup tooltip accordion event handlers
+        this.setupTooltipAccordionHandlers();
       } else {
         console.warn('Simple Hover Module not available, using fallback');
         // Create a comprehensive fallback
@@ -115,6 +198,181 @@
           createTooltip: () => null,
         };
       }
+    }
+
+    setupTooltipAccordionHandlers() {
+      // Handle modal close events (keeping for potential future use)
+      document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('product-modal-overlay')) {
+          this.closeProductModal();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && this.activeModal) {
+          this.closeProductModal();
+        }
+      });
+    }
+
+    openProductModal(button) {
+      const category = button.getAttribute('data-category');
+      const chartType = button.getAttribute('data-chart-type');
+      const isTraditional = chartType === 'tradicional';
+
+      // Get all products for this category
+      const categoryData = this.getCategoryData(chartType).find((cat) => cat.name === category);
+      if (!categoryData || !categoryData.details) return;
+
+      // Create modal
+      this.createProductModal(categoryData.details, category, isTraditional);
+    }
+
+    createProductModal(products, categoryName, isTraditional) {
+      // Remove existing modal if any
+      this.closeProductModal();
+
+      const modalOverlay = document.createElement('div');
+      modalOverlay.className = 'product-modal-overlay';
+      modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 10002;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+        animation: fadeIn 0.2s ease;
+      `;
+
+      const modal = document.createElement('div');
+      modal.className = 'product-modal';
+      modal.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+        margin: 20px;
+        animation: slideIn 0.2s ease;
+        font-family: 'Satoshi Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      `;
+
+      const modalContent = this.generateModalContent(products, categoryName, isTraditional);
+      modal.innerHTML = modalContent;
+
+      modalOverlay.appendChild(modal);
+      document.body.appendChild(modalOverlay);
+
+      this.activeModal = modalOverlay;
+
+      // Prevent modal content clicks from closing modal
+      modal.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    generateModalContent(products, categoryName, isTraditional) {
+      const categoryColor = this.categoryColors[categoryName] || '#c0c0c0';
+
+      let productsHtml = products
+        .map((product, index) => {
+          const commissionValue = isTraditional
+            ? product.cost
+              ? this.formatCurrency(product.cost)
+              : 'Sem custo'
+            : product.custoAnualReino
+              ? this.formatCurrency(product.custoAnualReino)
+              : 'Sem custo';
+
+          const investedValue = product.value ? this.formatCurrency(product.value) : 'R$ 0,00';
+          const isLast = index === products.length - 1;
+
+          return `
+          <div style="padding: 12px 0; ${!isLast ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div style="flex: 1;">
+                <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 4px;">${product.product}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1em; font-weight: 700; color: #111827; margin-bottom: 2px;">${commissionValue}</div>
+                <div style="font-size: 0.75em; color: #6b7280; font-weight: 500;">Custo de Comissão</div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+              <div style="text-align: right;">
+                <div style="font-size: 0.8em; color: #374151; font-weight: 500;">${investedValue}</div>
+                <div style="font-size: 0.7em; color: #9ca3af; font-weight: 400;">Valor Investido</div>
+              </div>
+            </div>
+          </div>
+        `;
+        })
+        .join('');
+
+      return `
+        <div style="padding: 20px;">
+          <div style="display: flex; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;">
+            <div style="width: 4px; height: 24px; background-color: ${categoryColor}; border-radius: 2px; margin-right: 12px;"></div>
+            <h3 style="margin: 0; font-size: 1.1em; font-weight: 600; color: #111827;">${categoryName}</h3>
+          </div>
+          <div style="margin-bottom: 12px;">
+            ${productsHtml}
+          </div>
+          <button
+            onclick="window.ReinoD3DonutChartSection5?.closeProductModal()"
+            style="
+              width: 100%;
+              padding: 8px 16px;
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 6px;
+              color: #64748b;
+              font-size: 0.8em;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            "
+            onmouseover="this.style.background='#f1f5f9'"
+            onmouseout="this.style.background='#f8fafc'"
+          >
+            Fechar
+          </button>
+        </div>
+      `;
+    }
+
+    closeProductModal() {
+      if (this.activeModal) {
+        this.activeModal.remove();
+        this.activeModal = null;
+      }
+    }
+
+    handleTooltipScroll(scrollContainerId, scrollIndicatorId) {
+      const scrollContainer = document.getElementById(scrollContainerId);
+      const scrollIndicator = document.getElementById(scrollIndicatorId);
+
+      if (!scrollContainer || !scrollIndicator) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5; // 5px threshold
+
+      // Hide indicator when at bottom, show when there's more content below
+      scrollIndicator.style.opacity = isAtBottom ? '0' : '1';
+    }
+
+    initializeTooltipScrollIndicators() {
+      // Initialize scroll indicators for existing tooltips
+      setTimeout(() => {
+        document.querySelectorAll('[id^="scroll-container-"]').forEach((container) => {
+          const containerId = container.id;
+          const indicatorId = containerId.replace('scroll-container-', 'scroll-indicator-');
+          this.handleTooltipScroll(containerId, indicatorId);
+        });
+      }, 100);
     }
 
     async loadD3() {
@@ -156,31 +414,43 @@
         this.handleRotationIndexChange();
       });
 
-      // Limpar tooltips quando o usuário sair da seção
+      // Enhanced click-outside behavior for pinned tooltips
       document.addEventListener('click', (e) => {
+        // Only handle clicks when there's a pinned tooltip
+        if (!this.hoverModule || !this.hoverModule.state.isPinned) {
+          return;
+        }
+
         const section5 =
           document.querySelector('[data-section="5"]') ||
           document.querySelector('.section-resultado') ||
           document.querySelector('[chart-content]')?.closest('section');
 
-        // Check if click is outside section 5 or on a chart element
+        // Check if click is outside section 5 entirely
         if (section5 && !section5.contains(e.target)) {
-          this.cleanupTooltips();
-        } else if (section5 && section5.contains(e.target)) {
-          // Check if click is on chart area but not on a slice or tooltip
-          const isChartClick = e.target.closest('svg') || e.target.closest('[chart-content]');
-          const isSliceClick = e.target.tagName === 'path' && e.target.closest('.arc');
-          const isTooltipClick = e.target.closest('.d3-donut-tooltip-section5');
+          this.unpinTooltipAndCleanup();
+          return;
+        }
 
-          // Only close tooltip if clicking on chart area, not on slice or tooltip
-          if (isChartClick && !isSliceClick && !isTooltipClick) {
-            if (this.hoverModule && this.hoverModule.unpinTooltip) {
-              this.hoverModule.unpinTooltip();
-              this.resetAllSliceEffects();
-              this.hideCenterText(this.currentChart);
-              this.clearCategoryHover();
-              this.currentPinnedSliceData = null;
-            }
+        // If we're inside section 5, check for specific click targets
+        if (section5 && section5.contains(e.target)) {
+          const isTooltipClick = e.target.closest('.d3-donut-tooltip-section5');
+          const isSliceClick = e.target.tagName === 'path' && e.target.closest('.arc');
+          const isChartAreaClick = e.target.closest('svg') || e.target.closest('[chart-content]');
+
+          // Don't close tooltip if clicking on the tooltip itself (allows text selection)
+          if (isTooltipClick) {
+            return;
+          }
+
+          // Don't close tooltip if clicking on a slice (handled by slice click handler)
+          if (isSliceClick) {
+            return;
+          }
+
+          // Close tooltip if clicking on empty chart areas or anywhere else in section 5
+          if (isChartAreaClick || !isSliceClick) {
+            this.unpinTooltipAndCleanup();
           }
         }
       });
@@ -386,6 +656,16 @@
 
           // Trigger cross-component interaction
           this.triggerCategoryHover(d.data.category || d.data.name);
+
+          // Set active state on corresponding lista-resultado-item for hover
+          this.setActiveListaResultadoItem(d.data.category || d.data.name);
+
+          // Dispatch tutorial event for hover completion
+          document.dispatchEvent(
+            new CustomEvent('donutTutorialHover', {
+              detail: { category: d.data.category || d.data.name },
+            })
+          );
         },
         onOut: (event, d) => {
           // Completely disable hover out effects when any tooltip is pinned
@@ -404,6 +684,11 @@
 
           // Clear cross-component interaction
           this.clearCategoryHover();
+
+          // Clear active state from lista-resultado-item when hover ends (only if no tooltip is pinned)
+          if (!this.hoverModule.state.isPinned) {
+            this.clearActiveListaResultadoItem();
+          }
         },
         tooltipContent: (d) => this.generateTooltipContent(d),
         className: 'd3-donut-tooltip-section5',
@@ -654,11 +939,12 @@
       return this.getCategoryData(type);
     }
 
-    // Generate tooltip content for Simple Hover Module
+    // Generate tooltip content for Simple Hover Module with scrollable product list
     generateTooltipContent(d) {
       const formatValue = this.formatCurrency(d.data.value);
       const isTraditional = d.data.chartType === 'tradicional';
       const categoryColor = this.categoryColors[d.data.name] || '#c0c0c0';
+      const tooltipId = `tooltip-${d.data.name.replace(/\s+/g, '-').toLowerCase()}`;
 
       let detailsHtml = '';
 
@@ -669,85 +955,194 @@
           <div style="flex: 1;">
             <div style="font-size: 1.1em; font-weight: 600; color: #1f2937; margin-bottom: 2px;">${d.data.name}</div>
             <div style="font-size: 1.7em; font-weight: 700; color: #111827; line-height: 1;">${formatValue}</div>
-            <div style="font-size: 0.9em; color: #6b7280; margin-top: 2px;">Custo de Comissão</div>
+            <div style="font-size: 0.9em; color: #6b7280; margin-top: 2px;">Custo Total dos Produtos</div>
           </div>
         </div>
       `;
 
-      // Build details section with enhanced product display
+      // Build details section with scrollable product list
       if (d.data.details && d.data.details.length > 0) {
-        detailsHtml =
-          '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">';
+        const scrollContainerId = `scroll-container-${tooltipId}`;
+        const scrollIndicatorId = `scroll-indicator-${tooltipId}`;
 
+        detailsHtml = `
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; position: relative;">
+            <div style="margin-bottom: 4px;">
+              <h4 style="margin: 0; font-size: 0.75em; font-weight: 500; color: #6b7280;">Custo de Comissão (${d.data.details.length} produtos)</h4>
+            </div>
+            <div
+              id="${scrollContainerId}"
+              style="
+                max-height: 180px;
+                overflow-y: auto;
+                padding-right: 4px;
+                margin-right: -4px;
+                position: relative;
+              "
+              onscroll="window.ReinoD3DonutChartSection5System?.handleTooltipScroll('${scrollContainerId}', '${scrollIndicatorId}')"
+            >
+        `;
+
+        // Show ALL products with scroll
         d.data.details.forEach((detail, index) => {
-          if (index < 4) {
-            // Show up to 4 details with better formatting
-            const detailValue = this.formatCurrency(detail.value);
-
-            // Get commission info with both percentage and value
-            let commissionDisplay = '';
-            let commissionValue = '';
-            let giroInfo = '';
-
-            if (isTraditional && detail.taxaInfo) {
-              const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
-              const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
-              commissionDisplay = `${mediaCorretagem}% média de corretagem`;
-              giroInfo = `Índice de Giro: ${indiceGiro}`;
-              if (detail.cost) {
-                commissionValue = this.formatCurrency(detail.cost);
-              }
-            } else if (isTraditional && detail.cost) {
-              const custoAnual = this.formatCurrency(detail.cost);
-              commissionDisplay = 'Custo tradicional';
-              commissionValue = custoAnual;
-            } else if (!isTraditional && detail.custoAnualReino) {
-              const custoReino = this.formatCurrency(detail.custoAnualReino);
-              commissionDisplay = 'Custo Reino';
-              commissionValue = custoReino;
-            } else {
-              commissionDisplay = 'Sem custo adicional';
-              commissionValue = '';
-            }
-
-            detailsHtml += `
-              <div style="padding: 10px 0; ${index < 3 && index < d.data.details.length - 1 ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-                  <div style="flex: 1;">
-                    <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
-                    <div style="font-size: 0.75em; color: #6b7280;">${commissionDisplay}</div>
-                    ${giroInfo ? `<div style="font-size: 0.6875em; color: #9ca3af; margin-top: 2px;">${giroInfo}</div>` : ''}
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="font-size: 0.8125em; font-weight: 600; color: #111827;">${detailValue}</div>
-                  </div>
-                </div>
-                ${
-                  commissionValue
-                    ? `
-                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f3f4f6;">
-                    <span style="font-size: 0.6875em; color: #6b7280;">Comissão média anual:</span>
-                    <span style="font-size: 0.75em; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
-                  </div>
-                `
-                    : ''
-                }
-              </div>
-            `;
-          }
+          detailsHtml += this.generateProductHtml(
+            detail,
+            index,
+            d.data.details.length - 1,
+            isTraditional
+          );
         });
 
-        if (d.data.details.length > 4) {
-          detailsHtml += `<div style="font-size: 0.75em; color: #9ca3af; margin-top: 8px; text-align: center; font-style: italic; padding: 6px; background-color: #f9fafb; border-radius: 6px;">+${d.data.details.length - 4} outros produtos nesta categoria</div>`;
-        }
+        detailsHtml += `
+            </div>
+            <div
+              id="${scrollIndicatorId}"
+              style="
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(transparent, rgba(255, 255, 255, 0.9));
+                font-size: 0.75em;
+                color: #6b7280;
+                font-weight: 500;
+                pointer-events: none;
+                transition: opacity 0.2s ease;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(2px);
+              "
+            >
+              <span style="display: flex; align-items: center; gap: 2px;">
+                ↓ Mais produtos
+              </span>
+            </div>
+          </div>
+        `;
+      }
 
-        detailsHtml += '</div>';
+      const tooltipHtml = `
+        <div style="min-width: 200px; max-width: 320px; font-size: 1.1em;" data-tooltip-id="${tooltipId}">
+          ${mainSection}
+          ${detailsHtml}
+        </div>
+      `;
+
+      // Initialize scroll indicators after tooltip is rendered
+      setTimeout(() => {
+        this.initializeTooltipScrollIndicators();
+      }, 50);
+
+      return tooltipHtml;
+    }
+
+    // Helper method to generate individual product HTML
+    generateProductHtml(detail, index, lastIndex, isTraditional) {
+      const detailValue = this.formatCurrency(detail.value);
+
+      // Get commission info with both percentage and value
+      let commissionDisplay = '';
+      let commissionValue = '';
+      let giroInfo = '';
+
+      if (isTraditional && detail.taxaInfo) {
+        const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
+        const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
+        commissionDisplay = `${mediaCorretagem}% média de corretagem`;
+        giroInfo = `Índice de Giro: ${indiceGiro}`;
+        if (detail.cost) {
+          commissionValue = this.formatCurrency(detail.cost);
+        }
+      } else if (isTraditional && detail.cost) {
+        const custoAnual = this.formatCurrency(detail.cost);
+        commissionDisplay = 'Custo tradicional';
+        commissionValue = custoAnual;
+      } else if (!isTraditional && detail.custoAnualReino) {
+        const custoReino = this.formatCurrency(detail.custoAnualReino);
+        commissionDisplay = 'Custo Reino';
+        commissionValue = custoReino;
+      } else {
+        commissionDisplay = 'Sem custo adicional';
+        commissionValue = '';
+      }
+
+      // Create styled tags for commission information
+      let commissionTags = '';
+      if (isTraditional && detail.taxaInfo) {
+        const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
+        const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
+
+        commissionTags = `
+          <div style="display: flex; gap: 6px; justify-content: flex-start; align-items: center;">
+            <span style="
+              background: linear-gradient(135deg, #E3AD0C, #D4A017);
+              color: #5D4E2A;
+              font-size: 0.65em;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 12px;
+              border: 1px solid #B8860B30;
+              white-space: nowrap;
+            ">${mediaCorretagem}% corretagem</span>
+            <span style="
+              background: linear-gradient(135deg, #8B4513, #A0522D);
+              color: #F5DEB3;
+              font-size: 0.65em;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 12px;
+              border: 1px solid #5D4E2A30;
+              white-space: nowrap;
+            ">Giro: ${indiceGiro}</span>
+          </div>
+        `;
+      } else if (commissionDisplay && commissionDisplay !== 'Sem custo adicional') {
+        commissionTags = `
+          <div style="display: flex; justify-content: flex-start;">
+            <span style="
+              background: linear-gradient(135deg, #BDAA6F, #A2883B);
+              color: #5D4E2A;
+              font-size: 0.65em;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 12px;
+              border: 1px solid #8B4513;
+              white-space: nowrap;
+            ">${commissionDisplay}</span>
+          </div>
+        `;
       }
 
       return `
-        <div style="min-width: 200px; font-size: 1.1em;">
-          ${mainSection}
-          ${detailsHtml}
+        <div style="padding: 10px 0 15px 0; ${index < lastIndex ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+            <div style="flex: 1;">
+              <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 1em; font-weight: 700; color: #111827;">${commissionValue || 'Sem custo'}</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px; margin-bottom: 8px;">
+            <div style="font-size: 0.75em; color: #374151; font-weight: 500;">
+              Valor Investido:
+            </div>
+            <div style="font-size: 0.75em; font-weight: 600; color: #111827;">
+              ${detailValue}
+            </div>
+          </div>
+          ${
+            commissionTags
+              ? `
+          <div style="display: flex; justify-content: flex-start; padding-top: 4px;">
+            ${commissionTags}
+          </div>
+          `
+              : ''
+          }
         </div>
       `;
     }
@@ -883,6 +1278,19 @@
       this.cleanupTooltips();
     }
 
+    unpinTooltipAndCleanup() {
+      if (this.hoverModule && this.hoverModule.unpinTooltip) {
+        this.hoverModule.unpinTooltip();
+      }
+      this.resetAllSliceEffects();
+      this.hideCenterText(this.currentChart);
+      this.clearCategoryHover();
+      this.currentPinnedSliceData = null;
+
+      // Dispatch event for other modules to listen
+      document.dispatchEvent(new CustomEvent('tooltipUnpinned'));
+    }
+
     cleanupTooltips() {
       // Reset pinned slice tracking
       this.currentPinnedSliceData = null;
@@ -918,6 +1326,28 @@
       document.dispatchEvent(new CustomEvent('donutCategoryHoverEnd'));
     }
 
+    setActiveListaResultadoItem(category) {
+      // Clear any existing active items
+      document.querySelectorAll('.lista-resultado-item.ativo').forEach((item) => {
+        item.classList.remove('ativo');
+      });
+
+      // Set active on matching category
+      const listaItem = document.querySelector(
+        `.lista-resultado-item[ativo-category="${category}"]`
+      );
+      if (listaItem) {
+        listaItem.classList.add('ativo');
+      }
+    }
+
+    clearActiveListaResultadoItem() {
+      // Clear all active items
+      document.querySelectorAll('.lista-resultado-item.ativo').forEach((item) => {
+        item.classList.remove('ativo');
+      });
+    }
+
     showCenterText(chart, data) {
       const centerValue = chart.g.select('.center-value');
       const centerCategory = chart.g.select('.center-category');
@@ -932,7 +1362,7 @@
       centerValue.text(formattedValue).transition().duration(80).style('opacity', 1);
 
       // Show category text
-      centerCategory.text(categoryName).transition().duration(80).style('opacity', 0.7);
+      centerCategory.text('Custo de comissão').transition().duration(80).style('opacity', 0.7);
     }
 
     hideCenterText(chart) {
@@ -956,12 +1386,8 @@
         this.currentPinnedSliceData.name === d.data.name &&
         this.hoverModule.state.isPinned
       ) {
-        // Unpin the current tooltip and reset visual effects
-        this.hoverModule.unpinTooltip();
-        this.resetAllSliceEffects();
-        this.hideCenterText(chart);
-        this.clearCategoryHover();
-        this.currentPinnedSliceData = null;
+        // Unpin the current tooltip and reset visual effects using helper method
+        this.unpinTooltipAndCleanup();
         return;
       }
 
@@ -983,8 +1409,18 @@
         // Trigger cross-component interaction for pinned slice
         this.triggerCategoryHover(d.data.category || d.data.name);
 
+        // Set active state on corresponding lista-resultado-item
+        this.setActiveListaResultadoItem(d.data.category || d.data.name);
+
         // Track the currently pinned slice
         this.currentPinnedSliceData = d.data;
+
+        // Dispatch tutorial event for click completion
+        document.dispatchEvent(
+          new CustomEvent('donutTutorialClick', {
+            detail: { category: d.data.category || d.data.name },
+          })
+        );
       }
     }
 

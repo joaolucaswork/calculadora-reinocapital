@@ -25,7 +25,6 @@
         this.setupClient();
         this.setupEventListeners();
         this.isReady = true;
-        this.log('✅ Supabase integration initialized');
       } catch (error) {
         this.log('❌ Failed to initialize Supabase: ' + error.message);
       }
@@ -79,8 +78,6 @@
 
         const mappedData = this.mapFormDataToSupabase(formData, typebotData);
 
-        this.log('📤 Sending data to Supabase:', mappedData);
-
         const { data, error } = await this.client
           .from(this.tableName)
           .insert([mappedData])
@@ -91,7 +88,6 @@
           throw error;
         }
 
-        this.log('✅ Data saved to Supabase successfully:', data);
         return { success: true, data };
       } catch (error) {
         this.log('❌ Supabase save error: ' + error.message);
@@ -248,7 +244,7 @@
 
     log(message) {
       if (this.debugMode) {
-        console.log('🗄️ [SupabaseIntegration] ' + message);
+        // Debug logging removed for production
       }
     }
   }

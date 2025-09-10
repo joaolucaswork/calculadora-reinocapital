@@ -64,7 +64,7 @@
           if (sendButton) {
             e.preventDefault();
             e.stopPropagation();
-            this.log('🔥 Send button click captured');
+
             this.handleSendButtonClick(sendButton);
           }
         },
@@ -83,7 +83,7 @@
             if (sendButton) {
               e.preventDefault();
               e.stopPropagation();
-              this.log('🔥 Send button captured by text match');
+
               this.handleSendButtonClick(sendButton);
             }
           }
@@ -106,12 +106,10 @@
 
       // Listen for debug mode activation
       document.addEventListener('debugModeActivated', (e) => {
-        this.log('🐛 Debug mode activated - updating send button state');
         this.updateSendButtonState();
       });
 
       this.updateSendButtonState();
-      this.log('✅ Allocation validation setup complete');
     }
 
     updateSendButtonState() {
@@ -142,22 +140,15 @@
         const newButton = button.cloneNode(true);
         button.parentNode.replaceChild(newButton, button);
       });
-
-      this.log(`🔄 Cleaned ${sendButtons.length} send buttons`);
     }
 
     handleSendButtonClick(button) {
       try {
-        this.log('📤 Processing send button click');
-
         // Check if debug mode is active and handle navigation directly
         if (window.ReinoDebugModule && window.ReinoDebugModule.isDebugActive()) {
-          this.log('🐛 Debug mode active - navigating to step 5');
-
           // Navigate directly to step 5
           if (window.ReinoProgressBarSystem && window.ReinoProgressBarSystem.showStep) {
             window.ReinoProgressBarSystem.showStep(5);
-            console.log('🐛 Debug navigation: Used progress bar system to navigate to step 5');
           } else {
             // Fallback direct navigation
             const currentSections = document.querySelectorAll('.step-section');
@@ -179,7 +170,6 @@
               targetSection.style.zIndex = '10000';
 
               window.scrollTo({ top: 0, behavior: 'smooth' });
-              console.log('🐛 Debug navigation: Direct DOM manipulation to show step 5');
             }
           }
           return;
@@ -192,7 +182,6 @@
 
         // Collect form data
         const formData = this.collectFormData();
-        this.log('📊 Form data collected:', formData);
 
         // Start Typebot flow
         if (window.ReinoTypebotIntegrationSystem) {
@@ -401,7 +390,7 @@
 
     log(message) {
       if (this.debugMode) {
-        console.log(`[ButtonCoordinator] ${message}`);
+        // Debug logging removed for production
       }
     }
   }
@@ -417,7 +406,6 @@
         const coordinator = new ButtonCoordinator();
         window.ReinoButtonCoordinator = coordinator;
         coordinator.init(window.ReinoStepNavigationProgressSystem);
-        console.log('✅ ButtonCoordinator initialized (send buttons only)');
       }
     } else {
       setTimeout(initializeButtonCoordinator, 200);
