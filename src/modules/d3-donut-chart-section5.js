@@ -42,6 +42,7 @@
 
       try {
         await this.loadD3();
+        this.addTooltipScrollbarStyles();
         this.initializeEnhancedHover();
         this.setupEventListeners();
         this.initializeCharts();
@@ -50,6 +51,88 @@
         document.dispatchEvent(new CustomEvent('donutChartSection5Ready'));
       } catch (error) {
         console.error('Failed to initialize D3DonutChartSection5System:', error);
+      }
+    }
+
+    addTooltipScrollbarStyles() {
+      // Add CSS for tooltip scrollbar styling - premium elegant style
+      if (!document.getElementById('tooltip-scrollbar-styles')) {
+        const style = document.createElement('style');
+        style.id = 'tooltip-scrollbar-styles';
+        style.textContent = `
+          /* Scrollbar elegante e premium para tooltip */
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"] {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+            scroll-behavior: smooth;
+          }
+
+          /* Webkit Scrollbar Styling */
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar {
+            width: 8px;
+            background: transparent;
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            margin: 15px 0;
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.15) 0%,
+              rgba(0, 0, 0, 0.25) 50%,
+              rgba(0, 0, 0, 0.15) 100%
+            );
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.25) 0%,
+              rgba(0, 0, 0, 0.35) 50%,
+              rgba(0, 0, 0, 0.25) 100%
+            );
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scaleX(1.2);
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.3) 0%,
+              rgba(0, 0, 0, 0.4) 50%,
+              rgba(0, 0, 0, 0.3) 100%
+            );
+          }
+
+          .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar-corner {
+            background: transparent;
+          }
+
+          /* Scroll indicator styling */
+          .d3-donut-tooltip-section5 [id^="scroll-indicator-"] {
+            font-family: 'Satoshi Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+            z-index: 10;
+          }
+
+          .d3-donut-tooltip-section5 [id^="scroll-indicator-"] span {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+          }
+        `;
+        document.head.appendChild(style);
       }
     }
 
@@ -118,16 +201,7 @@
     }
 
     setupTooltipAccordionHandlers() {
-      // Use event delegation to handle dynamically created tooltip modal buttons
-      document.addEventListener('click', (event) => {
-        if (event.target.classList.contains('tooltip-modal-btn')) {
-          event.preventDefault();
-          event.stopPropagation();
-          this.openProductModal(event.target);
-        }
-      });
-
-      // Handle modal close events
+      // Handle modal close events (keeping for potential future use)
       document.addEventListener('click', (event) => {
         if (event.target.classList.contains('product-modal-overlay')) {
           this.closeProductModal();
@@ -205,7 +279,7 @@
       const categoryColor = this.categoryColors[categoryName] || '#c0c0c0';
 
       let productsHtml = products
-        .map((product) => {
+        .map((product, index) => {
           const commissionValue = isTraditional
             ? product.cost
               ? this.formatCurrency(product.cost)
@@ -214,10 +288,26 @@
               ? this.formatCurrency(product.custoAnualReino)
               : 'Sem custo';
 
+          const investedValue = product.value ? this.formatCurrency(product.value) : 'R$ 0,00';
+          const isLast = index === products.length - 1;
+
           return `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-            <span style="font-size: 0.875em; color: #374151; font-weight: 500;">${product.product}</span>
-            <span style="font-size: 0.875em; color: #111827; font-weight: 600;">${commissionValue}</span>
+          <div style="padding: 12px 0; ${!isLast ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div style="flex: 1;">
+                <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 4px;">${product.product}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1em; font-weight: 700; color: #111827; margin-bottom: 2px;">${commissionValue}</div>
+                <div style="font-size: 0.75em; color: #6b7280; font-weight: 500;">Custo de Comissão</div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+              <div style="text-align: right;">
+                <div style="font-size: 0.8em; color: #374151; font-weight: 500;">${investedValue}</div>
+                <div style="font-size: 0.7em; color: #9ca3af; font-weight: 400;">Valor Investido</div>
+              </div>
+            </div>
           </div>
         `;
         })
@@ -259,6 +349,30 @@
         this.activeModal.remove();
         this.activeModal = null;
       }
+    }
+
+    handleTooltipScroll(scrollContainerId, scrollIndicatorId) {
+      const scrollContainer = document.getElementById(scrollContainerId);
+      const scrollIndicator = document.getElementById(scrollIndicatorId);
+
+      if (!scrollContainer || !scrollIndicator) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5; // 5px threshold
+
+      // Hide indicator when at bottom, show when there's more content below
+      scrollIndicator.style.opacity = isAtBottom ? '0' : '1';
+    }
+
+    initializeTooltipScrollIndicators() {
+      // Initialize scroll indicators for existing tooltips
+      setTimeout(() => {
+        document.querySelectorAll('[id^="scroll-container-"]').forEach((container) => {
+          const containerId = container.id;
+          const indicatorId = containerId.replace('scroll-container-', 'scroll-indicator-');
+          this.handleTooltipScroll(containerId, indicatorId);
+        });
+      }, 100);
     }
 
     async loadD3() {
@@ -825,7 +939,7 @@
       return this.getCategoryData(type);
     }
 
-    // Generate tooltip content for Simple Hover Module with expandable accordion
+    // Generate tooltip content for Simple Hover Module with scrollable product list
     generateTooltipContent(d) {
       const formatValue = this.formatCurrency(d.data.value);
       const isTraditional = d.data.chartType === 'tradicional';
@@ -841,77 +955,88 @@
           <div style="flex: 1;">
             <div style="font-size: 1.1em; font-weight: 600; color: #1f2937; margin-bottom: 2px;">${d.data.name}</div>
             <div style="font-size: 1.7em; font-weight: 700; color: #111827; line-height: 1;">${formatValue}</div>
-            <div style="font-size: 0.9em; color: #6b7280; margin-top: 2px;">Custo de Comissão</div>
+            <div style="font-size: 0.9em; color: #6b7280; margin-top: 2px;">Custo Total dos Produtos</div>
           </div>
         </div>
       `;
 
-      // Build details section with expandable accordion
+      // Build details section with scrollable product list
       if (d.data.details && d.data.details.length > 0) {
-        detailsHtml =
-          '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">';
+        const scrollContainerId = `scroll-container-${tooltipId}`;
+        const scrollIndicatorId = `scroll-indicator-${tooltipId}`;
 
-        // Show first 3 products by default
-        const visibleProducts = d.data.details.slice(0, 3);
-        const hiddenProducts = d.data.details.slice(3);
+        detailsHtml = `
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; position: relative;">
+            <div style="margin-bottom: 4px;">
+              <h4 style="margin: 0; font-size: 0.75em; font-weight: 500; color: #6b7280;">Custo de Comissão (${d.data.details.length} produtos)</h4>
+            </div>
+            <div
+              id="${scrollContainerId}"
+              style="
+                max-height: 180px;
+                overflow-y: auto;
+                padding-right: 4px;
+                margin-right: -4px;
+                position: relative;
+              "
+              onscroll="window.ReinoD3DonutChartSection5System?.handleTooltipScroll('${scrollContainerId}', '${scrollIndicatorId}')"
+            >
+        `;
 
-        // Render visible products
-        visibleProducts.forEach((detail, index) => {
+        // Show ALL products with scroll
+        d.data.details.forEach((detail, index) => {
           detailsHtml += this.generateProductHtml(
             detail,
             index,
-            visibleProducts.length - 1,
+            d.data.details.length - 1,
             isTraditional
           );
         });
 
-        // Add button to open mini-modal if there are more products
-        if (hiddenProducts.length > 0) {
-          detailsHtml += `
-            <div class="tooltip-expand-section" style="margin-top: 8px;">
-              <button
-                class="tooltip-modal-btn"
-                data-tooltip-id="${tooltipId}"
-                data-category="${d.data.name}"
-                data-chart-type="${isTraditional ? 'tradicional' : 'reino'}"
-                style="
-                  width: 100%;
-                  padding: 8px 12px;
-                  background: #f8fafc;
-                  border: 1px solid #e2e8f0;
-                  border-radius: 6px;
-                  color: #475569;
-                  font-size: 0.75em;
-                  font-weight: 500;
-                  cursor: pointer;
-                  transition: all 0.2s ease;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  gap: 4px;
-                "
-                onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1';"
-                onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0';"
-              >
-                <span>Ver todos os produtos (${hiddenProducts.length} restantes)</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M7 7h10v10"></path>
-                  <path d="M7 17 17 7"></path>
-                </svg>
-              </button>
+        detailsHtml += `
             </div>
-          `;
-        }
-
-        detailsHtml += '</div>';
+            <div
+              id="${scrollIndicatorId}"
+              style="
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(transparent, rgba(255, 255, 255, 0.9));
+                font-size: 0.75em;
+                color: #6b7280;
+                font-weight: 500;
+                pointer-events: none;
+                transition: opacity 0.2s ease;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(2px);
+              "
+            >
+              <span style="display: flex; align-items: center; gap: 2px;">
+                ↓ Mais produtos
+              </span>
+            </div>
+          </div>
+        `;
       }
 
-      return `
-        <div style="min-width: 200px; font-size: 1.1em;" data-tooltip-id="${tooltipId}">
+      const tooltipHtml = `
+        <div style="min-width: 200px; max-width: 320px; font-size: 1.1em;" data-tooltip-id="${tooltipId}">
           ${mainSection}
           ${detailsHtml}
         </div>
       `;
+
+      // Initialize scroll indicators after tooltip is rendered
+      setTimeout(() => {
+        this.initializeTooltipScrollIndicators();
+      }, 50);
+
+      return tooltipHtml;
     }
 
     // Helper method to generate individual product HTML
@@ -944,25 +1069,77 @@
         commissionValue = '';
       }
 
+      // Create styled tags for commission information
+      let commissionTags = '';
+      if (isTraditional && detail.taxaInfo) {
+        const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
+        const indiceGiro = detail.taxaInfo.indiceGiro || 'N/A';
+
+        commissionTags = `
+          <div style="display: flex; gap: 6px; justify-content: flex-start; align-items: center;">
+            <span style="
+              background: linear-gradient(135deg, #E3AD0C, #D4A017);
+              color: #5D4E2A;
+              font-size: 0.65em;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 12px;
+              border: 1px solid #B8860B30;
+              white-space: nowrap;
+            ">${mediaCorretagem}% corretagem</span>
+            <span style="
+              background: linear-gradient(135deg, #8B4513, #A0522D);
+              color: #F5DEB3;
+              font-size: 0.65em;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 12px;
+              border: 1px solid #5D4E2A30;
+              white-space: nowrap;
+            ">Giro: ${indiceGiro}</span>
+          </div>
+        `;
+      } else if (commissionDisplay && commissionDisplay !== 'Sem custo adicional') {
+        commissionTags = `
+          <div style="display: flex; justify-content: flex-start;">
+            <span style="
+              background: linear-gradient(135deg, #BDAA6F, #A2883B);
+              color: #5D4E2A;
+              font-size: 0.65em;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 12px;
+              border: 1px solid #8B4513;
+              white-space: nowrap;
+            ">${commissionDisplay}</span>
+          </div>
+        `;
+      }
+
       return `
-        <div style="padding: 10px 0; ${index < lastIndex ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
+        <div style="padding: 10px 0 15px 0; ${index < lastIndex ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div style="flex: 1;">
               <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
-              <div style="font-size: 0.75em; color: #6b7280;">${commissionDisplay}</div>
-              ${giroInfo ? `<div style="font-size: 0.6875em; color: #9ca3af; margin-top: 2px;">${giroInfo}</div>` : ''}
             </div>
             <div style="text-align: right;">
-              <div style="font-size: 0.8125em; font-weight: 600; color: #111827;">${detailValue}</div>
+              <div style="font-size: 1em; font-weight: 700; color: #111827;">${commissionValue || 'Sem custo'}</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px; margin-bottom: 8px;">
+            <div style="font-size: 0.75em; color: #374151; font-weight: 500;">
+              Valor Investido:
+            </div>
+            <div style="font-size: 0.75em; font-weight: 600; color: #111827;">
+              ${detailValue}
             </div>
           </div>
           ${
-            commissionValue
+            commissionTags
               ? `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f3f4f6;">
-              <span style="font-size: 0.6875em; color: #6b7280;">Comissão média anual:</span>
-              <span style="font-size: 0.75em; font-weight: 600; color: ${isTraditional ? '#dc2626' : '#16a34a'};">${commissionValue}</span>
-            </div>
+          <div style="display: flex; justify-content: flex-start; padding-top: 4px;">
+            ${commissionTags}
+          </div>
           `
               : ''
           }
