@@ -13,16 +13,48 @@ Add these elements to section 5 (data-step="4") near the donut chart:
   <div class="item-info-interativa" info="mouse-hover">
     <div class="tutorial-text">Passe o mouse sobre o gráfico para ver detalhes</div>
   </div>
-  
+
   <div class="item-info-interativa" info="click">
     <div class="tutorial-text">Clique em uma fatia para fixar o tooltip</div>
   </div>
+
+  <div class="item-info-interativa" info="indice-giro">
+    <div class="tutorial-text">Ajuste o índice de giro para ver diferentes cálculos</div>
+  </div>
 </div>
+
+## Dynamic Text Elements
+
+Add elements with the `nivel-indice` class to display the current rotation index level:
+
+```html
+<span class="nivel-indice">2</span>
+<!-- or -->
+<div class="nivel-indice">2</div>
 ```
+
+### Index Level Text Mapping
+
+The system automatically updates `.nivel-indice` elements to show the current rotation index number:
+
+| Index Value | Text Display |
+|-------------|--------------|
+| 1 | 1 |
+| 2 | 2 |
+| 3 | 3 |
+| 4 | 4 |
+
+**Features:**
+
+- Automatically initializes with current slider value
+- Updates in real-time when rotation index changes
+- Supports multiple elements with the same class
+- Fallback to "2" for invalid values
 
 ## Placement Recommendations
 
 ### Option 1: Above the Chart
+
 Place the tutorial container above the donut chart for immediate visibility:
 
 ```html
@@ -45,6 +77,7 @@ Place the tutorial container above the donut chart for immediate visibility:
 ```
 
 ### Option 2: Beside the Chart
+
 Place the tutorial container beside the chart legend:
 
 ```html
@@ -70,10 +103,11 @@ Place the tutorial container beside the chart legend:
 
 ### Checkbox States
 
-1. **Initial State**: Both checkboxes are unchecked with gray background
-2. **Hover Completed**: First checkbox turns green with checkmark when user hovers over any chart slice
-3. **Click Completed**: Second checkbox turns green with checkmark when user clicks to pin a tooltip
-4. **Tutorial Complete**: Both elements slide out to the right with premium animation
+1. **Initial State**: All three checkboxes are unchecked with gray border
+2. **Hover Completed**: First checkbox turns golden (#c49725) with checkmark when user hovers over any chart slice
+3. **Click Completed**: Second checkbox turns golden (#c49725) with checkmark when user clicks to pin a tooltip
+4. **Indice Giro Completed**: Third checkbox turns golden (#c49725) with checkmark when user adjusts the rotation index
+5. **Tutorial Complete**: All elements slide down and fade out with subtle animation
 
 ### Event Integration
 
@@ -83,6 +117,7 @@ The system automatically listens for:
 - `donutTutorialClick` - Dispatched when user clicks to pin tooltips
 - `donutCategoryHover` - Fallback for existing hover events
 - `simple-hover-tooltip-pinned` - Fallback for tooltip pinning
+- `rotationIndexChanged` - Dispatched when user adjusts the rotation index slider
 
 ### Auto-Detection
 
@@ -158,6 +193,7 @@ window.ReinoDonutTutorialCheckboxes.hideTutorial();
 // Check completion status
 const isHoverComplete = window.ReinoDonutTutorialCheckboxes.checkboxStates.hover;
 const isClickComplete = window.ReinoDonutTutorialCheckboxes.checkboxStates.click;
+const isIndiceGiroComplete = window.ReinoDonutTutorialCheckboxes.checkboxStates.indiceGiro;
 ```
 
 ### Manual Completion
@@ -170,6 +206,12 @@ window.ReinoDonutTutorialCheckboxes.markHoverCompleted();
 
 // Mark click as completed
 window.ReinoDonutTutorialCheckboxes.markClickCompleted();
+
+// Mark indice giro as completed
+window.ReinoDonutTutorialCheckboxes.markIndiceGiroCompleted();
+
+// Force full completion (all three checkboxes)
+window.ReinoDonutTutorialCheckboxes.forceFullCompletion();
 ```
 
 ## Accessibility
@@ -216,6 +258,7 @@ The tutorial system includes:
 - [ ] Include JavaScript module in build system
 - [ ] Test hover detection
 - [ ] Test click detection
+- [ ] Test rotation index detection
 - [ ] Test completion animation
 - [ ] Test step navigation
 - [ ] Test responsive behavior

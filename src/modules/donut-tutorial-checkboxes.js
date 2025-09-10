@@ -14,10 +14,12 @@
       this.checkboxStates = {
         hover: false,
         click: false,
+        indiceGiro: false,
       };
       this.tutorialElements = {
         hoverItem: null,
         clickItem: null,
+        indiceGiroItem: null,
       };
       this.hasCompletedAnimation = false;
       this.debugMode = window.location.search.includes('tutorial-debug=true');
@@ -30,6 +32,7 @@
       this.findTutorialElements();
       this.addCheckboxes();
       this.setupEventListeners();
+      this.initializeNivelIndiceText();
       this.isInitialized = true;
     }
 
@@ -54,8 +57,15 @@
       this.tutorialElements.clickItem = document.querySelector(
         '.item-info-interativa[info="click"]'
       );
+      this.tutorialElements.indiceGiroItem = document.querySelector(
+        '.item-info-interativa[info="indice-giro"]'
+      );
 
-      if (!this.tutorialElements.hoverItem || !this.tutorialElements.clickItem) {
+      if (
+        !this.tutorialElements.hoverItem ||
+        !this.tutorialElements.clickItem ||
+        !this.tutorialElements.indiceGiroItem
+      ) {
         if (this.debugMode) {
           console.warn(
             'Tutorial elements not found. Make sure .item-info-interativa elements exist in Webflow.'
@@ -65,10 +75,16 @@
     }
 
     addCheckboxes() {
-      if (!this.tutorialElements.hoverItem || !this.tutorialElements.clickItem) return;
+      if (
+        !this.tutorialElements.hoverItem ||
+        !this.tutorialElements.clickItem ||
+        !this.tutorialElements.indiceGiroItem
+      )
+        return;
 
       this.addCheckboxToElement(this.tutorialElements.hoverItem, 'hover');
       this.addCheckboxToElement(this.tutorialElements.clickItem, 'click');
+      this.addCheckboxToElement(this.tutorialElements.indiceGiroItem, 'indice-giro');
     }
 
     addCheckboxToElement(element, type) {
@@ -110,6 +126,12 @@
       document.addEventListener('simple-hover-tooltip-pinned', () => {
         this.markClickCompleted();
       });
+
+      // Listen for rotation index changes
+      document.addEventListener('rotationIndexChanged', (e) => {
+        this.updateNivelIndiceText(e.detail.index);
+        this.markIndiceGiroCompleted();
+      });
     }
 
     markHoverCompleted() {
@@ -134,6 +156,65 @@
       this.checkboxStates.click = true;
       this.animateCheckbox('click');
       this.checkForCompletion();
+    }
+
+    markIndiceGiroCompleted() {
+      if (this.checkboxStates.indiceGiro) return;
+
+      if (this.debugMode) {
+        console.log('🎯 Tutorial: Indice Giro completed');
+      }
+
+      this.checkboxStates.indiceGiro = true;
+      this.animateCheckbox('indice-giro');
+      this.checkForCompletion();
+    }
+
+    updateNivelIndiceText(indexValue) {
+      const nivelElements = document.querySelectorAll('.nivel-indice');
+
+      if (nivelElements.length === 0) {
+        if (this.debugMode) {
+          console.warn('⚠️ No .nivel-indice elements found');
+        }
+        return;
+      }
+
+      // Show only the number (1-4)
+      const newText =
+        indexValue && indexValue >= 1 && indexValue <= 4 ? indexValue.toString() : '2';
+
+      nivelElements.forEach((element) => {
+        element.textContent = newText;
+      });
+
+      if (this.debugMode) {
+        console.log(`📊 Nivel indice updated to: ${newText} (index: ${indexValue})`);
+      }
+    }
+
+    initializeNivelIndiceText() {
+      // Get current rotation index value from the controller or slider
+      let currentIndex = 2; // Default value
+
+      // Try to get from rotation index controller
+      if (window.ReinoRotationIndexController) {
+        currentIndex = window.ReinoRotationIndexController.getCurrentIndex() || 2;
+      } else {
+        // Fallback: try to get from slider element
+        const slider = document.querySelector(
+          '#indice-giro, .indice-giro, range-slider.indice-giro'
+        );
+        if (slider && slider.value) {
+          currentIndex = parseInt(slider.value) || 2;
+        }
+      }
+
+      this.updateNivelIndiceText(currentIndex);
+
+      if (this.debugMode) {
+        console.log(`🔧 Initialized nivel indice with value: ${currentIndex}`);
+      }
     }
 
     animateCheckbox(type) {
@@ -180,7 +261,12 @@
     }
 
     checkForCompletion() {
-      if (this.checkboxStates.hover && this.checkboxStates.click && !this.hasCompletedAnimation) {
+      if (
+        this.checkboxStates.hover &&
+        this.checkboxStates.click &&
+        this.checkboxStates.indiceGiro &&
+        !this.hasCompletedAnimation
+      ) {
         this.hasCompletedAnimation = true;
         setTimeout(() => {
           this.triggerCompletionAnimation();
@@ -189,12 +275,21 @@
     }
 
     triggerCompletionAnimation() {
-      if (!this.Motion || !this.tutorialElements.hoverItem || !this.tutorialElements.clickItem)
+      if (
+        !this.Motion ||
+        !this.tutorialElements.hoverItem ||
+        !this.tutorialElements.clickItem ||
+        !this.tutorialElements.indiceGiroItem
+      )
         return;
 
       const { animate } = this.Motion;
 
-      const elements = [this.tutorialElements.hoverItem, this.tutorialElements.clickItem];
+      const elements = [
+        this.tutorialElements.hoverItem,
+        this.tutorialElements.clickItem,
+        this.tutorialElements.indiceGiroItem,
+      ];
 
       elements.forEach((element, index) => {
         animate(
@@ -217,6 +312,7 @@
       this.checkboxStates = {
         hover: false,
         click: false,
+        indiceGiro: false,
       };
       this.hasCompletedAnimation = false;
 
@@ -229,6 +325,11 @@
         this.tutorialElements.clickItem.style.transform = '';
         this.tutorialElements.clickItem.style.opacity = '';
         this.tutorialElements.clickItem.classList.remove('tutorial-completed');
+      }
+      if (this.tutorialElements.indiceGiroItem) {
+        this.tutorialElements.indiceGiroItem.style.transform = '';
+        this.tutorialElements.indiceGiroItem.style.opacity = '';
+        this.tutorialElements.indiceGiroItem.classList.remove('tutorial-completed');
       }
 
       const checkboxes = document.querySelectorAll('.tutorial-checkbox');
@@ -255,7 +356,7 @@
       checkboxes.forEach((checkbox) => checkbox.remove());
 
       this.isInitialized = false;
-      this.checkboxStates = { hover: false, click: false };
+      this.checkboxStates = { hover: false, click: false, indiceGiro: false };
       this.hasCompletedAnimation = false;
     }
 
@@ -287,6 +388,13 @@
       this.markClickCompleted();
     }
 
+    forceIndiceGiroComplete() {
+      if (this.debugMode) {
+        console.log('🔧 Debug: Forcing indice giro completion');
+      }
+      this.markIndiceGiroCompleted();
+    }
+
     forceFullCompletion() {
       if (this.debugMode) {
         console.log('🔧 Debug: Forcing full tutorial completion');
@@ -295,6 +403,16 @@
       setTimeout(() => {
         this.markClickCompleted();
       }, 500);
+      setTimeout(() => {
+        this.markIndiceGiroCompleted();
+      }, 1000);
+    }
+
+    testNivelIndiceText(indexValue) {
+      if (this.debugMode) {
+        console.log(`🔧 Debug: Testing nivel indice with value: ${indexValue}`);
+      }
+      this.updateNivelIndiceText(indexValue);
     }
   }
 
