@@ -1120,7 +1120,7 @@
         <div style="padding: 10px 0 15px 0; ${index < lastIndex ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div style="flex: 1;">
-              <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
+              <div class="tooltip-product-name" style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;" title="${detail.product}">${detail.product}</div>
             </div>
             <div style="text-align: right;">
               <div style="font-size: 1em; font-weight: 700; color: #111827;">${commissionValue || 'Sem custo'}</div>

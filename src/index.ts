@@ -70,4 +70,5 @@ import './css/send-button-tooltip.css';
 import './css/focus-management.css';
 import './css/progress-bar-fix.css';
 import './css/tooltip-accordion.css';
+import './css/donut-tooltip-text-truncation.css';
 import './styles/components/asset-selection.css';
