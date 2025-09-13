@@ -1,9 +1,3 @@
-/**
- * Send Button Tooltip Module
- * Versão sem imports/exports para uso direto no Webflow
- * Implementa tooltips para o botão element-function="send" na seção 3
- */
-
 (function () {
   'use strict';
 
@@ -82,19 +76,16 @@
           return;
         }
 
-        // Create wrapper to handle disabled state tooltips
         this.createTooltipWrapper(button);
       });
     }
 
     createTooltipWrapper(button) {
-      // Check if button has a parent node
       if (!button.parentNode) {
         console.warn('Send button has no parent node, skipping tooltip creation');
         return;
       }
 
-      // Check if wrapper already exists
       if (
         button.parentElement &&
         button.parentElement.classList.contains('send-button-tooltip-wrapper')
@@ -102,17 +93,14 @@
         return;
       }
 
-      // Create wrapper element
       const wrapper = document.createElement('div');
       wrapper.className = 'send-button-tooltip-wrapper';
 
-      // Insert wrapper before button and move button inside
       button.parentNode.insertBefore(wrapper, button);
       wrapper.appendChild(button);
 
       const tooltipContent = this.getSendButtonContent();
 
-      // Create tooltip on wrapper instead of button
       const instance = window.tippy(wrapper, {
         content: tooltipContent,
         theme: this.options.theme,
@@ -120,13 +108,13 @@
         arrow: this.options.arrow,
         interactive: this.options.interactive,
         allowHTML: this.options.allowHTML,
-        maxWidth: 280, // Reduzido de 340 para 280
+        maxWidth: 280,
         delay: this.options.delay,
         duration: this.options.duration,
         animation: this.options.animation,
         trigger: 'mouseenter focus',
         hideOnClick: false,
-        followCursor: 'horizontal', // Segue o cursor horizontalmente
+        followCursor: 'horizontal',
         appendTo: () => document.body,
         onCreate: (tippyInstance) => {
           this.instances.set(button, tippyInstance);
@@ -221,7 +209,6 @@
     setupSingleTooltip(button) {
       if (this.isDestroyed || this.instances.has(button)) return;
 
-      // Use the same wrapper approach for dynamically added buttons
       this.createTooltipWrapper(button);
     }
 
@@ -281,13 +268,10 @@
     }
   }
 
-  // Make globally available
   window.SendButtonTooltip = SendButtonTooltip;
 
-  // Create global instance
   window.ReinoSendButtonTooltip = new SendButtonTooltip();
 
-  // Auto-initialization
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       if (!window.ReinoSendButtonTooltip.isInitialized) {

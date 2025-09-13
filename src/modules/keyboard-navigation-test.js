@@ -1,9 +1,3 @@
-/**
- * Keyboard Navigation Test Module
- * Simple test utilities for keyboard navigation functionality
- * Versão sem imports/exports para uso direto no Webflow
- */
-
 (function () {
   'use strict';
 
@@ -14,21 +8,17 @@
 
     runTests() {
       console.log('🧪 Running Keyboard Navigation Tests...');
-      
+
       this.testResults = [];
-      
-      // Test 1: Check if keyboard navigation system is loaded
+
       this.testSystemLoaded();
-      
-      // Test 2: Check if main input exists
+
       this.testMainInputExists();
-      
-      // Test 3: Check if step navigation system is available
+
       this.testStepNavigationSystem();
-      
-      // Test 4: Simulate Enter key press
+
       this.testEnterKeySimulation();
-      
+
       this.displayResults();
     }
 
@@ -36,7 +26,7 @@
       const test = {
         name: 'Keyboard Navigation System Loaded',
         passed: false,
-        message: ''
+        message: '',
       };
 
       if (window.ReinoKeyboardNavigationSystem) {
@@ -57,7 +47,7 @@
       const test = {
         name: 'Main Currency Input Exists',
         passed: false,
-        message: ''
+        message: '',
       };
 
       const mainInput = document.querySelector('input[is-main="true"].currency-input');
@@ -75,7 +65,7 @@
       const test = {
         name: 'Step Navigation System Available',
         passed: false,
-        message: ''
+        message: '',
       };
 
       if (window.ReinoStepNavigationProgressSystem) {
@@ -96,18 +86,20 @@
       const test = {
         name: 'Enter Key Simulation',
         passed: false,
-        message: ''
+        message: '',
       };
 
       try {
-        if (window.ReinoKeyboardNavigationSystem && window.ReinoKeyboardNavigationSystem.simulateEnterKey) {
-          // Store current step before simulation
-          const currentStep = window.ReinoStepNavigationProgressSystem ? 
-            window.ReinoStepNavigationProgressSystem.currentStep : null;
-          
-          // Simulate Enter key
+        if (
+          window.ReinoKeyboardNavigationSystem &&
+          window.ReinoKeyboardNavigationSystem.simulateEnterKey
+        ) {
+          const currentStep = window.ReinoStepNavigationProgressSystem
+            ? window.ReinoStepNavigationProgressSystem.currentStep
+            : null;
+
           window.ReinoKeyboardNavigationSystem.simulateEnterKey();
-          
+
           test.passed = true;
           test.message = `✅ Enter key simulation executed (current step: ${currentStep})`;
         } else {
@@ -123,22 +115,22 @@
     displayResults() {
       console.log('\n📊 Keyboard Navigation Test Results:');
       console.log('=====================================');
-      
+
       let passedCount = 0;
-      
+
       this.testResults.forEach((test, index) => {
         console.log(`${index + 1}. ${test.name}`);
         console.log(`   ${test.message}`);
-        
+
         if (test.passed) {
           passedCount++;
         }
-        
+
         console.log('');
       });
-      
+
       console.log(`Summary: ${passedCount}/${this.testResults.length} tests passed`);
-      
+
       if (passedCount === this.testResults.length) {
         console.log('🎉 All tests passed!');
       } else {
@@ -146,7 +138,6 @@
       }
     }
 
-    // Manual test method for developers
     manualTest() {
       console.log('🔧 Manual Test Instructions:');
       console.log('1. Navigate to step 1 (patrimony input section)');
@@ -158,16 +149,13 @@
     }
   }
 
-  // Create global instance
   window.ReinoKeyboardNavigationTest = new KeyboardNavigationTest();
 
-  // Auto-run tests in debug mode
   if (window.location.search.includes('debug=true')) {
     setTimeout(() => {
       if (document.readyState === 'complete') {
         window.ReinoKeyboardNavigationTest.runTests();
       }
-    }, 2000); // Wait for all systems to initialize
+    }, 2000);
   }
-
 })();
