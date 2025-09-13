@@ -1,73 +1,65 @@
 # AppState Implementation Roadmap - Reino Capital
 
-## 📊 **STATUS ATUAL (5/11 TASKS COMPLETAS - 45%)**
+## 📊 **STATUS ATUAL (6/11 TASKS COMPLETAS - 55%)**
 
 ### ✅ **COMPLETADO:**
+
 - [x] **ReinoAppState Base** - Módulo central criado com padrão IIFE
-- [x] **Sistema de Eventos Padronizado** - Contratos consistentes implementados  
+- [x] **Sistema de Eventos Padronizado** - Contratos consistentes implementados
 - [x] **Migração Patrimony-Sync** - Primeira integração com AppState funcionando
 - [x] **Migração Asset-Selection-Filter** - Segunda integração com AppState funcionando
 - [x] **Ordem Correta no index.ts** - AppState carregando primeiro
+- [x] **Migração Rotation-Index-Controller** - Terceira integração com AppState funcionando
 
-### 🔄 **PENDENTE (6 TASKS RESTANTES):**
+### 🔄 **PENDENTE (5 TASKS RESTANTES):**
 
 ---
 
 ## 🎯 **PRÓXIMAS TASKS PRIORITÁRIAS**
 
-### **1. MIGRAR ROTATION-INDEX-CONTROLLER** ⭐ **ALTA PRIORIDADE**
+### **1. ✅ MIGRAR ROTATION-INDEX-CONTROLLER** ⭐ **COMPLETADO**
+
 **UUID:** `3APMGAHwZ2HjfvLeYn4dS6`
 
-**Objetivo:** Integrar rotation-index-controller.js com AppState para centralizar currentIndex e cálculos relacionados
+**✅ IMPLEMENTADO COM SUCESSO:**
 
-**Arquivos a modificar:**
-- `src/modules/rotation-index-controller.js`
-- `src/modules/rotation-index-integration.js` (possivelmente)
+- ✅ Integração com AppState no constructor
+- ✅ Getter/setter inteligentes para `currentIndex`
+- ✅ Sincronização bidirecional (Controller ↔ AppState)
+- ✅ Cálculos passados automaticamente para AppState
+- ✅ Compatibilidade com código existente mantida
+- ✅ Eventos padronizados implementados
+- ✅ Listener para mudanças externas do AppState
 
-**Implementação:**
-1. Adicionar integração com AppState no constructor
-2. Migrar `currentIndex` para usar `appState.setRotationIndex()`
-3. Migrar cálculos para usar `appState.getRotationIndex()`
-4. Manter compatibilidade com código existente
-5. Atualizar eventos para usar contratos padronizados
+**Testes realizados:**
 
-**Padrão a seguir:**
-```javascript
-// Aguardar AppState
-async waitForAppState() { /* similar ao patrimony-sync */ }
-
-// Getter/Setter inteligentes
-get currentIndex() {
-  return this.appState ? this.appState.getRotationIndex().value : this._legacyIndex;
-}
-
-set currentIndex(value) {
-  if (this.appState) {
-    this.appState.setRotationIndex(value, calculations, 'rotation-controller');
-  } else {
-    this._legacyIndex = value;
-  }
-}
-```
+- ✅ Mudança via controller sincroniza com AppState
+- ✅ Mudança via AppState sincroniza com controller
+- ✅ Cálculos são passados corretamente
+- ✅ Eventos são disparados com source tracking
 
 ---
 
 ### **2. ATUALIZAR MÓDULOS DE INTEGRAÇÃO** ⭐ **ALTA PRIORIDADE**
+
 **UUID:** `vDioCQuNTwctRyzjpoHAdT`
 
 **Objetivo:** Modificar supabase-integration.js e salesforce-integration.js para consumir dados do AppState
 
 **Arquivos a modificar:**
+
 - `src/modules/supabase-integration.js`
 - `src/modules/salesforce-integration.js`
 
 **Implementação:**
+
 1. Remover acesso direto a módulos individuais
 2. Usar apenas `window.ReinoAppState.getStateSnapshot()`
 3. Implementar event listeners para capturar mudanças
 4. Seguir padrão event-driven conforme regra `supabase-data-capture-pattern.md`
 
 **Exemplo de refatoração:**
+
 ```javascript
 // ❌ ANTES (acesso direto)
 const indiceGiro = window.ReinoRotationIndexController?.getCurrentIndex() || 2;
@@ -82,14 +74,17 @@ const patrimonio = snapshot.patrimonio.value;
 ---
 
 ### **3. IMPLEMENTAR SISTEMA DE VALIDAÇÃO** 🔧 **MÉDIA PRIORIDADE**
+
 **UUID:** `w3gSCt7Wohs4n7Ss4tMeju`
 
 **Objetivo:** Criar validadores para garantir consistência do AppState
 
 **Arquivo a criar:**
+
 - `src/modules/reino-app-state-validators.js`
 
 **Validações necessárias:**
+
 1. **Alocações somam 100%** (ou menos)
 2. **Ativos selecionados correspondem às alocações**
 3. **Patrimônio restante não é negativo**
@@ -97,6 +92,7 @@ const patrimonio = snapshot.patrimonio.value;
 5. **Valores numéricos são válidos**
 
 **Implementação:**
+
 ```javascript
 class ReinoAppStateValidators {
   validateAllocations(state) {
@@ -112,14 +108,17 @@ class ReinoAppStateValidators {
 ---
 
 ### **4. CRIAR TESTES DE INTEGRAÇÃO** 🧪 **MÉDIA PRIORIDADE**
+
 **UUID:** `uq5gX4vRMf65HWXznYhTpo`
 
 **Objetivo:** Implementar testes para verificar fluxo completo
 
 **Arquivo a expandir:**
+
 - `src/modules/appstate-integration-test.js` (já existe, expandir)
 
 **Testes a adicionar:**
+
 1. **Teste de fluxo completo:** patrimônio → seleção → alocação → cálculos
 2. **Teste de sincronização UI:** mudanças no AppState refletem na UI
 3. **Teste de integrações:** Supabase/Salesforce recebem dados corretos
@@ -129,14 +128,17 @@ class ReinoAppStateValidators {
 ---
 
 ### **5. DOCUMENTAR API DO APPSTATE** 📚 **BAIXA PRIORIDADE**
+
 **UUID:** `aDSr3wKn4fEdL6iV5q3PxZ`
 
 **Objetivo:** Criar documentação completa da API do AppState
 
 **Arquivo a criar:**
+
 - `docs/appstate-api-documentation.md`
 
 **Conteúdo necessário:**
+
 1. **Métodos públicos** com exemplos
 2. **Eventos emitidos** com payloads
 3. **Padrões de uso** para desenvolvedores
@@ -148,15 +150,19 @@ class ReinoAppStateValidators {
 ## 🛠️ **ARQUIVOS PRINCIPAIS JÁ IMPLEMENTADOS**
 
 ### **AppState Core:**
+
 - ✅ `src/modules/reino-app-state.js` - Módulo principal
 - ✅ `src/modules/reino-event-contracts.js` - Contratos de eventos
 - ✅ `src/modules/appstate-integration-test.js` - Testes básicos
 
 ### **Módulos Migrados:**
+
 - ✅ `src/modules/patrimony-sync.js` - Integrado com AppState
 - ✅ `src/modules/asset-selection-filter.js` - Integrado com AppState
+- ✅ `src/modules/rotation-index-controller.js` - Integrado com AppState
 
 ### **Configuração:**
+
 - ✅ `src/index.ts` - Ordem correta de imports
 
 ---
@@ -164,6 +170,7 @@ class ReinoAppStateValidators {
 ## 🎮 **COMANDOS ÚTEIS PARA DESENVOLVIMENTO**
 
 ### **Controle de Logs:**
+
 ```javascript
 // Desabilitar spam de logs
 window.ReinoAppStateTest.setLogLevel('off')
@@ -176,6 +183,7 @@ window.ReinoAppStateTest.setLogLevel('verbose')
 ```
 
 ### **Testes e Debug:**
+
 ```javascript
 // Rodar todos os testes
 window.ReinoAppStateTest.runTests()
@@ -194,6 +202,7 @@ window.ReinoAppStateTest.checkDependencies()
 ```
 
 ### **Acesso Direto ao AppState:**
+
 ```javascript
 // Estado completo
 window.ReinoAppState.getStateSnapshot()
@@ -220,12 +229,14 @@ window.ReinoAppState.setRotationIndex(3, null, 'manual')
 ## 📋 **CHECKLIST PARA PRÓXIMO DESENVOLVEDOR**
 
 ### **Antes de começar:**
+
 - [ ] Ler `docs/iife-architecture-recommendations.md`
 - [ ] Entender padrão IIFE obrigatório
 - [ ] Verificar regras em `.augment/rules/`
 - [ ] Testar AppState atual: `window.ReinoAppStateTest.runTests()`
 
 ### **Para cada migração:**
+
 - [ ] Seguir padrão de aguardar AppState: `waitForAppState()`
 - [ ] Implementar getter/setter inteligentes
 - [ ] Manter compatibilidade com código existente
@@ -234,6 +245,7 @@ window.ReinoAppState.setRotationIndex(3, null, 'manual')
 - [ ] Testar no console antes de finalizar
 
 ### **Padrões obrigatórios:**
+
 - [ ] Módulos em IIFE: `(function() { 'use strict'; ... })()`
 - [ ] Classes globais: `window.Reino<ClassName>`
 - [ ] Source tracking: sempre passar `source` nos métodos
@@ -260,4 +272,4 @@ window.ReinoAppState.setRotationIndex(3, null, 'manual')
 - **Testes:** Console do browser com comandos acima
 - **Debug:** `window.ReinoAppStateTest.setLogLevel('verbose')`
 
-**Próxima task recomendada:** Migrar rotation-index-controller (UUID: 3APMGAHwZ2HjfvLeYn4dS6)
+**Próxima task recomendada:** Atualizar módulos de integração (UUID: vDioCQuNTwctRyzjpoHAdT)
