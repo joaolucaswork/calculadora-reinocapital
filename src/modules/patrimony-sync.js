@@ -423,6 +423,11 @@
       const category = item.container.getAttribute('ativo-category');
       const product = item.container.getAttribute('ativo-product');
 
+      // ✅ ATUALIZAR APPSTATE PRIMEIRO
+      if (PatrimonySync.appState && category && product) {
+        PatrimonySync.appState.setAllocation(category, product, item.value, 'patrimony-sync');
+      }
+
       document.dispatchEvent(
         new CustomEvent('allocationChanged', {
           detail: {
