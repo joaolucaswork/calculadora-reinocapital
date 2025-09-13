@@ -1,9 +1,3 @@
-/**
- * Currency Control System - Versão Webflow TXT
- * Handles currency input controls (increase/decrease buttons)
- * Versão sem imports/exports para uso direto no Webflow
- */
-
 (function () {
   'use strict';
 
@@ -80,10 +74,8 @@
     }
   }
 
-  // Cria instância global
   window.ReinoCurrencyControlSystem = new CurrencyControlSystem();
 
-  // Auto-inicialização com delay
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {

@@ -1,10 +1,4 @@
-/**
- * EventCoordinator - Sistema centralizado para gerenciar eventos do input principal
- * Versão Webflow TXT - Sem imports/exports
- * Evita conflitos entre múltiplos módulos e memory leaks
- */
-
-(function() {
+(function () {
   'use strict';
 
   class EventCoordinator {
@@ -229,14 +223,11 @@
     }
   }
 
-  // Cria instância global
   window.ReinoEventCoordinator = new EventCoordinator();
 
-  // Cleanup automático
   window.addEventListener('beforeunload', () => {
     if (window.ReinoEventCoordinator) {
       window.ReinoEventCoordinator.destroy();
     }
   });
-
 })();

@@ -1,9 +1,3 @@
-/**
- * D3.js Donut Chart System for Section 5 - Versão Webflow TXT
- * Creates donut charts grouped by asset categories in result comparison section
- * Versão sem imports/exports para uso direto no Webflow
- */
-
 (function () {
   'use strict';
 
@@ -23,14 +17,11 @@
         Outros: '#4f4f4f',
       };
 
-      // Initialize Simple Hover Module (will be set up in init method)
       this.hoverModule = null;
 
-      // Track currently pinned slice data for toggle behavior
       this.currentPinnedSliceData = null;
       this.currentChart = null;
 
-      // Animation state tracking
       this.hasPlayedEntranceAnimation = false;
       this.currentStep = -1;
 
@@ -55,12 +46,11 @@
     }
 
     addTooltipScrollbarStyles() {
-      // Add CSS for tooltip scrollbar styling - premium elegant style
       if (!document.getElementById('tooltip-scrollbar-styles')) {
         const style = document.createElement('style');
         style.id = 'tooltip-scrollbar-styles';
         style.textContent = `
-          /* Scrollbar elegante e premium para tooltip */
+
           .d3-donut-tooltip-section5 div[style*="overflow-y: auto"] {
             overflow-y: auto;
             overflow-x: hidden;
@@ -69,7 +59,6 @@
             scroll-behavior: smooth;
           }
 
-          /* Webkit Scrollbar Styling */
           .d3-donut-tooltip-section5 div[style*="overflow-y: auto"]::-webkit-scrollbar {
             width: 8px;
             background: transparent;
@@ -117,7 +106,6 @@
             background: transparent;
           }
 
-          /* Scroll indicator styling */
           .d3-donut-tooltip-section5 [id^="scroll-indicator-"] {
             font-family: 'Satoshi Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             user-select: none;
@@ -139,18 +127,15 @@
     handleStepChange(newStep, previousStep) {
       this.currentStep = newStep;
 
-      // Reset animation state when navigating to step 4 (results section)
       if (newStep === 4 && previousStep !== 4) {
         this.hasPlayedEntranceAnimation = false;
 
-        // Clear existing charts to force re-render with entrance animations
         this.charts.forEach((chart) => {
           if (chart.g) {
             chart.g.selectAll('.arc').remove();
           }
         });
 
-        // Trigger chart update after a brief delay to ensure DOM is ready
         setTimeout(() => {
           this.updateAllCharts();
         }, 100);
@@ -158,7 +143,6 @@
     }
 
     initializeEnhancedHover() {
-      // Initialize Simple Hover Module if available
       if (window.SimpleHoverModule) {
         this.hoverModule = new window.SimpleHoverModule({
           offset: { x: 15, y: -10 },
@@ -166,7 +150,6 @@
           className: 'd3-donut-tooltip-section5',
         });
 
-        // Set callback for when tooltip is unpinned
         this.hoverModule.onUnpinCallback = () => {
           this.resetAllSliceEffects();
           this.hideCenterText(this.currentChart);
@@ -174,19 +157,16 @@
           this.currentPinnedSliceData = null;
         };
 
-        // Override the updateTooltipPosition method for intelligent positioning
         this.hoverModule.updateTooltipPosition = (event) => {
           this.updateIntelligentTooltipPosition(event);
         };
 
-        // Setup tooltip accordion event handlers
         this.setupTooltipAccordionHandlers();
       } else {
         console.warn('Simple Hover Module not available, using fallback');
-        // Create a comprehensive fallback
+
         this.hoverModule = {
           attachHoverEvents: (selection, options) => {
-            // Fallback to basic hover events
             selection
               .on('mouseenter', options.onHover)
               .on('mouseleave', options.onOut)
@@ -201,7 +181,6 @@
     }
 
     setupTooltipAccordionHandlers() {
-      // Handle modal close events (keeping for potential future use)
       document.addEventListener('click', (event) => {
         if (event.target.classList.contains('product-modal-overlay')) {
           this.closeProductModal();
@@ -220,16 +199,13 @@
       const chartType = button.getAttribute('data-chart-type');
       const isTraditional = chartType === 'tradicional';
 
-      // Get all products for this category
       const categoryData = this.getCategoryData(chartType).find((cat) => cat.name === category);
       if (!categoryData || !categoryData.details) return;
 
-      // Create modal
       this.createProductModal(categoryData.details, category, isTraditional);
     }
 
     createProductModal(products, categoryName, isTraditional) {
-      // Remove existing modal if any
       this.closeProductModal();
 
       const modalOverlay = document.createElement('div');
@@ -271,7 +247,6 @@
 
       this.activeModal = modalOverlay;
 
-      // Prevent modal content clicks from closing modal
       modal.addEventListener('click', (e) => e.stopPropagation());
     }
 
@@ -358,14 +333,12 @@
       if (!scrollContainer || !scrollIndicator) return;
 
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5; // 5px threshold
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5;
 
-      // Hide indicator when at bottom, show when there's more content below
       scrollIndicator.style.opacity = isAtBottom ? '0' : '1';
     }
 
     initializeTooltipScrollIndicators() {
-      // Initialize scroll indicators for existing tooltips
       setTimeout(() => {
         document.querySelectorAll('[id^="scroll-container-"]').forEach((container) => {
           const containerId = container.id;
@@ -409,14 +382,11 @@
         this.handleAssetSelection();
       });
 
-      // Listener para mudanças no índice de giro
       document.addEventListener('rotationIndexChanged', (e) => {
         this.handleRotationIndexChange();
       });
 
-      // Enhanced click-outside behavior for pinned tooltips
       document.addEventListener('click', (e) => {
-        // Only handle clicks when there's a pinned tooltip
         if (!this.hoverModule || !this.hoverModule.state.isPinned) {
           return;
         }
@@ -426,36 +396,30 @@
           document.querySelector('.section-resultado') ||
           document.querySelector('[chart-content]')?.closest('section');
 
-        // Check if click is outside section 5 entirely
         if (section5 && !section5.contains(e.target)) {
           this.unpinTooltipAndCleanup();
           return;
         }
 
-        // If we're inside section 5, check for specific click targets
         if (section5 && section5.contains(e.target)) {
           const isTooltipClick = e.target.closest('.d3-donut-tooltip-section5');
           const isSliceClick = e.target.tagName === 'path' && e.target.closest('.arc');
           const isChartAreaClick = e.target.closest('svg') || e.target.closest('[chart-content]');
 
-          // Don't close tooltip if clicking on the tooltip itself (allows text selection)
           if (isTooltipClick) {
             return;
           }
 
-          // Don't close tooltip if clicking on a slice (handled by slice click handler)
           if (isSliceClick) {
             return;
           }
 
-          // Close tooltip if clicking on empty chart areas or anywhere else in section 5
           if (isChartAreaClick || !isSliceClick) {
             this.unpinTooltipAndCleanup();
           }
         }
       });
 
-      // Limpar tooltips ao fazer scroll
       document.addEventListener('scroll', () => {
         this.cleanupTooltips();
       });
@@ -492,10 +456,8 @@
 
       const g = svg.append('g').attr('transform', `translate(${width / 2}, ${height / 2})`);
 
-      // Add center text group
       const centerGroup = g.append('g').attr('class', 'center-text-group');
 
-      // Main value text (larger)
       centerGroup
         .append('text')
         .attr('class', 'center-value')
@@ -506,7 +468,6 @@
         .style('fill', '#111827')
         .style('opacity', 0);
 
-      // Category text (smaller, below)
       centerGroup
         .append('text')
         .attr('class', 'center-category')
@@ -539,7 +500,6 @@
         radius,
       };
 
-      // Store chart reference for callbacks
       this.currentChart = chart;
 
       this.charts.set(type, chart);
@@ -586,13 +546,11 @@
     renderChart(chart, data) {
       const { g, pie, arc, container } = chart;
 
-      // Remove no-data message if it exists
       const existingMessage = container.querySelector('.no-data-message');
       if (existingMessage) {
         existingMessage.remove();
       }
 
-      // Verificar se há dados válidos antes de renderizar
       const validData = data.filter((d) => d.value > 0 && isFinite(d.value));
       if (validData.length === 0) return;
 
@@ -602,7 +560,6 @@
 
       const arcEnter = arcs.enter().append('g').attr('class', 'arc');
 
-      // Check if this is the first render and we're on step 4 (entrance animation)
       const isFirstRender =
         !this.hasPlayedEntranceAnimation && this.currentStep === 4 && arcEnter.size() > 0;
 
@@ -615,27 +572,22 @@
 
       const arcUpdate = arcEnter.merge(arcs);
 
-      // Apply entrance animations if this is the first render
       if (isFirstRender) {
         this.applyEntranceAnimations(chart, arcUpdate, validData);
       } else {
-        // Standard update animation for subsequent renders
         this.applyStandardAnimation(arcUpdate, arc);
-        // Setup interactions immediately for standard updates
+
         this.setupInteractions(arcUpdate, chart);
       }
     }
 
     setupInteractions(arcUpdate, chart) {
-      // Use Simple Hover Module instead of direct event handlers
       this.hoverModule.attachHoverEvents(arcUpdate.select('path'), {
         onHover: (event, d) => {
-          // Completely disable hover tooltips when any tooltip is pinned
           if (this.hoverModule && this.hoverModule.state.isPinned) {
             return;
           }
 
-          // Reset ALL slices to original state first (opacity, filter) - no size change
           window.d3
             .selectAll('.arc path')
             .transition()
@@ -643,7 +595,6 @@
             .style('opacity', 0.3)
             .style('filter', 'brightness(1)');
 
-          // Then apply hover effect to current slice - no size change
           window.d3
             .select(event.target)
             .transition()
@@ -651,16 +602,12 @@
             .style('opacity', 1)
             .style('filter', 'brightness(1.1)');
 
-          // Show center text with category info
           this.showCenterText(chart, d.data);
 
-          // Trigger cross-component interaction
           this.triggerCategoryHover(d.data.category || d.data.name);
 
-          // Set active state on corresponding lista-resultado-item for hover
           this.setActiveListaResultadoItem(d.data.category || d.data.name);
 
-          // Dispatch tutorial event for hover completion
           document.dispatchEvent(
             new CustomEvent('donutTutorialHover', {
               detail: { category: d.data.category || d.data.name },
@@ -668,24 +615,18 @@
           );
         },
         onOut: (event, d) => {
-          // Completely disable hover out effects when any tooltip is pinned
           if (this.hoverModule && this.hoverModule.state.isPinned) {
             return;
           }
 
-          // Restore all slices to full opacity with faster transition
           window.d3.selectAll('.arc path').transition().duration(80).style('opacity', 1);
 
-          // Remove visual hover effect - no size reset needed
           window.d3.select(event.target).transition().duration(80).style('filter', 'brightness(1)');
 
-          // Hide center text
           this.hideCenterText(chart);
 
-          // Clear cross-component interaction
           this.clearCategoryHover();
 
-          // Clear active state from lista-resultado-item when hover ends (only if no tooltip is pinned)
           if (!this.hoverModule.state.isPinned) {
             this.clearActiveListaResultadoItem();
           }
@@ -694,7 +635,6 @@
         className: 'd3-donut-tooltip-section5',
       });
 
-      // Add click handlers for pinning tooltips
       arcUpdate.select('path').on('click', (event, d) => {
         this.handleSliceClick(event, d, chart);
       });
@@ -703,10 +643,8 @@
     applyEntranceAnimations(chart, arcUpdate, validData) {
       const { g, pie, arc } = chart;
 
-      // Mark that entrance animation is being played
       this.hasPlayedEntranceAnimation = true;
 
-      // Step 1: Apply 360-degree rotation to the entire chart group using SVG transform
       const { width, height } = chart;
       const centerX = width / 2;
       const centerY = height / 2;
@@ -722,23 +660,20 @@
           };
         });
 
-      // Step 2: Sequential segment growth animation
       const pieData = pie(validData);
 
       arcUpdate
         .select('path')
         .each(function (d, i) {
-          // Store original angles for later use
           d.originalStartAngle = d.startAngle;
           d.originalEndAngle = d.endAngle;
 
-          // Start with zero-size segments
           d.startAngle = d.originalStartAngle;
           d.endAngle = d.originalStartAngle;
         })
         .attr('d', arc)
         .transition()
-        .delay((d, i) => 400 + i * 200) // Staggered delay for sequential appearance
+        .delay((d, i) => 400 + i * 200)
         .duration(600)
         .ease(window.d3.easeBackOut.overshoot(1.2))
         .attrTween('d', function (d) {
@@ -750,7 +685,6 @@
         })
         .attr('fill', (d) => this.colorScale(d.data.category))
         .on('end', (d, i, nodes) => {
-          // Setup interactions after animation completes
           if (i === nodes.length - 1) {
             this.setupInteractions(arcUpdate, chart);
           }
@@ -758,7 +692,6 @@
     }
 
     applyStandardAnimation(arcUpdate, arc) {
-      // Standard update animation for subsequent renders
       arcUpdate
         .select('path')
         .transition()
@@ -775,7 +708,6 @@
     }
 
     getCategoryData(chartType = 'tradicional') {
-      // Tentar obter dados do sistema de resultado primeiro
       const resultadoSync =
         window.ReinoCalculator?.systems?.resultadoSync || window.resultadoSyncInstance;
       if (resultadoSync && typeof resultadoSync.getResultadoData === 'function') {
@@ -785,7 +717,6 @@
         }
       }
 
-      // Fallback: buscar diretamente do DOM
       return this.getCategoryDataFromDOM(chartType);
     }
 
@@ -801,7 +732,6 @@
           let taxaInfo = null;
           let custoCalculado = 0;
 
-          // Usar sistema de rotation index para cálculo de comissão
           const rotationController = window.ReinoRotationIndexController;
           if (rotationController) {
             const productKey = `${category}:${product}`;
@@ -810,7 +740,6 @@
             if (rotationCalc) {
               custoCalculado = item.valor * rotationCalc.comissaoRate;
 
-              // Obter dados do produto para incluir média de corretagem
               const productData = rotationController.getProductData(productKey);
               const mediaCorretagemPercent = productData
                 ? (productData.mediaCorretagem * 100).toFixed(2)
@@ -878,7 +807,6 @@
         let cost = 0;
         let taxaInfo = null;
 
-        // Usar sistema de rotation index para cálculo de comissão
         const rotationController = window.ReinoRotationIndexController;
         if (rotationController) {
           const productKey = `${category}:${product}`;
@@ -887,7 +815,6 @@
           if (rotationCalc) {
             cost = value * rotationCalc.comissaoRate;
 
-            // Obter dados do produto para incluir média de corretagem
             const productData = rotationController.getProductData(productKey);
             const mediaCorretagemPercent = productData
               ? (productData.mediaCorretagem * 100).toFixed(2)
@@ -934,12 +861,10 @@
       }));
     }
 
-    // Método de compatibilidade
     getChartData(type) {
       return this.getCategoryData(type);
     }
 
-    // Generate tooltip content for Simple Hover Module with scrollable product list
     generateTooltipContent(d) {
       const formatValue = this.formatCurrency(d.data.value);
       const isTraditional = d.data.chartType === 'tradicional';
@@ -948,7 +873,6 @@
 
       let detailsHtml = '';
 
-      // Main content section with category info - increased font sizes
       let mainSection = `
         <div style="display: flex; align-items: center; margin: 8px 0;">
           <div style="width: 4px; height: 40px; background-color: ${categoryColor}; border-radius: 2px; margin-right: 12px;"></div>
@@ -960,7 +884,6 @@
         </div>
       `;
 
-      // Build details section with scrollable product list
       if (d.data.details && d.data.details.length > 0) {
         const scrollContainerId = `scroll-container-${tooltipId}`;
         const scrollIndicatorId = `scroll-indicator-${tooltipId}`;
@@ -983,7 +906,6 @@
             >
         `;
 
-        // Show ALL products with scroll
         d.data.details.forEach((detail, index) => {
           detailsHtml += this.generateProductHtml(
             detail,
@@ -1031,7 +953,6 @@
         </div>
       `;
 
-      // Initialize scroll indicators after tooltip is rendered
       setTimeout(() => {
         this.initializeTooltipScrollIndicators();
       }, 50);
@@ -1039,11 +960,9 @@
       return tooltipHtml;
     }
 
-    // Helper method to generate individual product HTML
     generateProductHtml(detail, index, lastIndex, isTraditional) {
       const detailValue = this.formatCurrency(detail.value);
 
-      // Get commission info with both percentage and value
       let commissionDisplay = '';
       let commissionValue = '';
       let giroInfo = '';
@@ -1069,7 +988,6 @@
         commissionValue = '';
       }
 
-      // Create styled tags for commission information
       let commissionTags = '';
       if (isTraditional && detail.taxaInfo) {
         const mediaCorretagem = detail.taxaInfo.mediaCorretagem || 'N/A';
@@ -1120,7 +1038,7 @@
         <div style="padding: 10px 0 15px 0; ${index < lastIndex ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div style="flex: 1;">
-              <div style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;">${detail.product}</div>
+              <div class="tooltip-product-name" style="font-size: 0.875em; font-weight: 600; color: #111827; margin-bottom: 2px;" title="${detail.product}">${detail.product}</div>
             </div>
             <div style="text-align: right;">
               <div style="font-size: 1em; font-weight: 700; color: #111827;">${commissionValue || 'Sem custo'}</div>
@@ -1186,7 +1104,6 @@
         }
       });
 
-      // Atualizar listas de gráfico se existirem
       const tradicionalList = document.querySelector(
         '[chart-content="tradicional"][chart-type="list"]'
       );
@@ -1287,20 +1204,16 @@
       this.clearCategoryHover();
       this.currentPinnedSliceData = null;
 
-      // Dispatch event for other modules to listen
       document.dispatchEvent(new CustomEvent('tooltipUnpinned'));
     }
 
     cleanupTooltips() {
-      // Reset pinned slice tracking
       this.currentPinnedSliceData = null;
 
-      // Use Simple Hover Module cleanup
       if (this.hoverModule && typeof this.hoverModule.destroy === 'function') {
         this.hoverModule.destroy();
       }
 
-      // Fallback cleanup for any remaining tooltips
       if (window.d3) {
         window.d3.selectAll('.d3-donut-tooltip-section5').remove();
       }
@@ -1313,7 +1226,6 @@
     triggerCategoryHover(category) {
       if (!category) return;
 
-      // Dispatch custom event for cross-component interaction
       document.dispatchEvent(
         new CustomEvent('donutCategoryHover', {
           detail: { category: category },
@@ -1322,17 +1234,14 @@
     }
 
     clearCategoryHover() {
-      // Dispatch custom event to clear cross-component interaction
       document.dispatchEvent(new CustomEvent('donutCategoryHoverEnd'));
     }
 
     setActiveListaResultadoItem(category) {
-      // Clear any existing active items
       document.querySelectorAll('.lista-resultado-item.ativo').forEach((item) => {
         item.classList.remove('ativo');
       });
 
-      // Set active on matching category
       const listaItem = document.querySelector(
         `.lista-resultado-item[ativo-category="${category}"]`
       );
@@ -1342,7 +1251,6 @@
     }
 
     clearActiveListaResultadoItem() {
-      // Clear all active items
       document.querySelectorAll('.lista-resultado-item.ativo').forEach((item) => {
         item.classList.remove('ativo');
       });
@@ -1354,14 +1262,11 @@
 
       if (centerValue.empty() || centerCategory.empty()) return;
 
-      // Format the commission value
       const formattedValue = this.formatCurrency(data.value);
       const categoryName = data.category || data.name;
 
-      // Show value text
       centerValue.text(formattedValue).transition().duration(80).style('opacity', 1);
 
-      // Show category text
       centerCategory.text('Custo de comissão').transition().duration(80).style('opacity', 0.7);
     }
 
@@ -1371,7 +1276,6 @@
 
       if (centerValue.empty() || centerCategory.empty()) return;
 
-      // Hide both texts
       centerValue.transition().duration(80).style('opacity', 0);
 
       centerCategory.transition().duration(80).style('opacity', 0);
@@ -1380,18 +1284,15 @@
     handleSliceClick(event, d, chart) {
       event.stopPropagation();
 
-      // Check if clicking on the same slice that's already pinned (toggle behavior)
       if (
         this.currentPinnedSliceData &&
         this.currentPinnedSliceData.name === d.data.name &&
         this.hoverModule.state.isPinned
       ) {
-        // Unpin the current tooltip and reset visual effects using helper method
         this.unpinTooltipAndCleanup();
         return;
       }
 
-      // Pin the new slice tooltip (replaces any existing pinned tooltip)
       if (this.hoverModule && this.hoverModule.togglePinnedTooltip) {
         this.hoverModule.togglePinnedTooltip(
           event,
@@ -1400,22 +1301,16 @@
           'd3-donut-tooltip-section5'
         );
 
-        // Apply pinned state visual effects
         this.applyPinnedStateEffects(event.target, d);
 
-        // Show center text for pinned slice
         this.showCenterText(chart, d.data);
 
-        // Trigger cross-component interaction for pinned slice
         this.triggerCategoryHover(d.data.category || d.data.name);
 
-        // Set active state on corresponding lista-resultado-item
         this.setActiveListaResultadoItem(d.data.category || d.data.name);
 
-        // Track the currently pinned slice
         this.currentPinnedSliceData = d.data;
 
-        // Dispatch tutorial event for click completion
         document.dispatchEvent(
           new CustomEvent('donutTutorialClick', {
             detail: { category: d.data.category || d.data.name },
@@ -1425,7 +1320,6 @@
     }
 
     resetAllSliceEffects() {
-      // Reset all slices to normal state
       window.d3
         .selectAll('.arc path')
         .style('opacity', 1)
@@ -1433,7 +1327,6 @@
         .style('stroke', 'none')
         .style('stroke-width', null);
 
-      // Reset all slice transforms (explode effect)
       window.d3
         .selectAll('.arc')
         .transition()
@@ -1443,10 +1336,8 @@
     }
 
     applyPinnedStateEffects(selectedElement, selectedData) {
-      // First, reset all transforms
       window.d3.selectAll('.arc').transition().duration(250).attr('transform', 'translate(0, 0)');
 
-      // Set all slices to reduced opacity
       window.d3
         .selectAll('.arc path')
         .style('opacity', 0.3)
@@ -1454,7 +1345,6 @@
         .style('stroke', 'none')
         .style('stroke-width', null);
 
-      // Highlight the selected slice (no border, just opacity and brightness)
       window.d3
         .select(selectedElement)
         .style('opacity', 1)
@@ -1462,23 +1352,19 @@
         .style('stroke', 'none')
         .style('stroke-width', null);
 
-      // Apply explode effect to selected slice
       this.explodeSlice(selectedElement, selectedData);
     }
 
     explodeSlice(element, sliceData) {
       if (!this.currentChart || !sliceData) return;
 
-      const explodeDistance = 12; // Distance to move the slice outward
+      const explodeDistance = 12;
 
-      // Calculate the angle to determine direction
       const angle = (sliceData.startAngle + sliceData.endAngle) / 2;
 
-      // Calculate explode offset
       const explodeX = Math.sin(angle) * explodeDistance;
       const explodeY = -Math.cos(angle) * explodeDistance;
 
-      // Apply transform to move the slice group
       window.d3
         .select(element.parentNode)
         .transition()
@@ -1497,7 +1383,6 @@
         height: window.innerHeight,
       };
 
-      // Get tooltip dimensions
       let tooltipWidth = 280;
       let tooltipHeight = 200;
 
@@ -1510,33 +1395,25 @@
         }
       }
 
-      // Find the donut chart center position
       const donutCenter = this.getDonutCenterPosition();
 
-      // Calculate intelligent positioning
       let x = mouseX + this.hoverModule.options.offset.x;
       let y = mouseY + this.hoverModule.options.offset.y;
 
-      // Check if default position would overlap with donut center
       if (donutCenter && this.wouldOverlapCenter(x, y, tooltipWidth, tooltipHeight, donutCenter)) {
-        // Position tooltip to the left of cursor instead
         x = mouseX - tooltipWidth - Math.abs(this.hoverModule.options.offset.x);
 
-        // If still overlapping or going off-screen, try above/below
         if (this.wouldOverlapCenter(x, y, tooltipWidth, tooltipHeight, donutCenter) || x < 20) {
           x = mouseX + this.hoverModule.options.offset.x;
 
-          // Try positioning above the cursor
           if (mouseY > donutCenter.y) {
             y = mouseY - tooltipHeight - Math.abs(this.hoverModule.options.offset.y);
           } else {
-            // Position below the cursor
             y = mouseY + Math.abs(this.hoverModule.options.offset.y) + 20;
           }
         }
       }
 
-      // Ensure tooltip stays within viewport bounds
       if (x + tooltipWidth + 20 > viewport.width) {
         x = mouseX - tooltipWidth - Math.abs(this.hoverModule.options.offset.x);
       }
@@ -1545,7 +1422,6 @@
         y = mouseY - tooltipHeight - Math.abs(this.hoverModule.options.offset.y);
       }
 
-      // Final bounds checking
       x = Math.max(20, Math.min(x, viewport.width - tooltipWidth - 20));
       y = Math.max(20, Math.min(y, viewport.height - tooltipHeight - 20));
 
@@ -1562,12 +1438,11 @@
       return {
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
-        radius: (Math.min(rect.width, rect.height) / 2) * 0.65, // Inner radius area
+        radius: (Math.min(rect.width, rect.height) / 2) * 0.65,
       };
     }
 
     wouldOverlapCenter(tooltipX, tooltipY, tooltipWidth, tooltipHeight, center) {
-      // Check if tooltip rectangle would overlap with donut center circle
       const tooltipRect = {
         left: tooltipX,
         right: tooltipX + tooltipWidth,
@@ -1591,10 +1466,8 @@
     }
   }
 
-  // Cria instância global
   window.ReinoD3DonutChartSection5System = new D3DonutChartSection5System();
 
-  // Auto-inicialização
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       window.ReinoD3DonutChartSection5System.init();

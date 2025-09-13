@@ -1,0 +1,58 @@
+/**
+ * Donut Chart Tooltip Product Name Layout
+ * Improves spacing and text wrapping for long product names
+ */
+
+/* Target the specific tooltip class for donut chart section 5 */
+.d3-donut-tooltip-section5 {
+  /* Ensure tooltip has proper width constraints */
+  max-width: 320px;
+  min-width: 200px;
+}
+
+/* Product name with flexible layout - allows line breaks for long names */
+.d3-donut-tooltip-section5 .tooltip-product-name {
+  max-width: 160px !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  line-height: 1.3 !important;
+  display: block !important;
+  margin-right: 12px !important;
+}
+
+/* Improve spacing in the product row layout */
+.d3-donut-tooltip-section5 div[style*='display: flex'][style*='justify-content: space-between'] {
+  gap: 12px !important;
+  align-items: flex-start !important;
+}
+
+/* Ensure the product name container has proper flex properties */
+.d3-donut-tooltip-section5 div[style*='flex: 1'] {
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .d3-donut-tooltip-section5 {
+    max-width: 280px;
+    min-width: 180px;
+  }
+
+  .d3-donut-tooltip-section5 .tooltip-product-name {
+    max-width: 140px !important;
+    margin-right: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .d3-donut-tooltip-section5 {
+    max-width: 260px;
+    min-width: 160px;
+  }
+
+  .d3-donut-tooltip-section5 .tooltip-product-name {
+    max-width: 120px !important;
+    margin-right: 8px !important;
+  }
+}

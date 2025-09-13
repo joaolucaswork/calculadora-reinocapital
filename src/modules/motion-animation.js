@@ -1,9 +1,3 @@
-/**
- * Motion Animation System - Versão Webflow TXT
- * Handles all motion animations, including currency control buttons
- * Versão sem imports/exports para uso direto no Webflow
- */
-
 (function () {
   'use strict';
 
@@ -34,7 +28,6 @@
     initMotionEffects() {
       const { animate, hover, press } = this.Motion;
 
-      // Busca elementos pela estrutura real
       const input = document.querySelector('input[is-main="true"]');
       const interactiveArrow = document.getElementById('interative-arrow');
 
@@ -42,13 +35,11 @@
         return;
       }
 
-      // Busca o container pai que contém tanto o input quanto os botões
       const mainContainer = input.closest('.money_content_right-wrapper');
       if (!mainContainer) {
         return;
       }
 
-      // Busca os botões dentro do container principal
       const increaseBtn = mainContainer.querySelector('[currency-control="increase"]');
       const decreaseBtn = mainContainer.querySelector('[currency-control="decrease"]');
 
@@ -56,7 +47,6 @@
         return;
       }
 
-      // Controle da seta
       let hideTimeout;
       let isArrowVisible = true;
       let isButtonInteraction = false;
@@ -110,7 +100,6 @@
         }, 2000);
       };
 
-      // EventCoordinator integration
       if (window.ReinoEventCoordinator) {
         window.ReinoEventCoordinator.registerListener('motion-animation', 'input', () => {
           if (!isArrowVisible) showArrow();
@@ -127,7 +116,6 @@
         });
       }
 
-      // Button interaction tracking
       const buttonEffects = [increaseBtn, decreaseBtn];
       buttonEffects.forEach((button) => {
         button.addEventListener('mouseenter', () => {
@@ -142,7 +130,6 @@
         });
       });
 
-      // Ripple effect
       const createRippleEffect = (element, color) => {
         const ripple = document.createElement('div');
         ripple.style.cssText = `
@@ -205,7 +192,6 @@
         );
       };
 
-      // Hover no botão +
       hover(increaseBtn, (element) => {
         if (element.classList.contains('disabled')) return;
 
@@ -269,7 +255,6 @@
         };
       });
 
-      // Hover no botão -
       hover(decreaseBtn, (element) => {
         if (element.classList.contains('disabled')) return;
 
@@ -333,7 +318,6 @@
         };
       });
 
-      // Press no botão +
       press(increaseBtn, (element) => {
         if (element.classList.contains('disabled')) return;
 
@@ -372,7 +356,6 @@
         };
       });
 
-      // Press no botão -
       press(decreaseBtn, (element) => {
         if (element.classList.contains('disabled')) return;
 
@@ -413,15 +396,13 @@
     }
   }
 
-  // Cria instância global
   window.ReinoMotionAnimationSystem = new MotionAnimationSystem();
 
-  // Auto-inicialização com delay para aguardar Motion.js
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         window.ReinoMotionAnimationSystem.init();
-      }, 300); // Delay maior para garantir que Motion.js carregou
+      }, 300);
     });
   } else {
     setTimeout(() => {
