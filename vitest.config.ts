@@ -40,6 +40,8 @@ export default defineConfig({
       'src/tests/**',
       '**/*live*.test.js', // Exclude Playwright tests from Vitest
       '**/typebot*.test.js', // Exclude Typebot Playwright tests from Vitest
+      '**/database-isolation*.test.js', // Exclude database isolation Playwright tests from Vitest
+      'tests/**/*.test.js', // Exclude all Playwright tests in tests/ directory from Vitest
     ],
 
     // Clear mocks between tests
