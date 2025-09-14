@@ -120,6 +120,10 @@ Escopo: E2E foca na funcionalidade central da calculadora até/através da Seç�
 
 Requisitos: pnpm >= 10
 
+### Workflow de Release Automatizado
+
+Este projeto usa [Changesets](https://github.com/changesets/changesets) para versionamento automático e publicação no npm.
+
 Instalar dependências:
 
 ```bash
