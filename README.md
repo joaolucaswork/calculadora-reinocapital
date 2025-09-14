@@ -124,6 +124,12 @@ Requisitos: pnpm >= 10
 
 Este projeto usa [Changesets](https://github.com/changesets/changesets) para versionamento automático e publicação no npm.
 
+__Processo automatizado:__
+
+1. Criar changeset: `npx changeset`
+2. Commit e push para master
+3. GitHub Actions publica automaticamente no npm
+
 Instalar dependências:
 
 ```bash
