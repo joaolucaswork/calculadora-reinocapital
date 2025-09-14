@@ -220,8 +220,16 @@
 
     getCreatedByValue() {
       if (this.environment === 'testing') {
+        // Check for explicit test mode first
+        if (window.REINO_TEST_MODE) {
+          return 'playwright-test';
+        }
+
         const userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.includes('playwright')) {
+        if (
+          userAgent.includes('playwright') ||
+          (userAgent.includes('chrome') && userAgent.includes('headless'))
+        ) {
           return 'playwright-test';
         }
         if (userAgent.includes('headless')) {
@@ -485,18 +493,6 @@
       return parseFloat(cleaned) || 0;
     }
 
-    getStatus() {
-      return {
-        ready: this.isReady,
-        hasClient: !!this.client,
-        tableName: this.tableName,
-        debugMode: this.debugMode,
-        environment: this.environment,
-        testRunId: this.testRunId,
-        isTestEnvironment: this.environment !== 'production',
-      };
-    }
-
     async cleanupTestData() {
       if (this.environment === 'production') {
         throw new Error('Cannot cleanup test data in production environment');
@@ -549,9 +545,22 @@
       }
     }
 
+    getStatus() {
+      return {
+        isReady: this.isReady,
+        environment: this.environment,
+        testRunId: this.testRunId,
+        tableName: this.tableName,
+        hasClient: !!this.client,
+        debugMode: this.debugMode,
+        createdBy: this.getCreatedByValue(),
+        isTestEnvironment: this.environment !== 'production',
+      };
+    }
+
     log(message) {
       if (this.debugMode) {
-        // Debug logging removed for production
+        console.log(`[SupabaseIntegration] ${message}`);
       }
     }
   }

@@ -5,8 +5,9 @@
  * Removes test data from databases based on environment
  */
 
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Test data identification patterns - SAFE PATTERNS ONLY
 const TEST_PATTERNS = {
@@ -44,7 +45,7 @@ class TestDataCleaner {
     const envFile = `.env.${this.environment}`;
 
     // Load environment-specific config
-    require('dotenv').config({ path: envFile });
+    dotenv.config({ path: envFile });
 
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -290,7 +291,8 @@ Examples:
 `);
 }
 
-if (require.main === module) {
+// Execute if this is the main module
+if (process.argv[1] && process.argv[1].endsWith('cleanup-test-data.js')) {
   if (process.argv.includes('--help')) {
     showHelp();
     process.exit(0);
@@ -301,4 +303,4 @@ if (require.main === module) {
   cleaner.run();
 }
 
-module.exports = TestDataCleaner;
+export default TestDataCleaner;

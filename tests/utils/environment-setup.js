@@ -31,6 +31,14 @@ class TestEnvironmentSetup {
   }
 
   async injectTestConfiguration(page) {
+    await page.addInitScript((testRunId) => {
+      // Set global test configuration BEFORE any modules load
+      window.REINO_ENVIRONMENT = 'testing';
+      window.REINO_TEST_MODE = true;
+      window.REINO_TEST_RUN_ID = testRunId;
+    }, this.testRunId);
+
+    // Also set after page load for existing instances
     await page.evaluate((testRunId) => {
       // Override Supabase integration for testing
       if (window.ReinoSupabaseIntegration) {
@@ -41,6 +49,7 @@ class TestEnvironmentSetup {
       // Set global test configuration
       window.REINO_TEST_RUN_ID = testRunId;
       window.REINO_ENVIRONMENT = 'testing';
+      window.REINO_TEST_MODE = true;
     }, this.testRunId);
   }
 
@@ -79,19 +88,24 @@ class TestEnvironmentSetup {
 
   async cleanupTestData(page) {
     try {
-      const result = await page.evaluate(async (testRunId) => {
-        if (!window.ReinoSupabaseIntegration) {
-          return { success: false, error: 'Supabase integration not available' };
-        }
+      // Use Supabase Management API for cleanup
+      const { createClient } = await import('@supabase/supabase-js');
 
-        try {
-          return await window.ReinoSupabaseIntegration.cleanupTestRunData(testRunId);
-        } catch (error) {
-          return { success: false, error: error.message };
-        }
-      }, this.testRunId);
+      const supabase = createClient(
+        'https://dwpsyresppubuxbrwrkc.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3cHN5cmVzcHB1YnV4YnJ3cmtjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzM2NzE3OCwiZXhwIjoyMDY4OTQzMTc4fQ.osxkgCRNeVfTz0YCOYIS1zJWZWppVZ38gHi9aEiCUeI'
+      );
 
-      return result;
+      const { error } = await supabase
+        .from('calculator_submissions')
+        .delete()
+        .eq('test_run_id', this.testRunId);
+
+      if (error) {
+        throw error;
+      }
+
+      return { success: true, testRunId: this.testRunId };
     } catch (error) {
       return { success: false, error: error.message };
     }
