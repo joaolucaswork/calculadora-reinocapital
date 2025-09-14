@@ -18,7 +18,7 @@ class TestEnvironmentSetup {
 
     // Add test identification to user agent
     await page.setExtraHTTPHeaders({
-      'User-Agent': 'Mozilla/5.0 (Playwright Test Environment) AppleWebKit/537.36'
+      'User-Agent': 'Mozilla/5.0 (Playwright Test Environment) AppleWebKit/537.36',
     });
 
     // Add test query parameter
@@ -26,7 +26,7 @@ class TestEnvironmentSetup {
     const url = new URL(currentUrl);
     url.searchParams.set('test', 'true');
     url.searchParams.set('playwright', 'true');
-    
+
     await page.goto(url.toString());
   }
 
@@ -45,11 +45,16 @@ class TestEnvironmentSetup {
   }
 
   async waitForSupabaseReady(page) {
-    await page.waitForFunction(() => {
-      return window.ReinoSupabaseIntegration && 
-             window.ReinoSupabaseIntegration.isReady &&
-             window.ReinoSupabaseIntegration.environment === 'testing';
-    }, { timeout: 10000 });
+    await page.waitForFunction(
+      () => {
+        return (
+          window.ReinoSupabaseIntegration &&
+          window.ReinoSupabaseIntegration.isReady &&
+          window.ReinoSupabaseIntegration.environment === 'testing'
+        );
+      },
+      { timeout: 10000 }
+    );
   }
 
   async verifyTestEnvironment(page) {
@@ -128,7 +133,7 @@ class TestEnvironmentSetup {
   generateUniqueTestData() {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 5);
-    
+
     return {
       nome: `Playwright Test ${random}`,
       email: `playwright.${timestamp}@test.com`,
@@ -176,13 +181,13 @@ class TestEnvironmentSetup {
         }
 
         // Verify all entries are from testing environment
-        const allTesting = data.every(entry => entry.environment === 'testing');
-        
-        return { 
-          success: true, 
+        const allTesting = data.every((entry) => entry.environment === 'testing');
+
+        return {
+          success: true,
           isolated: allTesting,
           count: data.length,
-          sample: data 
+          sample: data,
         };
       } catch (error) {
         return { success: false, error: error.message };
@@ -204,13 +209,13 @@ class TestEnvironmentSetup {
 // Helper functions for test setup
 async function setupTestEnvironment(page) {
   const testEnv = new TestEnvironmentSetup();
-  
+
   await testEnv.setupTestEnvironment(page);
   await testEnv.injectTestConfiguration(page);
   await testEnv.waitForSupabaseReady(page);
-  
+
   const status = await testEnv.verifyTestEnvironment(page);
-  
+
   return { testEnv, status };
 }
 
@@ -229,9 +234,4 @@ async function verifyTestIsolation(page, testEnv) {
   return { success: false, error: 'No test environment provided' };
 }
 
-module.exports = {
-  TestEnvironmentSetup,
-  setupTestEnvironment,
-  cleanupAfterTest,
-  verifyTestIsolation
-};
+export { cleanupAfterTest, setupTestEnvironment, TestEnvironmentSetup, verifyTestIsolation };

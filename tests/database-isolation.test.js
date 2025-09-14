@@ -1,15 +1,19 @@
-const { test, expect } = require('@playwright/test');
-const { setupTestEnvironment, cleanupAfterTest, verifyTestIsolation } = require('./utils/environment-setup');
+import { test, expect } from '@playwright/test';
+import {
+  setupTestEnvironment,
+  cleanupAfterTest,
+  verifyTestIsolation,
+} from './utils/environment-setup.js';
 
 test.describe('Database Isolation Tests', () => {
   let testEnv;
 
   test.beforeEach(async ({ page }) => {
     await page.goto('https://reinocapital.webflow.io/taxas-app');
-    
+
     const setup = await setupTestEnvironment(page);
     testEnv = setup.testEnv;
-    
+
     // Verify test environment is properly configured
     expect(setup.status.environment).toBe('testing');
     expect(setup.status.isTestEnvironment).toBe(true);
@@ -48,7 +52,7 @@ test.describe('Database Isolation Tests', () => {
 
     // Allocate 100% to CDB
     const slider = page.locator('range-slider[class*="slider"]').first();
-    await slider.evaluate(el => el.value = 1);
+    await slider.evaluate((el) => (el.value = 1));
     await slider.dispatchEvent('input');
 
     // Wait for allocation to complete
@@ -59,7 +63,7 @@ test.describe('Database Isolation Tests', () => {
 
     // Submit form with test data
     const testData = testEnv.generateUniqueTestData();
-    
+
     const submissionResult = await page.evaluate(async (data) => {
       return await window.ReinoSupabaseIntegration.saveCalculatorSubmission(data);
     }, testData);
@@ -83,7 +87,7 @@ test.describe('Database Isolation Tests', () => {
     // Create test submission
     const testData = testEnv.generateUniqueTestData();
     const result = await testEnv.simulateFormSubmission(page, testData);
-    
+
     expect(result.success).toBe(true);
 
     // Verify data isolation
@@ -93,7 +97,7 @@ test.describe('Database Isolation Tests', () => {
     expect(isolation.count).toBeGreaterThan(0);
 
     // Verify all entries are from testing environment
-    isolation.sample.forEach(entry => {
+    isolation.sample.forEach((entry) => {
       expect(entry.environment).toBe('testing');
     });
   });
@@ -127,18 +131,18 @@ test.describe('Database Isolation Tests', () => {
       nome: 'João Silva',
       email: 'joao@exemplo.com',
       telefone: '(11) 99999-9999',
-      patrimonio: 150000
+      patrimonio: 150000,
     };
 
     const result = await page.evaluate(async (data) => {
       const sanitized = window.ReinoSupabaseIntegration.sanitizeTestData(data.nome);
       const emailSanitized = window.ReinoSupabaseIntegration.sanitizeTestData(data.email);
-      
+
       return {
         originalNome: data.nome,
         sanitizedNome: sanitized,
         originalEmail: data.email,
-        sanitizedEmail: emailSanitized
+        sanitizedEmail: emailSanitized,
       };
     }, originalData);
 
@@ -150,12 +154,12 @@ test.describe('Database Isolation Tests', () => {
     // Test various environment detection scenarios
     const detectionTests = await page.evaluate(() => {
       const integration = window.ReinoSupabaseIntegration;
-      
+
       return {
         currentEnvironment: integration.environment,
         testRunId: integration.testRunId,
         createdBy: integration.getCreatedByValue(),
-        isTestMode: integration.environment === 'testing'
+        isTestMode: integration.environment === 'testing',
       };
     });
 
@@ -180,10 +184,10 @@ test.describe('Database Isolation Tests', () => {
           .eq('environment', 'production')
           .limit(1);
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           hasProductionData: data && data.length > 0,
-          data: data || []
+          data: data || [],
         };
       } catch (error) {
         return { success: false, error: error.message };
