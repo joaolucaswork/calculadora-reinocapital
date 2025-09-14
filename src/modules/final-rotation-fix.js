@@ -48,8 +48,6 @@
           fatorEfetivo: rotationCalc.fatorEfetivo,
           calculoOriginal: originalResult.custoMedio,
         };
-      } else {
-        console.log(`⚠️ No rotation calculation found for ${productKey}`);
       }
 
       return originalResult;

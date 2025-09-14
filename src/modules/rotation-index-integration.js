@@ -23,7 +23,7 @@
       try {
         this.waitForDependencies();
       } catch (error) {
-        console.error('❌ Rotation Index Integration initialization failed:', error);
+        // Initialization failed silently
       }
     }
 
@@ -43,7 +43,7 @@
       }
 
       if (attempts >= maxAttempts) {
-        console.warn('⚠️ Rotation Index Integration: Dependencies not found');
+        // Dependencies not found - fail silently
       }
     }
 
