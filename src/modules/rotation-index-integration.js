@@ -6,7 +6,7 @@
       this.isInitialized = false;
       this.rotationController = null;
       this.originalCalcFunction = null;
-      this.debugMode = window.location.search.includes('debug=true');
+      this.debugMode = false; // Debug desabilitado para produção
     }
 
     init() {
@@ -54,11 +54,7 @@
       this.setupEventListeners();
       this.isInitialized = true;
 
-      console.log('✅ Rotation Index Integration initialized and calcularCustoProduto enhanced');
-
-      if (this.debugMode) {
-        console.log('🔄 Original function stored, enhanced function active');
-      }
+      // Rotation Index Integration initialized silently
     }
 
     setupEventListeners() {
@@ -71,35 +67,14 @@
       const originalResult = this.originalCalcFunction(valorAlocado, category, product);
 
       if (!this.rotationController || valorAlocado <= 0) {
-        console.log(
-          `⚠️ Rotation calc skipped: controller=${!!this.rotationController}, value=${valorAlocado}`
-        );
         return originalResult;
       }
 
       const productKey = `${category}:${product}`;
       const rotationCalc = this.rotationController.getProductCalculation(productKey);
 
-      console.log(`🔄 Rotation calc for ${productKey}:`, {
-        found: !!rotationCalc,
-        currentIndex: this.rotationController.getCurrentIndex(),
-        rotationCalc: rotationCalc
-          ? {
-              comissaoRate: rotationCalc.comissaoRate,
-              comissaoPercent: rotationCalc.comissaoPercent,
-            }
-          : null,
-      });
-
       if (rotationCalc) {
         const rotationBasedCost = valorAlocado * rotationCalc.comissaoRate;
-
-        console.log(`💰 Cost calculation:`, {
-          valorAlocado,
-          comissaoRate: rotationCalc.comissaoRate,
-          rotationBasedCost,
-          originalCost: originalResult.custoMedio,
-        });
 
         return {
           ...originalResult,
@@ -111,18 +86,12 @@
           fatorEfetivo: rotationCalc.fatorEfetivo,
           calculoOriginal: originalResult.custoMedio,
         };
-      } else {
-        console.log(`⚠️ No rotation calculation found for ${productKey}, using original result`);
       }
 
       return originalResult;
     }
 
     handleRotationIndexChange(detail) {
-      if (this.debugMode) {
-        console.log('🔄 Rotation index changed, triggering recalculation:', detail);
-      }
-
       this.triggerSystemRecalculation();
     }
 

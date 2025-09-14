@@ -445,11 +445,6 @@
       this.updateMainContainers(false);
     }
 
-    // Public method for external triggers
-    forceSync() {
-      this.updateVisibility();
-    }
-
     // Debug helper
     log(message, data = null) {
       if (this.debugMode) {

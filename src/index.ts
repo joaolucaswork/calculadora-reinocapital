@@ -23,8 +23,8 @@ import './modules/currency-control.js'; // ✅ AppState integrado
 // Módulos de cálculo que dependem dos controllers
 import './modules/resultado-sync.js'; // ✅ AppState integrado
 import './modules/resultado-comparativo-calculator.js'; // ✅ AppState integrado
-import './modules/rotation-index-integration.js'; // Integração de cálculos
-import './modules/final-rotation-fix.js'; // Fix definitivo para rotação
+import './modules/rotation-index-integration.js'; // Integração de cálculos (logs removidos)
+import './modules/final-rotation-fix.js'; // Fix definitivo para rotação (logs removidos)
 // ==================== 5. SYNC & BRIDGE MODULES ====================
 // Módulos que sincronizam estado com UI e integrações externas
 import './modules/category-summary-sync.js';
@@ -77,8 +77,19 @@ import './modules/keyboard-navigation.js';
 import './modules/lottie-lifecycle-manager.js';
 import './modules/calendly-minimalist-widget.js';
 // ==================== 12. DEBUG & TESTING ====================
-// Módulos de debug e teste (carregam por último)
-import './modules/dev/index.js';
+// IMPORTANTE: Testes e debug tools foram movidos para carregamento condicional
+// Para habilitar debug tools em desenvolvimento, use: ENABLE_DEBUG_TOOLS=true
+// Para habilitar testes de integração, use: ENABLE_INTEGRATION_TESTS=true
+// Para habilitar testes legacy, use: ENABLE_LEGACY_TESTS=true
+// Por padrão, NENHUM teste é carregado no browser para evitar interferência na UI
+// Os testes unitários Jest rodam separadamente via 'pnpm test'
+// Descomente as linhas abaixo apenas para debug específico:
+// import('./tests/debug/index.js');
+// import('./tests/integration/index.js');
+// import('./modules/dev/index.js');
+// Módulos de debug de rotação (descomente se necessário):
+// import('./modules/rotation-index-integration.js');
+// import('./modules/final-rotation-fix.js');
 // import './modules/swiper-resultado.js'; // DESATIVADO - mantido para uso futuro
 // Import CSS files
 import './css/tippy-custom.css';
