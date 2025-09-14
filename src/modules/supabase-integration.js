@@ -277,8 +277,8 @@
 
       return selectedAssets
         .map((assetKey) => {
-          // AppState usa formato "categoria|produto" em lowercase
-          const [category, product] = assetKey.split('|');
+          // AppState usa formato "categoria:produto" em lowercase
+          const [category, product] = assetKey.split(':');
           return {
             // Converter para formato original com capitalização
             category: this.capitalizeWords(category) || 'Unknown',
@@ -296,8 +296,8 @@
       const converted = {};
 
       Object.entries(allocations).forEach(([assetKey, value]) => {
-        // AppState usa formato "categoria|produto" em lowercase
-        const [category, product] = assetKey.split('|');
+        // AppState usa formato "categoria:produto" em lowercase
+        const [category, product] = assetKey.split(':');
 
         // Skip if split failed
         if (!category || !product) {

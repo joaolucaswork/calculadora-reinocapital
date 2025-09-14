@@ -41,10 +41,6 @@
             formatted: 'R$ 0,00',
             details: [],
           },
-          comparativo: {
-            reino: null,
-            tradicional: null,
-          },
           patrimonioRestante: {
             value: 0,
             formatted: 'R$ 0,00',
@@ -296,7 +292,7 @@
     // ==================== UTILITÁRIOS ====================
 
     normalizeAssetKey(category, product) {
-      return `${category.toLowerCase().trim()}|${product.toLowerCase().trim()}`;
+      return `${category.toLowerCase().trim()}:${product.toLowerCase().trim()}`;
     }
 
     parseNumericValue(value) {

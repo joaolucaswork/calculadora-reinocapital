@@ -136,7 +136,13 @@
     }
 
     isAssetSelected(category, product) {
-      const normalizedKey = `${category.toLowerCase().trim()}|${product.toLowerCase().trim()}`;
+      // Use AppState format (colon separator) if available
+      if (this.appState) {
+        return this.appState.isAssetSelected(category, product);
+      }
+
+      // Fallback to legacy format for compatibility (now using colon)
+      const normalizedKey = `${category.toLowerCase().trim()}:${product.toLowerCase().trim()}`;
       return this.selectedAssets.has(normalizedKey);
     }
 
@@ -172,6 +178,7 @@
       const resultadoItems = document.querySelectorAll('.resultado-produto-item');
       let totalComissao = 0;
 
+      // First, handle DOM-based products
       resultadoItems.forEach((item) => {
         const category = item.getAttribute('ativo-category');
         const product = item.getAttribute('ativo-product');
@@ -187,12 +194,52 @@
         }
       });
 
+      // Then, handle AppState-only assets (no DOM elements)
+      if (this.appState) {
+        const allocations = this.appState.getAllAllocations();
+        const processedAssets = new Set();
+
+        // Track which assets we already processed from DOM
+        resultadoItems.forEach((item) => {
+          const category = item.getAttribute('ativo-category');
+          const product = item.getAttribute('ativo-product');
+          if (category && product) {
+            const key = this.appState.normalizeAssetKey(category, product);
+            processedAssets.add(key);
+          }
+        });
+
+        // Process AppState assets that don't have DOM elements
+        Object.entries(allocations).forEach(([key, value]) => {
+          if (!processedAssets.has(key) && value > 0) {
+            const [category, product] = key.split(':');
+            if (category && product && this.isAssetSelected(category, product)) {
+              const comissaoValue = this.calculateCommissionForValue(value, category, product);
+              totalComissao += comissaoValue;
+              this.log(`💰 AppState-only commission: ${category}:${product} = ${comissaoValue}`);
+            }
+          }
+        });
+      }
+
       this.updateTotalComissao(totalComissao);
     }
 
     shouldShowProduct(category, product) {
       if (!this.isAssetSelected(category, product)) return false;
 
+      // If we have AppState data, check allocation there first
+      if (this.appState) {
+        const allocations = this.appState.getAllAllocations();
+        const key = this.appState.normalizeAssetKey(category, product);
+        const allocatedValue = allocations[key] || 0;
+
+        if (allocatedValue > 0) {
+          return true;
+        }
+      }
+
+      // Fallback to DOM check
       const patrimonioItem = document.querySelector(
         `.patrimonio_interactive_item[ativo-category="${category}"][ativo-product="${product}"]`
       );
@@ -204,7 +251,7 @@
       // Try to get allocation from AppState first
       if (this.appState) {
         const allocations = this.appState.getAllAllocations();
-        const key = `${category}:${product}`;
+        const key = this.appState.normalizeAssetKey(category, product);
         const allocatedValue = allocations[key] || 0;
 
         if (allocatedValue > 0) {
@@ -287,7 +334,9 @@
     getCommissionDetails() {
       const details = [];
       const resultadoItems = document.querySelectorAll('.resultado-produto-item');
+      const processedAssets = new Set();
 
+      // First, handle DOM-based products
       resultadoItems.forEach((item) => {
         const category = item.getAttribute('ativo-category');
         const product = item.getAttribute('ativo-product');
@@ -307,9 +356,42 @@
                 commission: Utils.formatCurrency(comissaoValue),
               },
             });
+
+            // Track processed assets
+            if (this.appState) {
+              const key = this.appState.normalizeAssetKey(category, product);
+              processedAssets.add(key);
+            }
           }
         }
       });
+
+      // Then, handle AppState-only assets (no DOM elements)
+      if (this.appState) {
+        const allocations = this.appState.getAllAllocations();
+
+        Object.entries(allocations).forEach(([key, value]) => {
+          if (!processedAssets.has(key) && value > 0) {
+            const [category, product] = key.split(':');
+            if (category && product && this.isAssetSelected(category, product)) {
+              const comissaoValue = this.calculateCommissionForValue(value, category, product);
+
+              if (comissaoValue > 0) {
+                details.push({
+                  category,
+                  product,
+                  value,
+                  commission: comissaoValue,
+                  formatted: {
+                    value: Utils.formatCurrency(value),
+                    commission: Utils.formatCurrency(comissaoValue),
+                  },
+                });
+              }
+            }
+          }
+        });
+      }
 
       return details;
     }
@@ -318,7 +400,7 @@
       // Try AppState first
       if (this.appState) {
         const allocations = this.appState.getAllAllocations();
-        const key = `${category}:${product}`;
+        const key = this.appState.normalizeAssetKey(category, product);
         return allocations[key] || 0;
       }
 
@@ -347,6 +429,11 @@
       this.selectedAssets.clear();
       this.hideAllProducts();
       this.updateMainContainers(false);
+    }
+
+    // Public method for external triggers
+    forceSync() {
+      this.updateVisibility();
     }
 
     // Debug helper

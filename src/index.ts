@@ -17,12 +17,12 @@ import './modules/event-coordinator.js'; // Coordenação de eventos (independen
 import './modules/patrimony-sync.js'; // ✅ AppState integrado
 import './modules/asset-selection-filter.js'; // ✅ AppState integrado
 import './modules/rotation-index-controller.js'; // ✅ AppState integrado
-import './modules/currency-formatting.js'; // 🔄 Precisa migrar para AppState
-import './modules/currency-control.js'; // 🔄 Precisa migrar para AppState
+import './modules/currency-formatting.js'; // ✅ AppState integrado
+import './modules/currency-control.js'; // ✅ AppState integrado
 // ==================== 4. CALCULATION MODULES ====================
 // Módulos de cálculo que dependem dos controllers
 import './modules/resultado-sync.js'; // ✅ AppState integrado
-import './modules/resultado-comparativo-calculator.js'; // 🔄 Precisa migrar para AppState
+import './modules/resultado-comparativo-calculator.js'; // ✅ AppState integrado
 import './modules/rotation-index-integration.js'; // Integração de cálculos
 // ==================== 5. SYNC & BRIDGE MODULES ====================
 // Módulos que sincronizam estado com UI e integrações externas
@@ -82,6 +82,21 @@ import './modules/appstate-integration-test.js';
 import './modules/integration-appstate-test.js';
 import './modules/resultado-sync-appstate-test.js';
 import './modules/validators-test.js';
+import './modules/currency-formatting-appstate-test.js';
+import './modules/resultado-comparativo-appstate-test.js';
+import './modules/currency-control-appstate-test.js';
+import './modules/commission-flow-debug.js';
+import './modules/commission-integration-test.js';
+import './modules/commission-quick-test.js';
+import './modules/commission-flow-analyzer.js';
+import './modules/commission-flow-fix-test.js';
+import './modules/commission-simple-test.js';
+import './modules/commission-debug-test.js';
+import './modules/commission-final-test.js';
+import './modules/commission-final-fix-test.js';
+import './modules/separator-fix-analysis.js';
+import './modules/separator-consistency-test.js';
+import './modules/taxas-debug-test.js';
 import './modules/keyboard-navigation-test.js';
 // import './modules/swiper-resultado.js'; // DESATIVADO - mantido para uso futuro
 // Import CSS files

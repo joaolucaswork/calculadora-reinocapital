@@ -383,8 +383,8 @@ class ReinoTypebotIntegrationSystem {
     if (this.appState) {
       const selectedAssets = this.appState.getSelectedAssets();
       const formattedAssets = selectedAssets.map((assetKey) => {
-        // Convert "categoria|produto" to "Produto (Categoria)"
-        const [category, product] = assetKey.split('|');
+        // Convert "categoria:produto" to "Produto (Categoria)"
+        const [category, product] = assetKey.split(':');
         if (category && product) {
           // Capitalize first letter of each word
           const capitalizedCategory = category
@@ -431,9 +431,9 @@ class ReinoTypebotIntegrationSystem {
     if (window.ReinoAssetSelectionFilter && window.ReinoAssetSelectionFilter.selectedAssets) {
       // Convert old format to new format
       window.ReinoAssetSelectionFilter.selectedAssets.forEach((asset) => {
-        // If asset contains "|", split and format properly
-        if (asset.includes('|')) {
-          const parts = asset.split('|');
+        // If asset contains ":", split and format properly
+        if (asset.includes(':')) {
+          const parts = asset.split(':');
           if (parts.length === 2) {
             const category = parts[0].trim();
             const product = parts[1].trim();
@@ -441,7 +441,7 @@ class ReinoTypebotIntegrationSystem {
             selectedAssets.push(formattedAsset);
           }
         } else {
-          // If no "|", use as is
+          // If no ":", use as is
           selectedAssets.push(asset);
         }
       });

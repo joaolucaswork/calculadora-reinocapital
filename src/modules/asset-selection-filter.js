@@ -113,7 +113,7 @@
     }
 
     normalizeAssetKey(category, product) {
-      return `${category.toLowerCase().trim()}|${product.toLowerCase().trim()}`;
+      return `${category.toLowerCase().trim()}:${product.toLowerCase().trim()}`;
     }
 
     initializeSystem() {
@@ -226,8 +226,8 @@
         checkbox: checkbox,
         category: category,
         product: product,
-        normalizedKey: `${normalizedCategory}|${normalizedProduct}`,
-        key: `${category}|${product}`,
+        normalizedKey: `${normalizedCategory}:${normalizedProduct}`,
+        key: `${category}:${product}`,
       });
     }
 
@@ -285,7 +285,7 @@
         // Limpa via AppState
         const currentAssets = this.appState.getSelectedAssets();
         currentAssets.forEach((assetKey) => {
-          const [category, product] = assetKey.split('|');
+          const [category, product] = assetKey.split(':');
           this.appState.removeSelectedAsset(category, product, 'asset-selection-filter-reset');
         });
       } else {
@@ -400,7 +400,7 @@
       const normalizedCategoryName = this.normalizeString(categoryName);
 
       this.selectedAssets.forEach((assetKey) => {
-        const [category] = assetKey.split('|');
+        const [category] = assetKey.split(':');
         if (category === normalizedCategoryName) {
           count += 1;
         }
@@ -473,8 +473,8 @@
             element: asset,
             category: category,
             product: product,
-            normalizedKey: `${this.normalizeString(category)}|${this.normalizeString(product)}`,
-            key: `${category}|${product}`,
+            normalizedKey: `${this.normalizeString(category)}:${this.normalizeString(product)}`,
+            key: `${category}:${product}`,
           });
         }
       });
@@ -512,7 +512,7 @@
     }
 
     isAssetSelected(category, product) {
-      const normalizedKey = `${this.normalizeString(category)}|${this.normalizeString(product)}`;
+      const normalizedKey = `${this.normalizeString(category)}:${this.normalizeString(product)}`;
       return this.selectedAssets.has(normalizedKey);
     }
 
