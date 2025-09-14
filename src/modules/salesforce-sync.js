@@ -32,7 +32,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         // Wait for dependencies
@@ -141,7 +143,9 @@
      * Process the sync queue
      */
     async processQueue() {
-      if (this.isProcessing || this.syncQueue.length === 0) return;
+      if (this.isProcessing || this.syncQueue.length === 0) {
+        return;
+      }
 
       this.isProcessing = true;
 

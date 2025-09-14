@@ -187,7 +187,9 @@
   const ComissoesUtils = {
     getComissaoData: function (category, product) {
       const taxaConfig = obterTaxaPorAtributos(category, product);
-      if (!taxaConfig) return null;
+      if (!taxaConfig) {
+        return null;
+      }
 
       return {
         min: taxaConfig.min,

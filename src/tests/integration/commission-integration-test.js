@@ -303,7 +303,9 @@
     // ==================== UTILITY METHODS ====================
 
     parseCurrencyValue(text) {
-      if (!text) return 0;
+      if (!text) {
+        return 0;
+      }
       return parseFloat(text.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
     }
 

@@ -40,7 +40,7 @@ window.ReinoExternalIntegrations = (function () {
 
   // DGM Canvas Integration
   ExternalIntegrations.prototype.configureDGMCanvas = function (config) {
-    var self = this;
+    const self = this;
 
     return new Promise(function (resolve, reject) {
       try {

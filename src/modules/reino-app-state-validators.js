@@ -16,7 +16,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       await this.waitForAppState();
       this.setupValidationRules();
@@ -72,7 +74,9 @@
     }
 
     setupEventListeners() {
-      if (!this.appState) return;
+      if (!this.appState) {
+        return;
+      }
 
       // Validate on every AppState change
       document.addEventListener('appStateChanged', (e) => {
@@ -98,7 +102,9 @@
     }
 
     validateCurrentState() {
-      if (!this.appState) return { isValid: true, errors: [] };
+      if (!this.appState) {
+        return { isValid: true, errors: [] };
+      }
 
       const snapshot = this.appState.getStateSnapshot();
       return this.validateState(snapshot);

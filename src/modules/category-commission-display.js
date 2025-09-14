@@ -28,7 +28,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         this.cacheElements();
@@ -69,7 +71,9 @@
 
       items.forEach((item) => {
         const category = item.getAttribute('ativo-category');
-        if (!category) return;
+        if (!category) {
+          return;
+        }
 
         const priceElement = item.querySelector(this.config.priceSelector);
         const nameElement = item.querySelector(this.config.nameSelector);
@@ -147,7 +151,9 @@
     }
 
     handleAllocationChange(detail) {
-      if (!detail.category) return;
+      if (!detail.category) {
+        return;
+      }
 
       setTimeout(() => {
         this.calculateCategoryCommissions();
@@ -218,15 +224,21 @@
         const category = item.getAttribute('ativo-category');
         const product = item.getAttribute('ativo-product');
 
-        if (!category || !product) return;
+        if (!category || !product) {
+          return;
+        }
 
         const inputElement = item.querySelector(
           '.currency-input.individual, [input-settings="receive"]'
         );
-        if (!inputElement) return;
+        if (!inputElement) {
+          return;
+        }
 
         const allocatedValue = this.parseCurrencyValue(inputElement.value);
-        if (allocatedValue <= 0) return;
+        if (allocatedValue <= 0) {
+          return;
+        }
 
         let commissionValue = 0;
 
@@ -297,7 +309,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
 
       const cleanValue = value
         .replace(/[^\d,.-]/g, '')
@@ -309,7 +323,9 @@
     }
 
     formatCurrency(value) {
-      if (typeof value !== 'number' || isNaN(value)) return '0,00';
+      if (typeof value !== 'number' || isNaN(value)) {
+        return '0,00';
+      }
 
       return value.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
@@ -346,12 +362,15 @@
         // Remove existing event listeners to avoid duplicates
         const existingHandlers = this.eventHandlers?.get(container);
         if (existingHandlers) {
-          if (existingHandlers.click)
+          if (existingHandlers.click) {
             container.removeEventListener('click', existingHandlers.click);
-          if (existingHandlers.hover)
+          }
+          if (existingHandlers.hover) {
             container.removeEventListener('mouseenter', existingHandlers.hover);
-          if (existingHandlers.hoverOut)
+          }
+          if (existingHandlers.hoverOut) {
             container.removeEventListener('mouseleave', existingHandlers.hoverOut);
+          }
         }
 
         // Create event handlers
@@ -366,7 +385,9 @@
         };
 
         // Store handlers for cleanup
-        if (!this.eventHandlers) this.eventHandlers = new Map();
+        if (!this.eventHandlers) {
+          this.eventHandlers = new Map();
+        }
         this.eventHandlers.set(container, {
           click: clickHandler,
           hover: hoverHandler,
@@ -382,14 +403,18 @@
 
     handleValoresCategoryHover(category) {
       const chartSystem = window.ReinoD3DonutChartSection5System;
-      if (!chartSystem) return;
+      if (!chartSystem) {
+        return;
+      }
 
       // Track the last hovered category
       this.lastHoveredCategory = category;
 
       // Find the corresponding slice (exactly like lista-resultado-chart-bridge.js)
       const sliceInfo = this.findChartSliceByCategory(category);
-      if (!sliceInfo) return;
+      if (!sliceInfo) {
+        return;
+      }
 
       // Apply same hover effects as direct slice hover (exactly like lista-resultado-chart-bridge.js)
       this.applySliceHoverEffect(sliceInfo.element, sliceInfo.data);
@@ -400,7 +425,9 @@
 
     handleValoresCategoryHoverEnd() {
       const chartSystem = window.ReinoD3DonutChartSection5System;
-      if (!chartSystem) return;
+      if (!chartSystem) {
+        return;
+      }
 
       // Get the last hovered category to find the slice
       if (this.lastHoveredCategory) {
@@ -440,10 +467,14 @@
       event.stopPropagation();
 
       const chartSystem = window.ReinoD3DonutChartSection5System;
-      if (!chartSystem) return;
+      if (!chartSystem) {
+        return;
+      }
 
       const elementData = this.categoryElements.get(category);
-      if (!elementData) return;
+      if (!elementData) {
+        return;
+      }
 
       // Check if clicking on already active item (toggle behavior)
       if (this.activeValoresItem === elementData.container) {
@@ -456,7 +487,9 @@
 
       // Find the corresponding slice and trigger click
       const sliceInfo = this.findChartSliceByCategory(category);
-      if (!sliceInfo) return;
+      if (!sliceInfo) {
+        return;
+      }
 
       const syntheticEvent = {
         ...event,
@@ -491,7 +524,9 @@
 
     applySliceHoverEffect(sliceElement, sliceData) {
       const chartSystem = window.ReinoD3DonutChartSection5System;
-      if (!chartSystem || !window.d3) return;
+      if (!chartSystem || !window.d3) {
+        return;
+      }
 
       // Don't apply hover effects if tooltip is pinned
       if (chartSystem.hoverModule && chartSystem.hoverModule.state.isPinned) {
@@ -524,7 +559,9 @@
 
     removeSliceHoverEffect(sliceElement, sliceData) {
       const chartSystem = window.ReinoD3DonutChartSection5System;
-      if (!chartSystem || !window.d3) return;
+      if (!chartSystem || !window.d3) {
+        return;
+      }
 
       // Don't remove hover effects if tooltip is pinned
       if (chartSystem.hoverModule && chartSystem.hoverModule.state.isPinned) {
@@ -631,7 +668,9 @@
         });
       }
 
-      if (!container || !targetElement) return;
+      if (!container || !targetElement) {
+        return;
+      }
 
       const { container: targetContainer } = targetElement;
 

@@ -96,7 +96,9 @@
         this.appState.addSelectedAsset(category, product, 'asset-selection-filter');
       } else {
         const key = this.normalizeAssetKey(category, product);
-        if (!this._legacySelectedAssets) this._legacySelectedAssets = new Set();
+        if (!this._legacySelectedAssets) {
+          this._legacySelectedAssets = new Set();
+        }
         this._legacySelectedAssets.add(key);
       }
     }
@@ -303,7 +305,9 @@
     }
 
     syncUIFromAppState() {
-      if (!this.appState) return;
+      if (!this.appState) {
+        return;
+      }
 
       const selectedAssets = this.appState.getSelectedAssets();
       const selectedSet = new Set(selectedAssets);
@@ -329,7 +333,9 @@
 
       dropdowns.forEach((dropdown) => {
         const categoryName = this.getCategoryFromDropdown(dropdown);
-        if (!categoryName) return;
+        if (!categoryName) {
+          return;
+        }
 
         // Procura por contador existente ou cria um novo
         let counterElement = dropdown.querySelector('.counter_ativos');

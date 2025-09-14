@@ -63,7 +63,9 @@
     handleAllocationChange(detail) {
       const { category, product, percentage } = detail;
 
-      if (!category || !product) return;
+      if (!category || !product) {
+        return;
+      }
 
       const pair = this.pairs.find((p) => p.category === category && p.product === product);
 
@@ -84,7 +86,9 @@
         const category = patrimonioItem.getAttribute('ativo-category');
         const product = patrimonioItem.getAttribute('ativo-product');
 
-        if (!category || !product) return;
+        if (!category || !product) {
+          return;
+        }
 
         const ativosItem = Array.from(ativosItems).find((item) => {
           return (
@@ -169,7 +173,9 @@
     }
 
     syncFromPatrimonio(pair) {
-      if (!pair.patrimonio.slider || !pair.ativos.bar) return;
+      if (!pair.patrimonio.slider || !pair.ativos.bar) {
+        return;
+      }
 
       try {
         const sliderValue = parseFloat(pair.patrimonio.slider.value) || 0;
@@ -211,7 +217,9 @@
     }
 
     updateAtivosBar(pair, percentage) {
-      if (!pair.ativos.bar) return;
+      if (!pair.ativos.bar) {
+        return;
+      }
 
       const height = Math.min((percentage / 100) * this.maxBarHeight, this.maxBarHeight);
       pair.ativos.bar.style.height = `${height}px`;
@@ -230,7 +238,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     }

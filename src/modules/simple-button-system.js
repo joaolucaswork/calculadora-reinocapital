@@ -42,7 +42,9 @@
       newButton.addEventListener('click', (e) => {
         e.preventDefault();
 
-        if (newButton.disabled) return;
+        if (newButton.disabled) {
+          return;
+        }
 
         if (type === 'next') {
           this.stepNavigationSystem?.nextStep?.();
@@ -71,7 +73,9 @@
     }
 
     updateAllButtons() {
-      if (!this.stepNavigationSystem) return;
+      if (!this.stepNavigationSystem) {
+        return;
+      }
 
       const canProceed = this.stepNavigationSystem.canProceedToNext();
       document.querySelectorAll('[element-function="next"]').forEach((button) => {

@@ -66,7 +66,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       console.log('🚀 ReinoAppState: Starting initialization...');
 
@@ -296,8 +298,12 @@
     }
 
     parseNumericValue(value) {
-      if (typeof value === 'number') return value;
-      if (!value) return 0;
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (!value) {
+        return 0;
+      }
 
       const cleaned = value
         .toString()

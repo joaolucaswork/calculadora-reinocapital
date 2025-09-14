@@ -29,7 +29,9 @@
     }
 
     setupMainListeners() {
-      if (!this.input || this.boundHandlers.has('main')) return;
+      if (!this.input || this.boundHandlers.has('main')) {
+        return;
+      }
 
       const inputHandler = (e) => this.handleInputEvent(e);
       const focusHandler = (e) => this.processFocusEvent(e);
@@ -68,7 +70,9 @@
     }
 
     registerListener(moduleId, eventType, callback) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const key = `${moduleId}_${eventType}`;
 
@@ -109,7 +113,9 @@
     }
 
     processInputEvent(e) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const inputCallbacks = this.getCallbacksForEvent('input');
 
@@ -128,17 +134,23 @@
     }
 
     processFocusEvent(e) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
       this.executeCallbacksForEvent('focus', e);
     }
 
     processBlurEvent(e) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
       this.executeCallbacksForEvent('blur', e);
     }
 
     processChangeEvent(e) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
       this.executeCallbacksForEvent('change', e);
     }
 
@@ -177,7 +189,9 @@
     }
 
     setSilentValue(value) {
-      if (this.isDestroyed || !this.input) return;
+      if (this.isDestroyed || !this.input) {
+        return;
+      }
 
       this.isProcessing = true;
       this.input.value = value;
@@ -192,7 +206,9 @@
     }
 
     setValue(value, sourceModule = 'unknown') {
-      if (this.isDestroyed || !this.input) return;
+      if (this.isDestroyed || !this.input) {
+        return;
+      }
 
       this.input.value = value;
       this.dispatchInputEvent(sourceModule);

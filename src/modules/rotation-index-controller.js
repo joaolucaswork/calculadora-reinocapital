@@ -42,7 +42,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       // Aguarda o AppState estar disponível
       this.waitForAppState();
@@ -142,7 +144,9 @@
     }
 
     forceSliderUpdate() {
-      if (!this.slider) return;
+      if (!this.slider) {
+        return;
+      }
 
       this.slider.value = this.currentIndex.toString();
 
@@ -437,7 +441,9 @@
     normalizeProductKey(productKey) {
       // Convert "renda fixa:cdb" to "Renda Fixa:CDB"
       const [category, product] = productKey.split(':');
-      if (!category || !product) return productKey;
+      if (!category || !product) {
+        return productKey;
+      }
 
       const normalizedCategory = category
         .split(' ')

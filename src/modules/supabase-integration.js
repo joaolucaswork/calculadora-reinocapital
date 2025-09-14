@@ -241,7 +241,9 @@
     }
 
     sanitizeTestData(value) {
-      if (!value) return value;
+      if (!value) {
+        return value;
+      }
 
       // Add test prefix for testing environment
       if (this.environment === 'testing' && typeof value === 'string') {
@@ -413,7 +415,9 @@
     }
 
     capitalizeWords(str) {
-      if (!str) return '';
+      if (!str) {
+        return '';
+      }
 
       // Mapeamento para preservar formatação original de produtos e categorias
       const originalFormatMap = {
@@ -485,7 +489,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value) return 0;
+      if (!value) {
+        return 0;
+      }
       const cleaned = value
         .toString()
         .replace(/[^\d,]/g, '')

@@ -13,7 +13,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         this.waitForMotion();
@@ -62,7 +64,9 @@
     }
 
     handleCategoryHover(hoveredCategory) {
-      if (!hoveredCategory || this.listaItems.length === 0) return;
+      if (!hoveredCategory || this.listaItems.length === 0) {
+        return;
+      }
 
       this.isHovering = true;
       this.currentHoveredCategory = hoveredCategory;
@@ -83,7 +87,9 @@
     }
 
     handleCategoryHoverEnd() {
-      if (!this.isHovering) return;
+      if (!this.isHovering) {
+        return;
+      }
 
       this.isHovering = false;
       this.currentHoveredCategory = null;
@@ -97,17 +103,23 @@
     }
 
     setItemOpacity(item, opacity) {
-      if (!item) return;
+      if (!item) {
+        return;
+      }
 
       item.style.transition = 'opacity 0.3s ease';
       item.style.opacity = opacity;
     }
 
     animateColorBall(item, targetScale) {
-      if (!item) return;
+      if (!item) {
+        return;
+      }
 
       const colorBall = item.querySelector('.color-ball');
-      if (!colorBall) return;
+      if (!colorBall) {
+        return;
+      }
 
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

@@ -17,7 +17,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       // Aguarda todos os módulos estarem prontos
       this.waitForDependencies();

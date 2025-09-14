@@ -30,7 +30,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       // Aguarda AppState estar disponível
       await this.waitForAppState();
@@ -189,7 +191,9 @@
 
     calculateAndUpdate() {
       try {
-        if (!this.hasValidData()) return;
+        if (!this.hasValidData()) {
+          return;
+        }
 
         // Gera hash para evitar recálculos desnecessários
         const currentHash = this.generateCalculationHash();
@@ -500,7 +504,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     }
@@ -590,7 +596,9 @@
     // ==================== APPSTATE INTEGRATION METHODS ====================
 
     getAppStateSnapshot() {
-      if (!this.appState) return null;
+      if (!this.appState) {
+        return null;
+      }
 
       return {
         patrimony: this.appState.getPatrimonio(),

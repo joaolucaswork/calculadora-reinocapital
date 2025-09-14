@@ -211,7 +211,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       console.log('🚀 ReinoEventContracts: Starting initialization...');
 
@@ -269,7 +271,9 @@
     }
 
     logEvent(eventName, detail) {
-      if (!this.debugMode) return;
+      if (!this.debugMode) {
+        return;
+      }
 
       const logEntry = {
         event: eventName,

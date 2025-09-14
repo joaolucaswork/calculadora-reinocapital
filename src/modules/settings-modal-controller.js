@@ -11,7 +11,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this.setup());
@@ -189,7 +191,9 @@
     }
 
     async openModal() {
-      if (this.isModalOpen) return;
+      if (this.isModalOpen) {
+        return;
+      }
 
       this.isModalOpen = true;
       this.modal.style.display = 'block';
@@ -224,7 +228,9 @@
     }
 
     async closeModal() {
-      if (!this.isModalOpen) return;
+      if (!this.isModalOpen) {
+        return;
+      }
 
       if (window.Motion) {
         await window.Motion.animate(

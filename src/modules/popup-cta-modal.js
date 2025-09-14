@@ -20,7 +20,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       this.waitForMotion();
     }
@@ -114,7 +116,9 @@
     }
 
     async openModal() {
-      if (this.isModalOpen || this.isAnimating) return;
+      if (this.isModalOpen || this.isAnimating) {
+        return;
+      }
 
       this.isAnimating = true;
       this.isModalOpen = true;
@@ -161,7 +165,9 @@
     }
 
     async closeModal() {
-      if (!this.isModalOpen || this.isAnimating) return;
+      if (!this.isModalOpen || this.isAnimating) {
+        return;
+      }
 
       this.isAnimating = true;
       const { animate } = this.Motion;

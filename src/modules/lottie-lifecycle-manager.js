@@ -19,7 +19,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       this.waitForDependencies();
     }

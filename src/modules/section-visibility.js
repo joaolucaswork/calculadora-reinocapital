@@ -15,7 +15,9 @@
     }
 
     init() {
-      if (this.isReady) return;
+      if (this.isReady) {
+        return;
+      }
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this.setup());
@@ -117,7 +119,9 @@
 
     async hideSection(sectionName, animate = true) {
       const section = this.sections[sectionName];
-      if (!section || !section.visible) return;
+      if (!section || !section.visible) {
+        return;
+      }
 
       if (animate && window.Motion) {
         await window.Motion.animate(
@@ -133,7 +137,9 @@
 
     async displaySection(sectionName, animate = true) {
       const section = this.sections[sectionName];
-      if (!section) return;
+      if (!section) {
+        return;
+      }
 
       section.element.style.display = '';
       section.visible = true;
@@ -155,7 +161,9 @@
 
     toggleSection(sectionName) {
       const section = this.sections[sectionName];
-      if (!section) return;
+      if (!section) {
+        return;
+      }
 
       if (section.visible) {
         this.hideSection(sectionName);

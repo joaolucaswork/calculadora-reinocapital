@@ -22,7 +22,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         this.findListContainer();
@@ -60,7 +62,9 @@
     }
 
     cacheListItems() {
-      if (!this.listContainer) return;
+      if (!this.listContainer) {
+        return;
+      }
 
       // Busca todos os itens categoria-ativo dentro do container
       const categoryItems = this.listContainer.querySelectorAll('.categoria-ativo');
@@ -248,7 +252,9 @@
     }
 
     toggleItemVisibility(item, show) {
-      if (!item.element) return;
+      if (!item.element) {
+        return;
+      }
 
       const categoryElement = item.element;
       const elementType = item.isPercentage ? 'categoria-porcentagem' : 'categoria-ativo';
@@ -286,7 +292,9 @@
     }
 
     updateContainerVisibility(show) {
-      if (!this.listContainer) return;
+      if (!this.listContainer) {
+        return;
+      }
 
       if (show) {
         this.listContainer.style.display = '';
@@ -300,7 +308,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value) return 0;
+      if (!value) {
+        return 0;
+      }
 
       // Remove tudo exceto números, vírgulas e pontos
       const cleanValue = value.toString().replace(/[^\d,.]/g, '');
