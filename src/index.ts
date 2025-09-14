@@ -3,16 +3,13 @@
 // 1. APPSTATE - Fonte única de verdade (PRIMEIRO)
 import './modules/reino-app-state.js';
 import './modules/reino-event-contracts.js';
-
 // 1.1 APPSTATE TESTS - Testes de integração
 import './modules/appstate-integration-test.js';
 import './modules/integration-appstate-test.js';
-
 // 2. CONFIGS - Configurações base
 import './config/honorarios-reino-config.js';
 import './config/supabase.js';
 import './config/taxas-tradicional.js';
-
 // 3. CONTROLLERS - Lógica de negócio
 import './modules/asset-selection-filter.js';
 import './modules/currency-control.js';
@@ -52,7 +49,6 @@ import './button-system/button-coordinator.js';
 import './button-system/external-integrations.js';
 import './button-system/form-submission.js';
 import './button-system/navigation-buttons.js';
-
 // Import rotation index integration after configs
 import './modules/rotation-index-integration.js';
 import './modules/tippy-tooltip-module.js';
@@ -61,7 +57,6 @@ import './modules/detalhes-calculo-tooltip.js';
 import './modules/send-button-tooltip.js';
 import './modules/reino-debug-module.js';
 import './modules/calendly-minimalist-widget.js';
-import './modules/appstate-integration-test.js';
 import './modules/lottie-lifecycle-manager.js';
 import './modules/focus-visible-polyfill.js';
 import './modules/keyboard-navigation.js';
