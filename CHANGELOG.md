@@ -1,5 +1,15 @@
 # reinocapital-calculadora
 
+## 1.2.10
+
+### Patch Changes
+
+- 6754817: Add automated release workflow documentation
+
+  - Document Changesets integration for automated versioning
+  - Improve README with release workflow information
+  - Test automated npm publishing with GitHub Actions
+
 ## 1.2.9
 
 ### Patch Changes
