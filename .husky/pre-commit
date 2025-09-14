@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Reino Capital Calculator - Pre-commit Hook
+# Executes linting and basic tests before each commit
+
+echo "🔍 Running pre-commit checks..."
+
+# Run linting
+echo "📝 Checking code style and linting..."
+pnpm lint
+if [ $? -ne 0 ]; then
+    echo "❌ Linting failed. Commit rejected."
+    echo "💡 Run 'pnpm lint:fix' to auto-fix issues."
+    exit 1
+fi
+
+# Run type checking
+echo "🔍 Running TypeScript type checking..."
+pnpm check
+if [ $? -ne 0 ]; then
+    echo "❌ Type checking failed. Commit rejected."
+    echo "💡 Fix TypeScript errors before committing."
+    exit 1
+fi
+
+# Run unit tests
+echo "🧪 Running unit tests..."
+pnpm test
+if [ $? -ne 0 ]; then
+    echo "❌ Unit tests failed. Commit rejected."
+    echo "💡 Fix failing tests before committing."
+    exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"
