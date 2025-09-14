@@ -15,6 +15,7 @@
       this.debugMode = window.location.search.includes('debug=true');
 
       this.lastCommissionData = null;
+      this.lastAppStateSnapshot = null;
 
       this.init();
     }
@@ -22,6 +23,7 @@
     async init() {
       try {
         await this.waitForSupabaseClient();
+        await this.waitForAppState();
         this.setupClient();
         this.setupEventListeners();
         this.isReady = true;
@@ -50,6 +52,26 @@
       });
     }
 
+    waitForAppState() {
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 50;
+
+        const check = () => {
+          if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+            resolve();
+          } else if (attempts >= maxAttempts) {
+            reject(new Error('AppState not available after waiting'));
+          } else {
+            attempts++;
+            setTimeout(check, 100);
+          }
+        };
+
+        check();
+      });
+    }
+
     setupClient() {
       if (window.ReinoSupabase && window.ReinoSupabase.client) {
         this.client = window.ReinoSupabase.client;
@@ -67,6 +89,16 @@
           timestamp: new Date().toISOString(),
         };
         this.log('📊 Commission data captured:', this.lastCommissionData);
+      });
+
+      document.addEventListener('appStateChanged', (e) => {
+        this.lastAppStateSnapshot = e.detail.snapshot;
+        this.log('📊 AppState snapshot captured:', this.lastAppStateSnapshot);
+      });
+
+      document.addEventListener('appStateReady', () => {
+        this.lastAppStateSnapshot = window.ReinoAppState.getStateSnapshot();
+        this.log('📊 Initial AppState snapshot captured');
       });
     }
 
@@ -96,27 +128,33 @@
     }
 
     mapFormDataToSupabase(formData, typebotData = null) {
+      const snapshot = this.getAppStateSnapshot();
+
       const baseData = {
-        patrimonio: formData.patrimonio || 0,
-        ativos_escolhidos: formData.ativosEscolhidos || [],
-        alocacao: formData.alocacao || {},
+        patrimonio: snapshot.patrimonio.value || formData.patrimonio || 0,
+        ativos_escolhidos:
+          this.convertSelectedAssetsFormat(snapshot.selectedAssets) ||
+          formData.ativosEscolhidos ||
+          [],
+        alocacao:
+          this.convertAllocationFormat(snapshot.allocations, snapshot.patrimonio.value) ||
+          formData.alocacao ||
+          {},
         user_agent: formData.user_agent || navigator.userAgent,
         session_id: formData.session_id || this.generateSessionId(),
-        total_alocado: formData.totalAlocado || 0,
-        percentual_alocado: formData.percentualAlocado || 0,
-        patrimonio_restante: formData.patrimonioRestante || 0,
+        total_alocado: this.calculateTotalAllocated(snapshot.allocations),
+        percentual_alocado: this.calculatePercentualAlocado(snapshot),
+        patrimonio_restante: this.calculatePatrimonioRestante(snapshot),
         submitted_at: new Date().toISOString(),
       };
 
-      const indiceGiro = window.ReinoRotationIndexController
-        ? window.ReinoRotationIndexController.getCurrentIndex()
-        : 2;
-
       baseData.comissao_total_calculada = this.lastCommissionData
         ? this.lastCommissionData.total
-        : 0;
-      baseData.indice_giro_usado = indiceGiro;
-      baseData.detalhes_comissao = this.lastCommissionData ? this.lastCommissionData.details : [];
+        : snapshot.commission?.value || 0;
+      baseData.indice_giro_usado = snapshot.rotationIndex.value || 2;
+      baseData.detalhes_comissao = this.lastCommissionData
+        ? this.lastCommissionData.details
+        : snapshot.commission?.details || [];
 
       if (typebotData) {
         baseData.nome = typebotData.nome || formData.nome;
@@ -214,12 +252,108 @@
       };
     }
 
-    getCurrentCommissionData() {
+    getAppStateSnapshot() {
+      if (this.lastAppStateSnapshot) {
+        return this.lastAppStateSnapshot;
+      }
+
+      if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+        return window.ReinoAppState.getStateSnapshot();
+      }
+
       return {
-        commission: this.lastCommissionData,
-        rotationIndex: window.ReinoRotationIndexController
-          ? window.ReinoRotationIndexController.getCurrentIndex()
-          : 2,
+        patrimonio: { value: 0 },
+        selectedAssets: [],
+        allocations: {},
+        rotationIndex: { value: 2 },
+        commission: { value: 0, details: [] },
+      };
+    }
+
+    convertSelectedAssetsFormat(selectedAssets) {
+      if (!selectedAssets || !Array.isArray(selectedAssets)) {
+        return [];
+      }
+
+      return selectedAssets
+        .map((assetKey) => {
+          // AppState usa formato "categoria|produto" em lowercase
+          const [category, product] = assetKey.split('|');
+          return {
+            // Converter para formato original com capitalização
+            category: this.capitalizeWords(category) || 'Unknown',
+            product: this.capitalizeWords(product) || 'Unknown',
+          };
+        })
+        .filter((asset) => asset.category !== 'Unknown' && asset.product !== 'Unknown');
+    }
+
+    convertAllocationFormat(allocations, patrimonio) {
+      if (!allocations || typeof allocations !== 'object') {
+        return {};
+      }
+
+      const converted = {};
+
+      Object.entries(allocations).forEach(([assetKey, value]) => {
+        // AppState usa formato "categoria|produto" em lowercase
+        const [category, product] = assetKey.split('|');
+
+        // Skip if split failed
+        if (!category || !product) {
+          this.log(`⚠️ Invalid asset key format: ${assetKey}`);
+          return;
+        }
+
+        const numericValue = parseFloat(value) || 0;
+        const percentage = patrimonio > 0 ? (numericValue / patrimonio) * 100 : 0;
+
+        // Converter para formato original com capitalização
+        const capitalizedCategory = this.capitalizeWords(category);
+        const capitalizedProduct = this.capitalizeWords(product);
+        const originalKey = `${capitalizedCategory}-${capitalizedProduct}`;
+
+        converted[originalKey] = {
+          value: numericValue,
+          percentage: percentage,
+          category: capitalizedCategory,
+          product: capitalizedProduct,
+        };
+      });
+
+      return converted;
+    }
+
+    capitalizeWords(str) {
+      if (!str) return '';
+      return str
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    calculateTotalAllocated(allocations) {
+      return Object.values(allocations || {}).reduce((sum, value) => sum + (value || 0), 0);
+    }
+
+    calculatePercentualAlocado(snapshot) {
+      const total = this.calculateTotalAllocated(snapshot.allocations);
+      const patrimonio = snapshot.patrimonio.value || 0;
+      return patrimonio > 0 ? (total / patrimonio) * 100 : 0;
+    }
+
+    calculatePatrimonioRestante(snapshot) {
+      const total = this.calculateTotalAllocated(snapshot.allocations);
+      const patrimonio = snapshot.patrimonio.value || 0;
+      return patrimonio - total;
+    }
+
+    getCurrentCommissionData() {
+      const snapshot = this.getAppStateSnapshot();
+
+      return {
+        commission: this.lastCommissionData || snapshot.commission,
+        rotationIndex: snapshot.rotationIndex.value,
         timestamp: new Date().toISOString(),
       };
     }
@@ -251,6 +385,7 @@
 
   const supabaseIntegration = new SupabaseIntegration();
 
+  // Expose the complete instance for testing and form submission
   window.ReinoSupabaseIntegration = supabaseIntegration;
 
   if (document.readyState === 'loading') {

@@ -14,7 +14,13 @@
   function waitForDependencies() {
     return new Promise((resolve) => {
       const check = () => {
-        if (window.ReinoSalesforceSyncSystem && window.ReinoSupabase && window.ReinoSalesforce) {
+        if (
+          window.ReinoSalesforceSyncSystem &&
+          window.ReinoSupabase &&
+          window.ReinoSalesforce &&
+          window.ReinoAppState &&
+          window.ReinoAppState.isInitialized
+        ) {
           resolve();
         } else {
           setTimeout(check, 100);

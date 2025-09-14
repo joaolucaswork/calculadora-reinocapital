@@ -14,6 +14,9 @@ class ReinoTypebotIntegrationSystem {
     this.isProcessingCompletion = false; // Flag to prevent duplicate processing
     this.lastProcessedCompletion = null; // Track last processed completion ID
 
+    // AppState integration
+    this.appState = null;
+
     // Config
     this.config = {
       PUBLIC_ID: 'relatorio-reino',
@@ -38,6 +41,9 @@ class ReinoTypebotIntegrationSystem {
     if (this.isInitialized) return;
 
     try {
+      // Initialize AppState integration
+      this.setupAppStateIntegration();
+
       await this.loadTypebotLibrary();
       await this.initializeTypebotPopup();
       this.setupCompletionListener();
@@ -46,6 +52,16 @@ class ReinoTypebotIntegrationSystem {
       this.isInitialized = true;
     } catch (error) {
       console.error('❌ TypebotIntegrationSystem initialization failed:', error);
+    }
+  }
+
+  setupAppStateIntegration() {
+    // Check if AppState is available
+    if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+      this.appState = window.ReinoAppState;
+      console.log('✅ TypebotIntegration: AppState integration enabled');
+    } else {
+      console.log('⚠️ TypebotIntegration: AppState not available, using DOM fallback');
     }
   }
 
@@ -153,7 +169,52 @@ class ReinoTypebotIntegrationSystem {
   }
 
   collectFormData() {
-    // Collect comprehensive form data from the page
+    // Use AppState if available for calculator data
+    if (this.appState) {
+      const snapshot = this.appState.getStateSnapshot();
+      console.log('📊 AppState snapshot in collectFormData:', snapshot);
+
+      const data = {
+        nome: '',
+        email: '',
+        telefone: '',
+        patrimonio: snapshot.patrimonio.formatted,
+        ativos_selecionados: this.getSelectedAssets(),
+
+        // Use AppState data
+        ativosEscolhidos: snapshot.selectedAssets,
+        alocacao: snapshot.allocations,
+        totalAlocado: snapshot.totalAllocated,
+        percentualAlocado: snapshot.percentualAlocado,
+        patrimonioRestante: snapshot.patrimonioRestante,
+      };
+
+      // Try to get contact info from DOM inputs (these come from forms, not AppState)
+      const nameInputs = document.querySelectorAll(
+        'input[name*="nome"], input[placeholder*="nome"], #nome'
+      );
+      if (nameInputs.length > 0) {
+        data.nome = nameInputs[0].value || '';
+      }
+
+      const emailInputs = document.querySelectorAll(
+        'input[type="email"], input[name*="email"], #email'
+      );
+      if (emailInputs.length > 0) {
+        data.email = emailInputs[0].value || '';
+      }
+
+      const phoneInputs = document.querySelectorAll(
+        'input[type="tel"], input[name*="telefone"], input[name*="phone"], #telefone'
+      );
+      if (phoneInputs.length > 0) {
+        data.telefone = phoneInputs[0].value || '';
+      }
+
+      return data;
+    }
+
+    // Fallback to DOM-based collection
     const data = {
       nome: '',
       email: '',
@@ -169,7 +230,7 @@ class ReinoTypebotIntegrationSystem {
       patrimonioRestante: 0,
     };
 
-    // Calculate derived values
+    // Calculate derived values (only for DOM fallback)
     const patrimonioNumeric = this.getPatrimonioNumericValue();
     data.percentualAlocado =
       patrimonioNumeric > 0 ? (data.totalAlocado / patrimonioNumeric) * 100 : 0;
@@ -203,6 +264,13 @@ class ReinoTypebotIntegrationSystem {
   }
 
   getPatrimonioValue() {
+    // Use AppState if available
+    if (this.appState) {
+      const patrimonio = this.appState.getPatrimonio();
+      return patrimonio.formatted || 'R$ 0';
+    }
+
+    // Fallback to DOM
     const patrimonioInput = document.querySelector('#currency');
     if (patrimonioInput && patrimonioInput.value) {
       const cleaned = patrimonioInput.value
@@ -221,6 +289,13 @@ class ReinoTypebotIntegrationSystem {
   }
 
   getPatrimonioNumericValue() {
+    // Use AppState if available
+    if (this.appState) {
+      const patrimonio = this.appState.getPatrimonio();
+      return patrimonio.value || 0;
+    }
+
+    // Fallback to DOM
     const patrimonioInput = document.querySelector('#currency');
     if (patrimonioInput && patrimonioInput.value) {
       const cleaned = patrimonioInput.value
@@ -304,6 +379,30 @@ class ReinoTypebotIntegrationSystem {
   }
 
   getSelectedAssets() {
+    // Use AppState if available
+    if (this.appState) {
+      const selectedAssets = this.appState.getSelectedAssets();
+      const formattedAssets = selectedAssets.map((assetKey) => {
+        // Convert "categoria|produto" to "Produto (Categoria)"
+        const [category, product] = assetKey.split('|');
+        if (category && product) {
+          // Capitalize first letter of each word
+          const capitalizedCategory = category
+            .split(' ')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          const capitalizedProduct = product
+            .split(' ')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          return `${capitalizedProduct} (${capitalizedCategory})`;
+        }
+        return assetKey;
+      });
+      return formattedAssets.join(', ') || 'Nenhum ativo selecionado';
+    }
+
+    // Fallback to DOM
     const selectedAssets = [];
 
     // Get from active allocation items (more reliable)
@@ -353,8 +452,18 @@ class ReinoTypebotIntegrationSystem {
 
   async handleTypebotCompletion(typebotData = {}) {
     try {
+      console.log('🔍 handleTypebotCompletion called with:', typebotData);
+      console.log('🔍 Data keys:', Object.keys(typebotData));
+      console.log('🔍 Data length:', Object.keys(typebotData).length);
+
       // Prevent duplicate processing with unique identifier
       const completionId = typebotData.timestamp || Date.now();
+      console.log('🔍 Processing state:', {
+        isProcessingCompletion: this.isProcessingCompletion,
+        lastProcessedCompletion: this.lastProcessedCompletion,
+        currentCompletionId: completionId,
+      });
+
       if (this.isProcessingCompletion || this.lastProcessedCompletion === completionId) {
         console.log('🚫 Duplicate completion detected, skipping:', completionId);
         return;
@@ -378,7 +487,11 @@ class ReinoTypebotIntegrationSystem {
       if (!this.currentFormData) {
         // Try to collect form data now
         this.currentFormData = this.collectFormData();
+        console.log('📊 Collected form data:', this.currentFormData);
+        console.log('📊 Form data keys:', Object.keys(this.currentFormData));
+
         if (!this.currentFormData || Object.keys(this.currentFormData).length === 0) {
+          console.log('❌ No form data collected, aborting');
           this.isProcessingCompletion = false;
           return;
         }
@@ -484,9 +597,14 @@ class ReinoTypebotIntegrationSystem {
       };
 
       // Trigger completion callbacks
+      console.log('🔄 Triggering completion callbacks, count:', this.completionCallbacks.length);
+      console.log('📊 Enhanced form data for callbacks:', enhancedFormData);
+
       for (const callback of this.completionCallbacks) {
         try {
+          console.log('🔄 Executing callback...');
           await callback(enhancedFormData);
+          console.log('✅ Callback executed successfully');
         } catch (callbackError) {
           console.error('❌ Completion callback error:', callbackError);
         }
@@ -637,49 +755,62 @@ class ReinoTypebotIntegrationSystem {
       patrimonioRestante: 0,
     };
 
-    // Extract patrimonio value from formatted string
-    if (buttonCoordinatorData.patrimonio) {
-      const patrimonioStr = buttonCoordinatorData.patrimonio.toString();
-      const cleanValue = patrimonioStr.replace(/[^\d,]/g, '').replace(',', '.');
-      converted.patrimonio = parseFloat(cleanValue) || 0;
-    }
+    // Use AppState if available, otherwise fallback to buttonCoordinatorData
+    if (this.appState) {
+      const snapshot = this.appState.getStateSnapshot();
+      console.log('📊 Using AppState snapshot for conversion:', snapshot);
 
-    // Get selected assets directly from DOM (most reliable)
-    converted.ativosEscolhidos = this.getSelectedAssetsDetailed();
-
-    // Get allocation data from DOM
-    const allocationItems = document.querySelectorAll(
-      '.patrimonio_interactive_item .active-produto-item'
-    );
-    let totalAlocado = 0;
-
-    allocationItems.forEach((item) => {
-      const container = item.closest('.patrimonio_interactive_item');
-      const product = container.getAttribute('ativo-product');
-      const category = container.getAttribute('ativo-category');
-      const input = container.querySelector('.currency-input');
-      const slider = container.querySelector('.slider');
-
-      if (product && category && (input || slider)) {
-        const value = input ? this.parseCurrencyValue(input.value) : 0;
-        const percentage = slider ? parseFloat(slider.value) * 100 : 0;
-
-        converted.alocacao[category + '-' + product] = {
-          value: value,
-          percentage: percentage,
-          category: category,
-          product: product,
-        };
-
-        totalAlocado += value;
+      converted.patrimonio = snapshot.patrimonio.value || 0;
+      converted.ativosEscolhidos = snapshot.selectedAssets || [];
+      converted.alocacao = snapshot.allocations || {};
+      converted.totalAlocado = snapshot.totalAllocated || 0;
+      converted.percentualAlocado = snapshot.percentualAlocado || 0;
+      converted.patrimonioRestante = snapshot.patrimonioRestante || 0;
+    } else {
+      // Fallback to buttonCoordinatorData and DOM
+      if (buttonCoordinatorData.patrimonio) {
+        const patrimonioStr = buttonCoordinatorData.patrimonio.toString();
+        const cleanValue = patrimonioStr.replace(/[^\d,]/g, '').replace(',', '.');
+        converted.patrimonio = parseFloat(cleanValue) || 0;
       }
-    });
 
-    // Calculate derived values
-    converted.totalAlocado = totalAlocado;
-    converted.percentualAlocado =
-      converted.patrimonio > 0 ? (totalAlocado / converted.patrimonio) * 100 : 0;
-    converted.patrimonioRestante = converted.patrimonio - totalAlocado;
+      // Get selected assets directly from DOM (fallback)
+      converted.ativosEscolhidos = this.getSelectedAssetsDetailed();
+
+      // Get allocation data from DOM (fallback)
+      const allocationItems = document.querySelectorAll(
+        '.patrimonio_interactive_item .active-produto-item'
+      );
+      let totalAlocado = 0;
+
+      allocationItems.forEach((item) => {
+        const container = item.closest('.patrimonio_interactive_item');
+        const product = container.getAttribute('ativo-product');
+        const category = container.getAttribute('ativo-category');
+        const input = container.querySelector('.currency-input');
+        const slider = container.querySelector('.slider');
+
+        if (product && category && (input || slider)) {
+          const value = input ? this.parseCurrencyValue(input.value) : 0;
+          const percentage = slider ? parseFloat(slider.value) * 100 : 0;
+
+          converted.alocacao[category + '-' + product] = {
+            value: value,
+            percentage: percentage,
+            category: category,
+            product: product,
+          };
+
+          totalAlocado += value;
+        }
+      });
+
+      // Calculate derived values (fallback)
+      converted.totalAlocado = totalAlocado;
+      converted.percentualAlocado =
+        converted.patrimonio > 0 ? (totalAlocado / converted.patrimonio) * 100 : 0;
+      converted.patrimonioRestante = converted.patrimonio - totalAlocado;
+    }
 
     return converted;
   }
@@ -786,6 +917,17 @@ class ReinoTypebotIntegrationSystem {
     // Listen for postMessage from Typebot (PRIMARY METHOD)
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'typebot-completion') {
+        console.log('📨 PostMessage received:', event.data);
+        console.log('📨 Data payload:', event.data.data);
+        console.log('📨 Event origin:', event.origin);
+        console.log('📨 Event source:', event.source);
+
+        // Skip empty data payloads
+        if (!event.data.data || Object.keys(event.data.data).length === 0) {
+          console.log('🚫 Skipping empty postMessage data');
+          return;
+        }
+
         // Call handleTypebotCompletion directly with the data
         this.handleTypebotCompletion(event.data.data);
 

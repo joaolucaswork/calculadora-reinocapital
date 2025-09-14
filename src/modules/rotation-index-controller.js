@@ -4,6 +4,7 @@
   class RotationIndexController {
     constructor() {
       this.isInitialized = false;
+      this.appState = null;
       this.slider = null;
       this.displayElement = null;
       this.debugMode = window.location.search.includes('debug=true');
@@ -15,13 +16,59 @@
         step: 1,
       };
 
-      this.currentIndex = this.config.defaultValue;
+      // Legacy fallback para compatibilidade
+      this._legacyIndex = this.config.defaultValue;
       this.productData = this.initializeProductData();
+    }
+
+    // Getter inteligente que usa AppState se disponível
+    get currentIndex() {
+      if (this.appState) {
+        return this.appState.getRotationIndex().value;
+      }
+      return this._legacyIndex;
+    }
+
+    // Setter inteligente que usa AppState se disponível
+    set currentIndex(value) {
+      if (this.appState) {
+        const calculations = this.calculateAllProducts(value);
+        this.appState.setRotationIndex(value, calculations, 'rotation-controller');
+      } else {
+        this._legacyIndex = value;
+        // Dispara evento legacy para compatibilidade
+        this.dispatchIndexChange();
+      }
     }
 
     init() {
       if (this.isInitialized) return;
 
+      // Aguarda o AppState estar disponível
+      this.waitForAppState();
+    }
+
+    async waitForAppState() {
+      const maxAttempts = 50;
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+          this.appState = window.ReinoAppState;
+          this.setupController();
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        console.warn('⚠️ RotationIndexController: AppState not found, falling back to legacy mode');
+        this.setupController();
+      }
+    }
+
+    setupController() {
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this.setup());
       } else {
@@ -44,7 +91,8 @@
         this.isInitialized = true;
 
         if (this.debugMode) {
-          console.log('✅ Rotation Index Controller initialized');
+          const mode = this.appState ? 'with AppState integration' : 'in legacy mode';
+          console.log(`✅ Rotation Index Controller initialized ${mode}`);
         }
       } catch (error) {
         console.error('❌ Rotation Index Controller initialization failed:', error);
@@ -79,7 +127,16 @@
 
     setupSlider() {
       const currentValue = parseInt(this.slider.getAttribute('value'), 10);
-      this.currentIndex = currentValue || this.config.defaultValue;
+      const initialValue = currentValue || this.config.defaultValue;
+
+      // Se AppState estiver disponível, sincroniza com ele
+      if (this.appState) {
+        const appStateValue = this.appState.getRotationIndex().value;
+        // Usa o valor do AppState se disponível, senão usa o valor inicial
+        this.currentIndex = appStateValue || initialValue;
+      } else {
+        this.currentIndex = initialValue;
+      }
 
       this.forceSliderUpdate();
     }
@@ -123,15 +180,30 @@
       document.addEventListener('settingsModalOpened', () => {
         this.updateDisplay();
       });
+
+      // Listener para mudanças do AppState (de outras fontes)
+      if (this.appState) {
+        document.addEventListener('rotationIndexChanged', (e) => {
+          // Só atualiza se a mudança não veio deste controller
+          if (e.detail.source !== 'rotation-controller') {
+            this.forceSliderUpdate();
+            this.updateDisplay();
+          }
+        });
+      }
     }
 
     handleSliderChange(e) {
       const newValue = parseInt(e.target.value, 10);
 
       if (newValue !== this.currentIndex) {
-        this.currentIndex = newValue;
+        this.currentIndex = newValue; // Usa o setter inteligente
         this.updateDisplay();
-        this.dispatchIndexChange();
+
+        // Se não estiver usando AppState, dispara evento legacy
+        if (!this.appState) {
+          this.dispatchIndexChange();
+        }
 
         if (window.rotationSliderTooltipInstance) {
           window.rotationSliderTooltipInstance.updateTooltipContent();
@@ -160,20 +232,22 @@
       );
     }
 
-    calculateAllProducts() {
+    calculateAllProducts(indexOverride = null) {
       const results = {};
+      const indexToUse = indexOverride !== null ? indexOverride : this.currentIndex;
 
       for (const [key, product] of Object.entries(this.productData)) {
-        results[key] = this.calculateProductCommission(product);
+        results[key] = this.calculateProductCommission(product, indexToUse);
       }
 
       return results;
     }
 
-    calculateProductCommission(product) {
+    calculateProductCommission(product, indexOverride = null) {
       const { mediaCorretagem, prazoMedioAnos, fatorGiro, fixed } = product;
+      const indexToUse = indexOverride !== null ? indexOverride : this.currentIndex;
 
-      const indiceGiro = fixed ? 1 : this.currentIndex;
+      const indiceGiro = fixed ? 1 : indexToUse;
       const comissaoRate = (mediaCorretagem / prazoMedioAnos) * fatorGiro * indiceGiro;
 
       return {
@@ -320,9 +394,13 @@
 
     setIndex(newIndex) {
       if (newIndex >= this.config.minValue && newIndex <= this.config.maxValue) {
-        this.currentIndex = newIndex;
+        this.currentIndex = newIndex; // Usa o setter inteligente
         this.forceSliderUpdate();
-        this.dispatchIndexChange();
+
+        // Se não estiver usando AppState, dispara evento legacy
+        if (!this.appState) {
+          this.dispatchIndexChange();
+        }
       }
     }
 

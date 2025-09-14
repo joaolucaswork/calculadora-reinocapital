@@ -10,7 +10,7 @@
   class AssetSelectionFilterSystem {
     constructor() {
       this.isInitialized = false;
-      this.selectedAssets = new Set();
+      this.appState = null;
       this.section2Assets = [];
       this.section3Assets = [];
       this.categoryCounters = new Map(); // Contadores por categoria
@@ -24,6 +24,30 @@
         return;
       }
 
+      // Aguarda AppState estar disponível
+      this.waitForAppState();
+    }
+
+    async waitForAppState() {
+      const maxAttempts = 50;
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+          this.appState = window.ReinoAppState;
+          this.setupAppStateIntegration();
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        console.warn('⚠️ AssetSelectionFilter: AppState not found, using legacy mode');
+      }
+
+      // Inicializa o sistema independentemente
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
           this.initializeSystem();
@@ -33,6 +57,63 @@
       }
 
       this.isInitialized = true;
+    }
+
+    setupAppStateIntegration() {
+      console.log('✅ AssetSelectionFilter: AppState integration enabled');
+
+      // Sincroniza estado inicial se AppState já tem dados
+      const currentAssets = this.appState.getSelectedAssets();
+      if (currentAssets.length > 0) {
+        console.log('📥 Loading existing assets from AppState:', currentAssets);
+      }
+    }
+
+    // Getter que usa AppState se disponível, senão fallback local
+    get selectedAssets() {
+      if (this.appState) {
+        const assets = this.appState.getSelectedAssets();
+        return new Set(assets);
+      }
+      return this._legacySelectedAssets || new Set();
+    }
+
+    // Setter que atualiza AppState se disponível
+    set selectedAssets(value) {
+      if (this.appState) {
+        // AppState gerencia individualmente, não como Set
+        console.warn(
+          '⚠️ Use addSelectedAsset/removeSelectedAsset instead of setting selectedAssets directly'
+        );
+      } else {
+        this._legacySelectedAssets = value;
+      }
+    }
+
+    // Métodos para gerenciar seleção via AppState
+    addAssetToSelection(category, product) {
+      if (this.appState) {
+        this.appState.addSelectedAsset(category, product, 'asset-selection-filter');
+      } else {
+        const key = this.normalizeAssetKey(category, product);
+        if (!this._legacySelectedAssets) this._legacySelectedAssets = new Set();
+        this._legacySelectedAssets.add(key);
+      }
+    }
+
+    removeAssetFromSelection(category, product) {
+      if (this.appState) {
+        this.appState.removeSelectedAsset(category, product, 'asset-selection-filter');
+      } else {
+        const key = this.normalizeAssetKey(category, product);
+        if (this._legacySelectedAssets) {
+          this._legacySelectedAssets.delete(key);
+        }
+      }
+    }
+
+    normalizeAssetKey(category, product) {
+      return `${category.toLowerCase().trim()}|${product.toLowerCase().trim()}`;
     }
 
     initializeSystem() {
@@ -155,14 +236,14 @@
     }
 
     handleAssetSelection(isSelected, category, product, assetElement) {
-      const normalizedKey = `${this.normalizeString(category)}|${this.normalizeString(product)}`;
-
       if (isSelected) {
-        this.selectedAssets.add(normalizedKey);
+        // Usa AppState se disponível
+        this.addAssetToSelection(category, product);
         assetElement.classList.add('selected-asset');
         this.resetAssetValues(category, product);
       } else {
-        this.selectedAssets.delete(normalizedKey);
+        // Usa AppState se disponível
+        this.removeAssetFromSelection(category, product);
         assetElement.classList.remove('selected-asset');
         this.resetAssetValues(category, product);
       }
@@ -170,26 +251,76 @@
       this.updateCounter();
       this.filterSection3();
 
-      document.dispatchEvent(
-        new CustomEvent('assetSelectionChanged', {
-          detail: {
-            selectedCount: this.selectedAssets.size,
-            selectedAssets: Array.from(this.selectedAssets),
-          },
-        })
-      );
+      // O AppState já dispara eventos, mas mantemos compatibilidade
+      if (!this.appState) {
+        document.dispatchEvent(
+          new CustomEvent('assetSelectionChanged', {
+            detail: {
+              selectedCount: this.selectedAssets.size,
+              selectedAssets: Array.from(this.selectedAssets),
+            },
+          })
+        );
+      }
     }
 
     setupSystemListeners() {
       document.addEventListener('patrimonySyncReset', () => {
-        this.selectedAssets.clear();
-        this.section2Assets.forEach((asset) => {
-          asset.checkbox.checked = false;
-          asset.element.classList.remove('selected-asset');
-        });
-        this.updateCounter();
-        this.filterSection3();
+        this.clearAllSelections();
       });
+
+      // Escuta eventos do AppState para sincronizar UI
+      if (this.appState) {
+        document.addEventListener('assetSelectionChanged', (e) => {
+          // Sincroniza UI quando AppState muda (evita loops)
+          if (e.detail.source !== 'asset-selection-filter') {
+            this.syncUIFromAppState();
+          }
+        });
+      }
+    }
+
+    clearAllSelections() {
+      if (this.appState) {
+        // Limpa via AppState
+        const currentAssets = this.appState.getSelectedAssets();
+        currentAssets.forEach((assetKey) => {
+          const [category, product] = assetKey.split('|');
+          this.appState.removeSelectedAsset(category, product, 'asset-selection-filter-reset');
+        });
+      } else {
+        // Modo legacy
+        this.selectedAssets.clear();
+      }
+
+      // Atualiza UI
+      this.section2Assets.forEach((asset) => {
+        asset.checkbox.checked = false;
+        asset.element.classList.remove('selected-asset');
+      });
+      this.updateCounter();
+      this.filterSection3();
+    }
+
+    syncUIFromAppState() {
+      if (!this.appState) return;
+
+      const selectedAssets = this.appState.getSelectedAssets();
+      const selectedSet = new Set(selectedAssets);
+
+      this.section2Assets.forEach((asset) => {
+        const isSelected = selectedSet.has(asset.normalizedKey);
+        asset.checkbox.checked = isSelected;
+
+        if (isSelected) {
+          asset.element.classList.add('selected-asset');
+        } else {
+          asset.element.classList.remove('selected-asset');
+        }
+      });
+
+      this.updateCounter();
+      this.filterSection3();
     }
 
     setupCounter() {
@@ -323,20 +454,9 @@
             percentageDisplay.textContent = '0%';
           }
         }
-      } catch (error) {}
-    }
-
-    clearAllSelections() {
-      this.selectedAssets.clear();
-
-      this.section2Assets.forEach((asset) => {
-        asset.checkbox.checked = false;
-        asset.element.classList.remove('selected-asset');
-        this.resetAssetValues(asset.category, asset.product);
-      });
-
-      this.updateCounter();
-      this.filterSection3();
+      } catch (error) {
+        // Silently handle errors in asset value reset
+      }
     }
 
     initialFilterSetup() {
@@ -427,7 +547,9 @@
             },
           })
         );
-      } catch (error) {}
+      } catch (error) {
+        // Silently handle errors in event dispatch
+      }
     }
   }
 
