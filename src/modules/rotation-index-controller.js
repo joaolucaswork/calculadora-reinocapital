@@ -409,12 +409,44 @@
     }
 
     getProductCalculation(productKey) {
-      const product = this.productData[productKey];
+      // Try exact match first
+      let product = this.productData[productKey];
+
+      // If not found, try normalized key
+      if (!product) {
+        const normalizedKey = this.normalizeProductKey(productKey);
+        product = this.productData[normalizedKey];
+      }
+
       return product ? this.calculateProductCommission(product) : null;
     }
 
     getProductData(productKey) {
-      return this.productData[productKey] || null;
+      // Try exact match first
+      let product = this.productData[productKey];
+
+      // If not found, try normalized key
+      if (!product) {
+        const normalizedKey = this.normalizeProductKey(productKey);
+        product = this.productData[normalizedKey];
+      }
+
+      return product || null;
+    }
+
+    normalizeProductKey(productKey) {
+      // Convert "renda fixa:cdb" to "Renda Fixa:CDB"
+      const [category, product] = productKey.split(':');
+      if (!category || !product) return productKey;
+
+      const normalizedCategory = category
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+
+      const normalizedProduct = product.toUpperCase();
+
+      return `${normalizedCategory}:${normalizedProduct}`;
     }
   }
 

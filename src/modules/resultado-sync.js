@@ -311,6 +311,20 @@
         totalElement.textContent = formatted;
       }
 
+      // DIRECT FIX: Also update the [data-resultado="tradicional"] element directly
+      // This ensures it gets updated even if resultado-comparativo-calculator has issues
+      const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
+      if (tradicionalElement) {
+        // Use the same formatting as resultado-comparativo-calculator
+        const displayFormatted = new Intl.NumberFormat('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(total);
+
+        tradicionalElement.textContent = displayFormatted;
+        this.log(`🏦 Direct tradicional DOM update: ${displayFormatted} (raw: ${total})`);
+      }
+
       // Update AppState if available
       if (this.appState) {
         this.appState.setCommissionResults(total, this.getCommissionDetails(), 'resultado-sync');

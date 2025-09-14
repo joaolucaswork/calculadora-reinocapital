@@ -24,6 +24,7 @@ import './modules/currency-control.js'; // ✅ AppState integrado
 import './modules/resultado-sync.js'; // ✅ AppState integrado
 import './modules/resultado-comparativo-calculator.js'; // ✅ AppState integrado
 import './modules/rotation-index-integration.js'; // Integração de cálculos
+import './modules/final-rotation-fix.js'; // Fix definitivo para rotação
 // ==================== 5. SYNC & BRIDGE MODULES ====================
 // Módulos que sincronizam estado com UI e integrações externas
 import './modules/category-summary-sync.js';

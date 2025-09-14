@@ -155,8 +155,13 @@
 
     onRotationIndexChange(detail) {
       // Mudanças no índice de giro afetam cálculos tradicionais
-      this.calculateAndUpdate();
-      this.log(`🔄 Rotation index changed: ${detail.index}`);
+      // Mas não recalculamos aqui - aguardamos o totalComissaoChanged do resultado-sync
+      // que já considera o índice de giro corretamente
+      this.log(`🔄 Rotation index changed: ${detail.index} - awaiting commission recalculation`);
+
+      // Apenas recalcula o valor Reino (que não depende do índice de giro)
+      const reinoValues = this.calculateReinoValue();
+      this.updateReinoDOMElement(reinoValues.annual);
     }
 
     onTradicionalValueChange(value) {
@@ -193,30 +198,37 @@
           return;
         }
 
-        // Calcula valores Reino e Tradicional
+        // Sempre calcula valores Reino
         const reinoValues = this.calculateReinoValue();
-        const traditionalValues = this.calculateTradicionalValue();
+        this.updateReinoDOMElement(reinoValues.annual);
 
-        // Atualiza elementos DOM
-        this.updateDOMElements(reinoValues, traditionalValues);
+        // Para o valor tradicional, verifica se há um sistema de resultado-sync ativo
+        if (window.ReinoSimpleResultadoSync && window.ReinoSimpleResultadoSync.isInitialized) {
+          // Se há resultado-sync ativo, não recalcula o tradicional aqui
+          // O resultado-sync já considera o índice de giro corretamente
+          this.log('📊 Reino calculated, traditional value managed by resultado-sync');
+        } else {
+          // Fallback: calcula tradicional apenas se não há resultado-sync
+          const traditionalValues = this.calculateTradicionalValue();
+          this.updateTradicionalDOMElement(traditionalValues.total);
+
+          this.cache.lastTradicionalValue = traditionalValues.total;
+
+          // Dispatch event para outros sistemas
+          this.dispatchCalculationUpdate(
+            traditionalValues,
+            reinoValues.annual,
+            reinoValues.patrimony
+          );
+
+          this.log(
+            `📊 Calculation completed - Reino: ${reinoValues.formatted.annual}, Traditional: ${traditionalValues.formatted.total}`
+          );
+        }
 
         // Atualiza cache
         this.cache.lastReinoValue = reinoValues.annual;
-        this.cache.lastTradicionalValue = traditionalValues.total;
         this.cache.lastCalculationHash = currentHash;
-
-        // AppState não precisa ser atualizado aqui - o DOM é suficiente
-
-        // Dispatch event para outros sistemas
-        this.dispatchCalculationUpdate(
-          traditionalValues,
-          reinoValues.annual,
-          reinoValues.patrimony
-        );
-
-        this.log(
-          `📊 Calculation completed - Reino: ${reinoValues.formatted.annual}, Traditional: ${traditionalValues.formatted.total}`
-        );
       } catch (error) {
         console.error('❌ [ResultadoComparativo] Error in calculation:', error);
       }

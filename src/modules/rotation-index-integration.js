@@ -54,8 +54,10 @@
       this.setupEventListeners();
       this.isInitialized = true;
 
+      console.log('✅ Rotation Index Integration initialized and calcularCustoProduto enhanced');
+
       if (this.debugMode) {
-        console.log('✅ Rotation Index Integration initialized');
+        console.log('🔄 Original function stored, enhanced function active');
       }
     }
 
@@ -69,31 +71,35 @@
       const originalResult = this.originalCalcFunction(valorAlocado, category, product);
 
       if (!this.rotationController || valorAlocado <= 0) {
+        console.log(
+          `⚠️ Rotation calc skipped: controller=${!!this.rotationController}, value=${valorAlocado}`
+        );
         return originalResult;
       }
 
       const productKey = `${category}:${product}`;
       const rotationCalc = this.rotationController.getProductCalculation(productKey);
 
-      if (this.debugMode) {
-        console.log(`🔄 Rotation calc for ${productKey}:`, {
-          found: !!rotationCalc,
-          rotationCalc,
-          currentIndex: this.rotationController.getCurrentIndex(),
-        });
-      }
+      console.log(`🔄 Rotation calc for ${productKey}:`, {
+        found: !!rotationCalc,
+        currentIndex: this.rotationController.getCurrentIndex(),
+        rotationCalc: rotationCalc
+          ? {
+              comissaoRate: rotationCalc.comissaoRate,
+              comissaoPercent: rotationCalc.comissaoPercent,
+            }
+          : null,
+      });
 
       if (rotationCalc) {
         const rotationBasedCost = valorAlocado * rotationCalc.comissaoRate;
 
-        if (this.debugMode) {
-          console.log(`💰 Cost calculation:`, {
-            valorAlocado,
-            comissaoRate: rotationCalc.comissaoRate,
-            rotationBasedCost,
-            originalCost: originalResult.custoMedio,
-          });
-        }
+        console.log(`💰 Cost calculation:`, {
+          valorAlocado,
+          comissaoRate: rotationCalc.comissaoRate,
+          rotationBasedCost,
+          originalCost: originalResult.custoMedio,
+        });
 
         return {
           ...originalResult,
@@ -105,6 +111,8 @@
           fatorEfetivo: rotationCalc.fatorEfetivo,
           calculoOriginal: originalResult.custoMedio,
         };
+      } else {
+        console.log(`⚠️ No rotation calculation found for ${productKey}, using original result`);
       }
 
       return originalResult;
@@ -163,11 +171,34 @@
     }
   }
 
-  if (typeof window !== 'undefined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeRotationIndexIntegration);
-    } else {
+  // Multiple initialization attempts to ensure dependencies are loaded
+  function tryInitialization() {
+    if (window.ReinoRotationIndexController && window.calcularCustoProduto) {
       initializeRotationIndexIntegration();
+      return true;
+    }
+    return false;
+  }
+
+  if (typeof window !== 'undefined') {
+    // Try immediate initialization
+    if (!tryInitialization()) {
+      // If not ready, try on DOMContentLoaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          if (!tryInitialization()) {
+            // If still not ready, try with delays
+            setTimeout(() => tryInitialization(), 500);
+            setTimeout(() => tryInitialization(), 1000);
+            setTimeout(() => tryInitialization(), 2000);
+          }
+        });
+      } else {
+        // Document already loaded, try with delays
+        setTimeout(() => tryInitialization(), 100);
+        setTimeout(() => tryInitialization(), 500);
+        setTimeout(() => tryInitialization(), 1000);
+      }
     }
   }
 })();
