@@ -1,6 +1,8 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
+
+import { describe, beforeEach, test, expect, vi } from 'vitest';
 
 describe('ReinoAppStateValidators', () => {
   let mockValidators;
@@ -8,11 +10,11 @@ describe('ReinoAppStateValidators', () => {
   beforeEach(() => {
     // Mock the validators module
     mockValidators = {
-      validatePatrimonio: jest.fn(),
-      validateAllocation: jest.fn(),
-      validateAssets: jest.fn(),
-      validateRotationIndex: jest.fn(),
-      validateCommission: jest.fn(),
+      validatePatrimonio: vi.fn(),
+      validateAllocation: vi.fn(),
+      validateAssets: vi.fn(),
+      validateRotationIndex: vi.fn(),
+      validateCommission: vi.fn(),
       isInitialized: true,
     };
 
@@ -31,14 +33,14 @@ describe('ReinoAppStateValidators', () => {
         warnings: [],
       });
 
-      const result = mockValidators.validatePatrimonio({ 
-        patrimonio: { value: 1000000 } 
+      const result = mockValidators.validatePatrimonio({
+        patrimonio: { value: 1000000 },
       });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(mockValidators.validatePatrimonio).toHaveBeenCalledWith({
-        patrimonio: { value: 1000000 }
+        patrimonio: { value: 1000000 },
       });
     });
 
@@ -49,8 +51,8 @@ describe('ReinoAppStateValidators', () => {
         warnings: [],
       });
 
-      const result = mockValidators.validatePatrimonio({ 
-        patrimonio: { value: -1000 } 
+      const result = mockValidators.validatePatrimonio({
+        patrimonio: { value: -1000 },
       });
 
       expect(result.isValid).toBe(false);
@@ -64,8 +66,8 @@ describe('ReinoAppStateValidators', () => {
         warnings: ['Patrimônio muito baixo'],
       });
 
-      const result = mockValidators.validatePatrimonio({ 
-        patrimonio: { value: 500 } 
+      const result = mockValidators.validatePatrimonio({
+        patrimonio: { value: 500 },
       });
 
       expect(result.isValid).toBe(true);
@@ -88,8 +90,8 @@ describe('ReinoAppStateValidators', () => {
           warnings: [],
         });
 
-        const result = mockValidators.validatePatrimonio({ 
-          patrimonio: { value } 
+        const result = mockValidators.validatePatrimonio({
+          patrimonio: { value },
         });
 
         expect(result.isValid).toBe(expectedValid);
@@ -192,7 +194,7 @@ describe('ReinoAppStateValidators', () => {
     test('should validate rotation index range', () => {
       const validIndices = [1, 2, 3, 4];
 
-      validIndices.forEach(index => {
+      validIndices.forEach((index) => {
         mockValidators.validateRotationIndex.mockReturnValue({
           isValid: true,
           errors: [],
@@ -210,7 +212,7 @@ describe('ReinoAppStateValidators', () => {
     test('should reject invalid rotation indices', () => {
       const invalidIndices = [0, 5, -1, null, undefined, 'invalid'];
 
-      invalidIndices.forEach(index => {
+      invalidIndices.forEach((index) => {
         mockValidators.validateRotationIndex.mockReturnValue({
           isValid: false,
           errors: ['Índice de rotação inválido'],

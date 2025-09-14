@@ -1,6 +1,8 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
+
+import { describe, beforeEach, test, expect, vi } from 'vitest';
 
 describe('Commission Calculator', () => {
   let mockCalcularCustoProduto;
@@ -8,13 +10,13 @@ describe('Commission Calculator', () => {
 
   beforeEach(() => {
     // Mock the commission calculation function
-    mockCalcularCustoProduto = jest.fn();
+    mockCalcularCustoProduto = vi.fn();
 
     // Mock rotation controller
     mockRotationController = {
-      getCurrentIndex: jest.fn().mockReturnValue(2),
-      setIndex: jest.fn(),
-      getEffectiveFactor: jest.fn(),
+      getCurrentIndex: vi.fn().mockReturnValue(2),
+      setIndex: vi.fn(),
+      getEffectiveFactor: vi.fn(),
     };
 
     // Set up global window mocks
