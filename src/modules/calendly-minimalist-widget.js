@@ -180,7 +180,7 @@
         this.container.style.height = `${adjustedHeight}px`;
 
         // Também ajusta o container pai se necessário
-        const parentElement = this.container.parentElement;
+        const { parentElement } = this.container;
         if (parentElement && parentElement.style.height !== 'auto') {
           parentElement.style.height = `${adjustedHeight}px`;
         }

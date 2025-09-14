@@ -68,21 +68,27 @@
         {
           name: 'Valid patrimônio passes',
           test: () => {
-            const result = window.ReinoAppStateValidators.validatePatrimonio({ patrimonio: { value: 1000000 } });
+            const result = window.ReinoAppStateValidators.validatePatrimonio({
+              patrimonio: { value: 1000000 },
+            });
             return result.isValid;
           },
         },
         {
           name: 'Negative patrimônio fails',
           test: () => {
-            const result = window.ReinoAppStateValidators.validatePatrimonio({ patrimonio: { value: -1000 } });
+            const result = window.ReinoAppStateValidators.validatePatrimonio({
+              patrimonio: { value: -1000 },
+            });
             return !result.isValid && result.errors.length > 0;
           },
         },
         {
           name: 'Low patrimônio generates warning',
           test: () => {
-            const result = window.ReinoAppStateValidators.validatePatrimonio({ patrimonio: { value: 500 } });
+            const result = window.ReinoAppStateValidators.validatePatrimonio({
+              patrimonio: { value: 500 },
+            });
             return result.isValid && result.warnings.length > 0;
           },
         },
@@ -244,21 +250,27 @@
         {
           name: 'Valid rotation index passes',
           test: () => {
-            const result = window.ReinoAppStateValidators.validateRotationIndex({ rotationIndex: { value: 2 } });
+            const result = window.ReinoAppStateValidators.validateRotationIndex({
+              rotationIndex: { value: 2 },
+            });
             return result.isValid;
           },
         },
         {
           name: 'Invalid rotation index fails',
           test: () => {
-            const result = window.ReinoAppStateValidators.validateRotationIndex({ rotationIndex: { value: 5 } });
+            const result = window.ReinoAppStateValidators.validateRotationIndex({
+              rotationIndex: { value: 5 },
+            });
             return !result.isValid && result.errors.length > 0;
           },
         },
         {
           name: 'Non-integer rotation index fails',
           test: () => {
-            const result = window.ReinoAppStateValidators.validateRotationIndex({ rotationIndex: { value: 2.5 } });
+            const result = window.ReinoAppStateValidators.validateRotationIndex({
+              rotationIndex: { value: 2.5 },
+            });
             return !result.isValid && result.errors.length > 0;
           },
         },

@@ -52,7 +52,7 @@
       }
 
       const debugInfo = window.ReinoCurrencyControlSystem.getDebugInfo();
-      
+
       if (!debugInfo.hasAppState) {
         throw new Error('CurrencyControl not connected to AppState');
       }
@@ -75,12 +75,17 @@
 
       // Verifica se o currency control obtém o valor correto
       const currentValue = currencyControl.getCurrentValue();
-      
+
       if (currentValue !== testValue) {
-        throw new Error(`Current value retrieval failed. Expected: ${testValue}, Got: ${currentValue}`);
+        throw new Error(
+          `Current value retrieval failed. Expected: ${testValue}, Got: ${currentValue}`
+        );
       }
 
-      this.addResult(true, `Current value retrieval working: ${appState.formatCurrency(testValue)}`);
+      this.addResult(
+        true,
+        `Current value retrieval working: ${appState.formatCurrency(testValue)}`
+      );
     }
 
     async testIncrementLogic() {
@@ -104,18 +109,20 @@
         await this.wait(50);
 
         const initialValue = currencyControl.getCurrentValue();
-        
+
         // Simula clique no botão de incremento
         const increaseButton = document.querySelector('[currency-control="increase"]');
         if (increaseButton) {
           increaseButton.click();
           await this.wait(50);
-          
+
           const newValue = currencyControl.getCurrentValue();
           const actualIncrement = newValue - initialValue;
-          
+
           if (actualIncrement !== testCase.expectedIncrement) {
-            throw new Error(`Increment logic failed for ${testCase.initial}. Expected increment: ${testCase.expectedIncrement}, Got: ${actualIncrement}`);
+            throw new Error(
+              `Increment logic failed for ${testCase.initial}. Expected increment: ${testCase.expectedIncrement}, Got: ${actualIncrement}`
+            );
           }
         }
       }
@@ -140,20 +147,22 @@
         const beforeValue = currencyControl.getCurrentValue();
         decreaseButton.click();
         await this.wait(50);
-        
+
         const afterValue = currencyControl.getCurrentValue();
-        
+
         if (afterValue >= beforeValue) {
-          throw new Error(`Decrement logic failed. Value should decrease. Before: ${beforeValue}, After: ${afterValue}`);
+          throw new Error(
+            `Decrement logic failed. Value should decrease. Before: ${beforeValue}, After: ${afterValue}`
+          );
         }
 
         // Testa limite mínimo (não pode ser negativo)
         appState.setPatrimonio(50, 'test');
         await this.wait(50);
-        
+
         decreaseButton.click();
         await this.wait(50);
-        
+
         const finalValue = currencyControl.getCurrentValue();
         if (finalValue < 0) {
           throw new Error(`Decrement logic failed - value went negative: ${finalValue}`);
@@ -234,14 +243,14 @@
 
       const icon = success ? '✅' : '❌';
       this.log(`${icon} ${message}`);
-      
+
       if (error) {
         this.log(`   Error details:`, error);
       }
     }
 
     printResults() {
-      const passed = this.testResults.filter(r => r.success).length;
+      const passed = this.testResults.filter((r) => r.success).length;
       const total = this.testResults.length;
       const failed = total - passed;
 
@@ -253,8 +262,8 @@
       if (failed > 0) {
         console.log('\n❌ Failed Tests:');
         this.testResults
-          .filter(r => !r.success)
-          .forEach(result => {
+          .filter((r) => !r.success)
+          .forEach((result) => {
             console.log(`   • ${result.message}`);
             if (result.error) {
               console.log(`     ${result.error.message}`);
@@ -264,9 +273,9 @@
     }
 
     getTestSummary() {
-      const passed = this.testResults.filter(r => r.success).length;
+      const passed = this.testResults.filter((r) => r.success).length;
       const total = this.testResults.length;
-      
+
       return {
         passed,
         failed: total - passed,
@@ -277,7 +286,7 @@
     }
 
     async wait(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     enableDebug() {
@@ -311,5 +320,4 @@
       }
     });
   }
-
 })();

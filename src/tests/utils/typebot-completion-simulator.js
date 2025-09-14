@@ -12,16 +12,16 @@
       this.options = {
         delay: 2000, // Default delay before completion
         debug: true,
-        ...options
+        ...options,
       };
-      
+
       this.defaultCompletionData = {
         nome: 'João Teste',
         email: 'joao.teste@exemplo.com',
         telefone: '(11) 99999-9999',
         completed: true,
         timestamp: new Date().toISOString(),
-        method: 'test-simulation'
+        method: 'test-simulation',
       };
     }
 
@@ -33,15 +33,15 @@
      */
     async simulateCompletion(customData = {}, options = {}) {
       const config = { ...this.options, ...options };
-      
+
       try {
         this.log('🤖 Starting Typebot completion simulation...');
-        
+
         // Prepare completion data
         const completionData = {
           ...this.defaultCompletionData,
           ...customData,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
 
         this.log('📋 Completion data prepared:', completionData);
@@ -62,7 +62,6 @@
 
         this.log('✅ Typebot completion simulation completed successfully');
         return true;
-
       } catch (error) {
         this.log('❌ Typebot completion simulation failed:', error);
         return false;
@@ -75,19 +74,25 @@
      */
     sendCompletionMessage(completionData) {
       this.log('📤 Sending typebot-completion postMessage...');
-      
+
       // Send the exact same postMessage structure as the real Typebot script
-      window.postMessage({
-        type: 'typebot-completion',
-        data: completionData
-      }, '*');
+      window.postMessage(
+        {
+          type: 'typebot-completion',
+          data: completionData,
+        },
+        '*'
+      );
 
       // Also try sending to parent window (in case we're in an iframe context)
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({
-          type: 'typebot-completion',
-          data: completionData
-        }, '*');
+        window.parent.postMessage(
+          {
+            type: 'typebot-completion',
+            data: completionData,
+          },
+          '*'
+        );
       }
 
       this.log('📨 PostMessage sent with completion data');
@@ -114,7 +119,6 @@
 
         // Hide any visible Typebot containers
         this.hideTypebotContainers();
-
       } catch (error) {
         this.log('⚠️ Error during Typebot close simulation:', error);
       }
@@ -128,17 +132,17 @@
         '#typebot-embed-container',
         '*[id*="typebot"]',
         '*[class*="typebot"]',
-        'iframe[src*="typebot"]'
+        'iframe[src*="typebot"]',
       ];
 
-      selectors.forEach(selector => {
+      selectors.forEach((selector) => {
         try {
           const elements = document.querySelectorAll(selector);
-          elements.forEach(el => {
+          elements.forEach((el) => {
             el.style.display = 'none';
             el.style.visibility = 'hidden';
           });
-          
+
           if (elements.length > 0) {
             this.log(`🙈 Hidden ${elements.length} elements matching: ${selector}`);
           }
@@ -160,29 +164,29 @@
           email: 'maria.silva@empresa.com',
           telefone: '(11) 98765-4321',
           completed: true,
-          method: 'test-lead-qualified'
+          method: 'test-lead-qualified',
         },
         'lead-basic': {
           nome: 'João Santos',
           email: 'joao@gmail.com',
           telefone: '(21) 99999-8888',
           completed: true,
-          method: 'test-lead-basic'
+          method: 'test-lead-basic',
         },
-        'incomplete': {
+        incomplete: {
           nome: 'Pedro Oliveira',
           email: '',
           telefone: '',
           completed: false,
-          method: 'test-incomplete'
+          method: 'test-incomplete',
         },
         'invalid-email': {
           nome: 'Ana Costa',
           email: 'email-invalido',
           telefone: '(31) 77777-6666',
           completed: true,
-          method: 'test-invalid-email'
-        }
+          method: 'test-invalid-email',
+        },
       };
 
       return scenarios[scenario] || this.defaultCompletionData;
@@ -195,18 +199,18 @@
      */
     async simulateMultipleCompletions(count = 3, interval = 1000) {
       this.log(`🔄 Starting ${count} completion simulations with ${interval}ms interval...`);
-      
+
       for (let i = 0; i < count; i++) {
         const scenarioData = this.createTestScenario(i % 2 === 0 ? 'lead-qualified' : 'lead-basic');
         scenarioData.nome = `${scenarioData.nome} ${i + 1}`;
-        
+
         await this.simulateCompletion(scenarioData, { delay: 500 });
-        
+
         if (i < count - 1) {
           await this.wait(interval);
         }
       }
-      
+
       this.log('🏁 Multiple completion simulation finished');
     }
 
@@ -215,7 +219,7 @@
      * @param {number} ms - Milliseconds to wait
      */
     wait(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     /**
@@ -240,22 +244,22 @@
      */
     async validateCompletion(timeout = 5000) {
       this.log('🔍 Validating completion processing...');
-      
+
       const startTime = Date.now();
-      
+
       while (Date.now() - startTime < timeout) {
         // Check if we've navigated to section 4 or 5 (completion indicators)
         const section4 = document.querySelector('[data-step="4"]');
         const section5 = document.querySelector('[data-step="5"]');
-        
+
         if (section4?.style.display !== 'none' || section5?.style.display !== 'none') {
           this.log('✅ Completion validation successful - navigation detected');
           return true;
         }
-        
+
         await this.wait(100);
       }
-      
+
       this.log('⚠️ Completion validation timeout - no navigation detected');
       return false;
     }
@@ -272,5 +276,4 @@
     console.log('🤖 TypebotCompletionSimulator loaded and ready for testing');
     console.log('Usage: window.typebotSimulator.simulateCompletion()');
   }
-
 })();

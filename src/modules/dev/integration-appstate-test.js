@@ -458,10 +458,9 @@
       console.log('📊 Mapped data for Supabase:', result);
       console.log('✅ Test completed - check the mapped data above');
       return result;
-    } else {
-      console.log('❌ Supabase integration not available');
-      return null;
     }
+    console.log('❌ Supabase integration not available');
+    return null;
   };
 
   // Auto-run tests if in debug mode

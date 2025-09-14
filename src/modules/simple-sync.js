@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class SimpleSyncSystem {
@@ -192,16 +192,17 @@
       this.pairs.forEach((pair) => {
         if (pair.patrimonio.input && pair.patrimonio.input.value) {
           const currentValue = this.parseCurrencyValue(pair.patrimonio.input.value);
-          const totalPatrimony = window.ReinoEventCoordinator ? 
-            this.parseCurrencyValue(window.ReinoEventCoordinator.getValue()) : 0;
-          
+          const totalPatrimony = window.ReinoEventCoordinator
+            ? this.parseCurrencyValue(window.ReinoEventCoordinator.getValue())
+            : 0;
+
           if (totalPatrimony > 0) {
             const percentage = (currentValue / totalPatrimony) * 100;
-            
+
             if (pair.patrimonio.slider) {
               pair.patrimonio.slider.value = percentage / 100;
             }
-            
+
             this.updateAtivosBar(pair, percentage);
             this.updateAtivosText(pair, percentage);
           }
@@ -287,5 +288,4 @@
   } else {
     window.ReinoSimpleSyncSystem.init();
   }
-
 })();

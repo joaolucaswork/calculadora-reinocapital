@@ -16,7 +16,7 @@
       assetSelection: testAssetSelection(),
       supabase: testSupabase(),
       typebot: testTypebot(),
-      commission: testCommissionFlow()
+      commission: testCommissionFlow(),
     };
 
     console.log('📊 Test Results Summary:');
@@ -25,8 +25,8 @@
       console.log(`${status} ${module}: ${result.message}`);
     });
 
-    const allSuccess = Object.values(results).every(r => r.success);
-    
+    const allSuccess = Object.values(results).every((r) => r.success);
+
     if (allSuccess) {
       console.log('🎉 ALL MODULES CONSISTENT! Separator standardization complete!');
     } else {
@@ -43,11 +43,11 @@
 
     try {
       const appState = window.ReinoAppState;
-      
+
       // Test key normalization
       const testKey = appState.normalizeAssetKey('Test Category', 'Test Product');
       const usesColon = testKey.includes(':') && !testKey.includes('|');
-      
+
       if (!usesColon) {
         return { success: false, message: `Key format incorrect: ${testKey}` };
       }
@@ -65,16 +65,20 @@
 
     try {
       const resultadoSync = window.ReinoSimpleResultadoSync;
-      
+
       // Test if it recognizes colon-separated assets
       if (window.ReinoAppState) {
         window.ReinoAppState.addSelectedAsset('Test Category', 'Test Product', 'separator-test');
-        
+
         const isRecognized = resultadoSync.isAssetSelected('Test Category', 'Test Product');
-        
+
         // Cleanup
-        window.ReinoAppState.removeSelectedAsset('Test Category', 'Test Product', 'separator-test-cleanup');
-        
+        window.ReinoAppState.removeSelectedAsset(
+          'Test Category',
+          'Test Product',
+          'separator-test-cleanup'
+        );
+
         if (!isRecognized) {
           return { success: false, message: 'Does not recognize colon-separated assets' };
         }
@@ -93,11 +97,11 @@
 
     try {
       const filter = window.ReinoAssetSelectionFilter;
-      
+
       // Test key normalization
       const testKey = filter.normalizeAssetKey('Test Category', 'Test Product');
       const usesColon = testKey.includes(':') && !testKey.includes('|');
-      
+
       if (!usesColon) {
         return { success: false, message: `Key format incorrect: ${testKey}` };
       }
@@ -115,11 +119,11 @@
 
     try {
       const supabase = window.ReinoSupabaseIntegration;
-      
+
       // Test asset format conversion
       const testAssets = ['test category:test product'];
       const converted = supabase.convertSelectedAssetsFormat(testAssets);
-      
+
       if (!converted || converted.length === 0) {
         return { success: false, message: 'Asset format conversion failed' };
       }
@@ -159,10 +163,10 @@
 
       // Check if asset is recognized
       const isRecognized = resultadoSync.isAssetSelected('Renda Fixa', 'CDB');
-      
+
       // Check if allocation is retrieved
       const allocation = appState.getAllocation('Renda Fixa', 'CDB');
-      
+
       // Cleanup
       appState.removeSelectedAsset('Renda Fixa', 'CDB', 'commission-flow-test-cleanup');
 
@@ -206,7 +210,7 @@
         eventTotal = e.detail.total;
         console.log('📡 Commission event received:', {
           total: e.detail.total,
-          source: e.detail.source
+          source: e.detail.source,
         });
       };
 
@@ -221,8 +225,9 @@
         // Check results
         const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
         const tradicionalValue = tradicionalElement ? tradicionalElement.textContent : 'NOT_FOUND';
-        
-        const supabaseCommission = window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
+
+        const supabaseCommission =
+          window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
 
         console.log('📊 Full Commission Test Results:');
         console.log('- Event received:', eventReceived);
@@ -240,7 +245,6 @@
 
         // Cleanup
         appState.removeSelectedAsset('Renda Fixa', 'CDB', 'full-commission-test-cleanup');
-
       }, 500);
     }, 200);
   }
@@ -253,5 +257,4 @@
   console.log('🔧 Available functions:');
   console.log('  - testSeparatorConsistency()');
   console.log('  - runFullCommissionTest()');
-
 })();

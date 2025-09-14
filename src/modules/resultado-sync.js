@@ -96,7 +96,7 @@
     handleAppStateChange(detail) {
       if (!detail.snapshot) return;
 
-      const snapshot = detail.snapshot;
+      const { snapshot } = detail;
 
       // Update selected assets from AppState
       if (snapshot.selectedAssets) {

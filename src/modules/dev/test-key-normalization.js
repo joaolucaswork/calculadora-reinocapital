@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   function testKeyNormalization() {
@@ -24,29 +24,29 @@
       'Renda Fixa:CDB',
       'RENDA FIXA:CDB',
       'renda fixa:CDB',
-      'Renda Fixa:cdb'
+      'Renda Fixa:cdb',
     ];
 
     console.log('\n📋 Testing different key formats:');
-    
-    testCases.forEach(testKey => {
+
+    testCases.forEach((testKey) => {
       console.log(`\n--- Testing: "${testKey}" ---`);
-      
+
       // Test normalization method if available
       if (typeof controller.normalizeProductKey === 'function') {
         const normalized = controller.normalizeProductKey(testKey);
         console.log(`   Normalized: "${normalized}"`);
       }
-      
+
       // Test getProductCalculation
       const calculation = controller.getProductCalculation(testKey);
       console.log(`   Calculation found: ${!!calculation}`);
-      
+
       if (calculation) {
         console.log(`   Commission rate: ${calculation.comissaoRate}`);
         console.log(`   Commission %: ${calculation.comissaoPercent}%`);
       }
-      
+
       // Test getProductData
       const productData = controller.getProductData(testKey);
       console.log(`   Product data found: ${!!productData}`);
@@ -54,24 +54,28 @@
 
     // Test with actual calculation
     console.log('\n🧮 Testing actual calculation:');
-    
+
     const testValue = 500000;
     const testKey = 'renda fixa:cdb';
-    
+
     console.log(`Testing calcularCustoProduto with "${testKey}"`);
-    
+
     if (window.calcularCustoProduto) {
       const [category, product] = testKey.split(':');
       const resultado = window.calcularCustoProduto(testValue, category, product);
-      
+
       console.log('Result:', {
         custoMedio: resultado.custoMedio,
         custoRotacao: resultado.custoRotacao,
         indiceGiro: resultado.indiceGiro,
         comissaoRate: resultado.comissaoRate,
-        hasRotationData: !!(resultado.custoRotacao || resultado.indiceGiro || resultado.comissaoRate)
+        hasRotationData: !!(
+          resultado.custoRotacao ||
+          resultado.indiceGiro ||
+          resultado.comissaoRate
+        ),
       });
-      
+
       if (resultado.custoMedio > 0) {
         console.log('✅ Calculation working!');
       } else {
@@ -86,5 +90,4 @@
   window.testKeyNormalization = testKeyNormalization;
 
   console.log('✅ Key Normalization Test loaded. Call testKeyNormalization() to run.');
-
 })();

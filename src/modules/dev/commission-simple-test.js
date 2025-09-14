@@ -15,7 +15,7 @@
       appState: !!window.ReinoAppState,
       resultadoSync: !!window.ReinoSimpleResultadoSync,
       comparativo: !!window.ReinoResultadoComparativoCalculator,
-      supabase: !!window.ReinoSupabaseIntegration
+      supabase: !!window.ReinoSupabaseIntegration,
     };
 
     console.log('📋 Modules:', modules);
@@ -27,7 +27,7 @@
 
     // Test asset recognition
     console.log('🎯 Testing asset recognition...');
-    
+
     const appState = window.ReinoAppState;
     const resultadoSync = window.ReinoSimpleResultadoSync;
 
@@ -42,13 +42,13 @@
 
       if (!isRecognized) {
         console.error('❌ Asset recognition failed');
-        
+
         // Debug info
         console.log('🔍 Debug:');
         console.log('- AppState assets:', appState.getSelectedAssets());
         console.log('- ResultadoSync assets:', Array.from(resultadoSync.selectedAssets));
         console.log('- AppState allocations:', appState.getAllAllocations());
-        
+
         return;
       }
 
@@ -76,7 +76,7 @@
 
       setTimeout(() => {
         document.removeEventListener('totalComissaoChanged', handler);
-        
+
         if (eventReceived) {
           console.log('🎉 SUCCESS: Commission flow working!');
         } else {
@@ -88,16 +88,16 @@
         const tradicionalValue = tradicionalElement ? tradicionalElement.textContent : 'NOT_FOUND';
         console.log('🖥️ DOM tradicional value:', tradicionalValue);
 
-        const supabaseCommission = window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
+        const supabaseCommission =
+          window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
         console.log('📊 Supabase commission:', supabaseCommission);
-
       }, 300);
     }, 100);
   }
 
   function debugAssetKeys() {
     console.log('🔍 Debugging asset keys...');
-    
+
     if (!window.ReinoAppState || !window.ReinoSimpleResultadoSync) {
       console.error('❌ Required modules not available');
       return;
@@ -113,15 +113,18 @@
     // Test key normalization
     const testCategory = 'Renda Fixa';
     const testProduct = 'CDB';
-    
+
     console.log('🔑 Key normalization test:');
     console.log('- AppState format:', `${testCategory}:${testProduct}`);
-    console.log('- Legacy format:', `${testCategory.toLowerCase().trim()}|${testProduct.toLowerCase().trim()}`);
-    
+    console.log(
+      '- Legacy format:',
+      `${testCategory.toLowerCase().trim()}|${testProduct.toLowerCase().trim()}`
+    );
+
     // Test if AppState recognizes
     const appStateRecognizes = appState.isAssetSelected(testCategory, testProduct);
     console.log('- AppState recognizes:', appStateRecognizes);
-    
+
     // Test if ResultadoSync recognizes
     const resultadoSyncRecognizes = resultadoSync.isAssetSelected(testCategory, testProduct);
     console.log('- ResultadoSync recognizes:', resultadoSyncRecognizes);
@@ -129,22 +132,26 @@
 
   function testCommissionCalculation() {
     console.log('🧮 Testing commission calculation...');
-    
+
     if (!window.ReinoSimpleResultadoSync) {
       console.error('❌ ResultadoSync not available');
       return;
     }
 
     const resultadoSync = window.ReinoSimpleResultadoSync;
-    
+
     try {
       const testValue = 500000;
       const testCategory = 'Renda Fixa';
       const testProduct = 'CDB';
-      
-      const commission = resultadoSync.calculateCommissionForValue(testValue, testCategory, testProduct);
+
+      const commission = resultadoSync.calculateCommissionForValue(
+        testValue,
+        testCategory,
+        testProduct
+      );
       console.log(`💰 Commission for ${testValue} in ${testCategory}:${testProduct}:`, commission);
-      
+
       if (commission > 0) {
         console.log('✅ Commission calculation working');
       } else {
@@ -165,5 +172,4 @@
   console.log('  - simpleCommissionTest()');
   console.log('  - debugAssetKeys()');
   console.log('  - testCommissionCalculation()');
-
 })();

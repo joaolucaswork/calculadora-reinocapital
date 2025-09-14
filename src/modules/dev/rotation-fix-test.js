@@ -4,14 +4,18 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   function testRotationFix() {
     console.log('🔧 Testing Rotation Fix...');
     console.log('==========================');
 
-    if (!window.ReinoAppState || !window.ReinoSimpleResultadoSync || !window.ReinoRotationIndexController) {
+    if (
+      !window.ReinoAppState ||
+      !window.ReinoSimpleResultadoSync ||
+      !window.ReinoRotationIndexController
+    ) {
       console.error('❌ Required modules not available');
       return;
     }
@@ -38,7 +42,7 @@
     setTimeout(() => {
       const initialValue = tradicionalElement.textContent;
       const initialIndex = rotationController.getCurrentIndex();
-      
+
       console.log(`   Initial DOM value: "${initialValue}"`);
       console.log(`   Initial rotation index: ${initialIndex}`);
 
@@ -46,14 +50,14 @@
       console.log('\n2. 🔄 Changing rotation index...');
       const newIndex = initialIndex === 2 ? 3 : 2;
       console.log(`   Changing from ${initialIndex} to ${newIndex}`);
-      
+
       rotationController.setIndex(newIndex);
 
       // Check result after short delay
       setTimeout(() => {
         const finalValue = tradicionalElement.textContent;
         const finalIndex = rotationController.getCurrentIndex();
-        
+
         console.log('\n3. 📊 Results:');
         console.log(`   Final DOM value: "${finalValue}"`);
         console.log(`   Final rotation index: ${finalIndex}`);
@@ -61,7 +65,9 @@
         console.log(`   Rotation index changed: ${finalIndex === newIndex ? '✅' : '❌'}`);
 
         if (finalValue !== initialValue) {
-          console.log('\n🎉 SUCCESS! The fix is working - DOM element updates when rotation index changes.');
+          console.log(
+            '\n🎉 SUCCESS! The fix is working - DOM element updates when rotation index changes.'
+          );
         } else {
           console.log('\n❌ ISSUE: DOM element did not update when rotation index changed.');
         }
@@ -70,9 +76,7 @@
         console.log('\n4. 🧹 Cleaning up...');
         appState.removeSelectedAsset('Renda Fixa', 'CDB', 'rotation-fix-test-cleanup');
         rotationController.setIndex(initialIndex);
-
       }, 1000);
-
     }, 500);
   }
 
@@ -80,5 +84,4 @@
   window.testRotationFix = testRotationFix;
 
   console.log('✅ Rotation Fix Test loaded. Call testRotationFix() to run.');
-
 })();

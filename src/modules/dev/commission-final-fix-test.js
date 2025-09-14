@@ -22,12 +22,12 @@
 
     // Test 2: Test taxas with lowercase format
     console.log('\n2. 🧮 Testing taxas with lowercase format:');
-    
+
     const testCases = [
       { category: 'renda fixa', product: 'cdb', value: 100000 },
       { category: 'renda variável', product: 'ações e ativos', value: 200000 },
       { category: 'coe', product: 'coe', value: 50000 },
-      { category: 'outros', product: 'poupança', value: 30000 }
+      { category: 'outros', product: 'poupança', value: 30000 },
     ];
 
     let successCount = 0;
@@ -35,22 +35,25 @@
     testCases.forEach((testCase, index) => {
       try {
         console.log(`\n   ${index + 1}. Testing: ${testCase.category}:${testCase.product}`);
-        
-        const result = window.calcularCustoProduto(testCase.value, testCase.category, testCase.product);
-        
+
+        const result = window.calcularCustoProduto(
+          testCase.value,
+          testCase.category,
+          testCase.product
+        );
+
         console.log('      Result:', {
           custoMedio: result.custoMedio,
           taxaMedia: result.taxaMedia,
-          produto: result.produto
+          produto: result.produto,
         });
-        
+
         if (result.custoMedio > 0) {
           console.log('      ✅ SUCCESS - Commission calculated');
           successCount++;
         } else {
           console.log('      ❌ FAILED - No commission calculated');
         }
-        
       } catch (error) {
         console.log(`      ❌ ERROR: ${error.message}`);
       }
@@ -93,7 +96,7 @@
         console.log('   📡 Commission event received:', {
           total: e.detail.total,
           source: e.detail.source,
-          details: e.detail.details?.length || 0
+          details: e.detail.details?.length || 0,
         });
       };
 
@@ -117,7 +120,8 @@
         console.log('   DOM tradicional:', tradicionalValue);
 
         // Check Supabase
-        const supabaseCommission = window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
+        const supabaseCommission =
+          window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
         console.log('   Supabase commission:', supabaseCommission);
 
         // Check AppState
@@ -130,7 +134,7 @@
           eventReceived: eventReceived,
           eventHasValue: eventTotal > 0,
           domUpdated: tradicionalValue !== '0,00' && tradicionalValue !== 'NOT_FOUND',
-          supabaseUpdated: supabaseCommission > 0
+          supabaseUpdated: supabaseCommission > 0,
         };
 
         console.log('\n5. ✅ Success Assessment:');
@@ -160,7 +164,6 @@
 
         // Cleanup
         appState.removeSelectedAsset('Renda Fixa', 'CDB', 'final-fix-test-cleanup');
-
       }, 500);
     }, 200);
   }
@@ -177,7 +180,7 @@
     const quickTests = [
       { category: 'renda fixa', product: 'cdb' },
       { category: 'renda variável', product: 'ações e ativos' },
-      { category: 'coe', product: 'coe' }
+      { category: 'coe', product: 'coe' },
     ];
 
     quickTests.forEach((test, index) => {
@@ -199,5 +202,4 @@
   console.log('🔧 Available functions:');
   console.log('  - testCommissionFinalFix() - Complete test');
   console.log('  - quickTaxasTest() - Quick taxas verification');
-
 })();

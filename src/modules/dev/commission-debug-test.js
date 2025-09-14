@@ -16,7 +16,7 @@
     }
 
     const resultadoSync = window.ReinoSimpleResultadoSync;
-    
+
     // Test parameters
     const testValue = 100000;
     const testCategory = 'Renda Fixa';
@@ -30,21 +30,28 @@
     // Check if calculateCommissionForValue method exists
     if (typeof resultadoSync.calculateCommissionForValue !== 'function') {
       console.error('❌ calculateCommissionForValue method not found');
-      console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(resultadoSync)));
+      console.log(
+        'Available methods:',
+        Object.getOwnPropertyNames(Object.getPrototypeOf(resultadoSync))
+      );
       return;
     }
 
     try {
-      const commission = resultadoSync.calculateCommissionForValue(testValue, testCategory, testProduct);
+      const commission = resultadoSync.calculateCommissionForValue(
+        testValue,
+        testCategory,
+        testProduct
+      );
       console.log(`💰 Calculated commission: ${commission}`);
 
       if (commission === 0) {
         console.log('⚠️ Commission is 0 - investigating why...');
-        
+
         // Check if calcularCustoProduto function exists
         if (typeof window.calcularCustoProduto === 'function') {
           console.log('✅ calcularCustoProduto function found');
-          
+
           try {
             const custoResult = window.calcularCustoProduto(testValue, testCategory, testProduct);
             console.log('🧮 calcularCustoProduto result:', custoResult);
@@ -53,7 +60,10 @@
           }
         } else {
           console.error('❌ calcularCustoProduto function not found');
-          console.log('Available global functions:', Object.keys(window).filter(key => key.includes('calcular')));
+          console.log(
+            'Available global functions:',
+            Object.keys(window).filter((key) => key.includes('calcular'))
+          );
         }
 
         // Check rotation index
@@ -77,11 +87,9 @@
             console.log('💰 Input value:', input.value);
           }
         }
-
       } else {
         console.log('✅ Commission calculation working correctly');
       }
-
     } catch (error) {
       console.error('❌ Commission calculation failed:', error.message);
       console.error('Stack trace:', error.stack);
@@ -112,7 +120,7 @@
       const category = item.getAttribute('ativo-category');
       const product = item.getAttribute('ativo-product');
       const isVisible = item.style.display !== 'none';
-      
+
       console.log(`  ${index + 1}. ${category}:${product} - visible: ${isVisible}`);
     });
 
@@ -150,7 +158,7 @@
       console.log(`📡 Event ${eventCount}: totalComissaoChanged`, {
         total: e.detail.total,
         source: e.detail.source,
-        details: e.detail.details?.length || 0
+        details: e.detail.details?.length || 0,
       });
     };
 
@@ -162,7 +170,7 @@
     setTimeout(() => {
       document.removeEventListener('totalComissaoChanged', handler);
       console.log(`📊 Total events received: ${eventCount}`);
-      
+
       // Disable debug mode
       resultadoSync.debugMode = false;
     }, 1000);
@@ -178,5 +186,4 @@
   console.log('  - debugCommissionCalculation()');
   console.log('  - debugResultadoSyncState()');
   console.log('  - forceCommissionRecalculation()');
-
 })();

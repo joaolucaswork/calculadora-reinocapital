@@ -16,7 +16,7 @@
       resultadoSync: !!window.ReinoSimpleResultadoSync,
       comparativo: !!window.ReinoResultadoComparativoCalculator,
       supabase: !!window.ReinoSupabaseIntegration,
-      calcularCustoProduto: !!window.calcularCustoProduto
+      calcularCustoProduto: !!window.calcularCustoProduto,
     };
 
     console.log('📋 Modules:', modules);
@@ -32,13 +32,13 @@
 
     // Clear and setup test
     console.log('🧹 Setting up clean test...');
-    
+
     const appState = window.ReinoAppState;
     const resultadoSync = window.ReinoSimpleResultadoSync;
 
     // Remove existing test assets
     const existingAssets = appState.getSelectedAssets();
-    existingAssets.forEach(assetKey => {
+    existingAssets.forEach((assetKey) => {
       const [category, product] = assetKey.split(':');
       if (category && product && category.includes('test')) {
         appState.removeSelectedAsset(category, product, 'cleanup');
@@ -50,7 +50,9 @@
     const testProduct = 'CDB';
     const testValue = 500000; // R$ 500,000
 
-    console.log(`🎯 Testing with ${testCategory}:${testProduct} = R$ ${testValue.toLocaleString()}`);
+    console.log(
+      `🎯 Testing with ${testCategory}:${testProduct} = R$ ${testValue.toLocaleString()}`
+    );
 
     appState.addSelectedAsset(testCategory, testProduct, 'final-test');
     appState.setAllocation(testCategory, testProduct, testValue, 'final-test');
@@ -58,11 +60,11 @@
     setTimeout(() => {
       // Test key consistency
       console.log('🔑 Testing key consistency...');
-      
+
       const appStateAssets = appState.getSelectedAssets();
       const expectedKey = `${testCategory.toLowerCase()}:${testProduct.toLowerCase()}`;
       const keyExists = appStateAssets.includes(expectedKey);
-      
+
       console.log('- Expected key:', expectedKey);
       console.log('- AppState assets:', appStateAssets);
       console.log('- Key exists:', keyExists);
@@ -92,7 +94,7 @@
 
       // Test commission calculation
       console.log('🧮 Testing commission calculation...');
-      
+
       let calculationResult = 0;
       if (window.calcularCustoProduto) {
         try {
@@ -118,7 +120,7 @@
           total: e.detail.total,
           formatted: e.detail.formatted,
           source: e.detail.source,
-          details: e.detail.details?.length || 0
+          details: e.detail.details?.length || 0,
         });
       };
 
@@ -130,23 +132,24 @@
 
       setTimeout(() => {
         document.removeEventListener('totalComissaoChanged', handler);
-        
+
         console.log('📊 FINAL RESULTS:');
         console.log('================');
-        
+
         // Event results
         console.log('📡 Event received:', eventReceived);
         console.log('💰 Event total:', eventTotal);
-        
+
         // DOM results
         const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
         const tradicionalValue = tradicionalElement ? tradicionalElement.textContent : 'NOT_FOUND';
         console.log('🖥️ DOM tradicional:', tradicionalValue);
-        
+
         // Supabase results
-        const supabaseCommission = window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
+        const supabaseCommission =
+          window.ReinoSupabaseIntegration?.lastCommissionData?.total || null;
         console.log('📊 Supabase commission:', supabaseCommission);
-        
+
         // AppState results
         const appStateCommission = window.ReinoAppState.getCommissionResults();
         console.log('📊 AppState commission:', appStateCommission);
@@ -157,13 +160,13 @@
           eventHasValue: eventTotal > 0,
           domUpdated: tradicionalValue !== '0,00' && tradicionalValue !== 'NOT_FOUND',
           supabaseUpdated: supabaseCommission > 0,
-          appStateUpdated: appStateCommission.total > 0
+          appStateUpdated: appStateCommission.total > 0,
         };
 
         console.log('✅ Success criteria:', success);
 
         const allSuccess = Object.values(success).every(Boolean);
-        
+
         if (allSuccess) {
           console.log('🎉 🎉 🎉 ALL TESTS PASSED! Commission flow is working perfectly! 🎉 🎉 🎉');
         } else {
@@ -177,7 +180,6 @@
 
         // Cleanup
         appState.removeSelectedAsset(testCategory, testProduct, 'final-test-cleanup');
-
       }, 500);
     }, 200);
   }
@@ -186,5 +188,4 @@
   window.finalCommissionTest = finalCommissionTest;
 
   console.log('🔧 Commission Final Test loaded. Run with: finalCommissionTest()');
-
 })();

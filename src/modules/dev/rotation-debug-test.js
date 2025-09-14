@@ -4,7 +4,7 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   function debugRotationDOMUpdate() {
@@ -16,14 +16,16 @@
       appState: window.ReinoAppState,
       resultadoSync: window.ReinoSimpleResultadoSync,
       rotationController: window.ReinoRotationIndexController,
-      resultadoComparativo: window.ReinoResultadoComparativoCalculator
+      resultadoComparativo: window.ReinoResultadoComparativoCalculator,
     };
 
     console.log('\n1. 📋 Module Availability:');
     Object.entries(modules).forEach(([name, module]) => {
       const available = !!module;
       const initialized = module?.isInitialized;
-      console.log(`   ${available ? '✅' : '❌'} ${name}: ${available ? 'available' : 'missing'} ${initialized ? '(initialized)' : '(not initialized)'}`);
+      console.log(
+        `   ${available ? '✅' : '❌'} ${name}: ${available ? 'available' : 'missing'} ${initialized ? '(initialized)' : '(not initialized)'}`
+      );
     });
 
     if (!modules.appState || !modules.resultadoSync || !modules.rotationController) {
@@ -47,7 +49,10 @@
     modules.appState.setAllocation('Renda Fixa', 'CDB', 500000, 'rotation-debug');
 
     // Enable debug mode on resultado-comparativo if available
-    if (modules.resultadoComparativo && typeof modules.resultadoComparativo.enableDebug === 'function') {
+    if (
+      modules.resultadoComparativo &&
+      typeof modules.resultadoComparativo.enableDebug === 'function'
+    ) {
       modules.resultadoComparativo.enableDebug();
       console.log('   ✅ Enabled debug mode on resultado-comparativo');
     }
@@ -70,11 +75,11 @@
           total: e.detail.total,
           formatted: e.detail.formatted,
           source: e.detail.source,
-          detailsCount: e.detail.details?.length || 0
+          detailsCount: e.detail.details?.length || 0,
         };
         totalComissaoEvents.push(event);
         console.log(`   📡 totalComissaoChanged: ${event.formatted} (source: ${event.source})`);
-        
+
         // Check if DOM updates immediately
         setTimeout(() => {
           const currentDOMValue = tradicionalElement ? tradicionalElement.textContent : 'NOT_FOUND';
@@ -87,10 +92,12 @@
           timestamp: new Date().toISOString(),
           index: e.detail.index,
           oldIndex: e.detail.oldIndex,
-          source: e.detail.source
+          source: e.detail.source,
         };
         rotationIndexEvents.push(event);
-        console.log(`   🔄 rotationIndexChanged: ${event.oldIndex} → ${event.index} (source: ${event.source})`);
+        console.log(
+          `   🔄 rotationIndexChanged: ${event.oldIndex} → ${event.index} (source: ${event.source})`
+        );
       };
 
       document.addEventListener('totalComissaoChanged', totalComissaoHandler);
@@ -100,7 +107,7 @@
       console.log('\n5. 🔄 Changing rotation index...');
       const newIndex = initialIndex === 2 ? 3 : 2;
       console.log(`   Changing from ${initialIndex} to ${newIndex}`);
-      
+
       modules.rotationController.setIndex(newIndex);
 
       // Check results after delay
@@ -139,15 +146,20 @@
 
         // Test direct DOM update
         console.log('\n7. 🧪 Testing direct DOM update...');
-        if (modules.resultadoComparativo && typeof modules.resultadoComparativo.updateTradicionalDOMElement === 'function') {
+        if (
+          modules.resultadoComparativo &&
+          typeof modules.resultadoComparativo.updateTradicionalDOMElement === 'function'
+        ) {
           const testValue = 99999;
           modules.resultadoComparativo.updateTradicionalDOMElement(testValue);
-          
+
           setTimeout(() => {
-            const afterDirectUpdate = tradicionalElement ? tradicionalElement.textContent : 'NOT_FOUND';
+            const afterDirectUpdate = tradicionalElement
+              ? tradicionalElement.textContent
+              : 'NOT_FOUND';
             console.log(`   After direct update: "${afterDirectUpdate}"`);
             console.log(`   Direct update works: ${afterDirectUpdate.includes('99.999')}`);
-            
+
             // Restore original value
             if (totalComissaoEvents.length > 0) {
               const lastEvent = totalComissaoEvents[totalComissaoEvents.length - 1];
@@ -164,9 +176,7 @@
           modules.appState.removeSelectedAsset('Renda Fixa', 'CDB', 'rotation-debug-cleanup');
           modules.rotationController.setIndex(initialIndex);
         }, 500);
-
       }, 2000); // Wait 2 seconds for all events
-
     }, 1000); // Wait 1 second for initial setup
   }
 
@@ -174,5 +184,4 @@
   window.debugRotationDOMUpdate = debugRotationDOMUpdate;
 
   console.log('✅ Rotation Debug Test loaded. Call debugRotationDOMUpdate() to run.');
-
 })();

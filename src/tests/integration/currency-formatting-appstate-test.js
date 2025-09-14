@@ -52,7 +52,7 @@
       }
 
       const debugInfo = window.ReinoCurrencyFormatting.getDebugInfo();
-      
+
       if (!debugInfo.hasAppState) {
         throw new Error('CurrencyFormatting not connected to AppState');
       }
@@ -75,9 +75,11 @@
 
       // Verifica se o sistema de currency foi notificado
       const debugInfo = currencySystem.getDebugInfo();
-      
+
       if (debugInfo.lastMainValue !== testValue) {
-        throw new Error(`Patrimony sync failed. Expected: ${testValue}, Got: ${debugInfo.lastMainValue}`);
+        throw new Error(
+          `Patrimony sync failed. Expected: ${testValue}, Got: ${debugInfo.lastMainValue}`
+        );
       }
 
       this.addResult(true, `Patrimony sync working: ${appState.formatCurrency(testValue)}`);
@@ -98,9 +100,11 @@
 
       // Verifica se o sistema foi notificado
       const debugInfo = currencySystem.getDebugInfo();
-      
+
       if (debugInfo.lastTotalAllocation !== 500000) {
-        throw new Error(`Allocation sync failed. Expected: 500000, Got: ${debugInfo.lastTotalAllocation}`);
+        throw new Error(
+          `Allocation sync failed. Expected: 500000, Got: ${debugInfo.lastTotalAllocation}`
+        );
       }
 
       this.addResult(true, 'Allocation sync working: R$ 500.000,00');
@@ -125,7 +129,9 @@
       const expectedInput = '1.234.567,89';
 
       if (inputFormatted !== expectedInput) {
-        throw new Error(`Input formatting failed. Expected: ${expectedInput}, Got: ${inputFormatted}`);
+        throw new Error(
+          `Input formatting failed. Expected: ${expectedInput}, Got: ${inputFormatted}`
+        );
       }
 
       // Testa parsing
@@ -200,14 +206,14 @@
 
       const icon = success ? '✅' : '❌';
       this.log(`${icon} ${message}`);
-      
+
       if (error) {
         this.log(`   Error details:`, error);
       }
     }
 
     printResults() {
-      const passed = this.testResults.filter(r => r.success).length;
+      const passed = this.testResults.filter((r) => r.success).length;
       const total = this.testResults.length;
       const failed = total - passed;
 
@@ -219,8 +225,8 @@
       if (failed > 0) {
         console.log('\n❌ Failed Tests:');
         this.testResults
-          .filter(r => !r.success)
-          .forEach(result => {
+          .filter((r) => !r.success)
+          .forEach((result) => {
             console.log(`   • ${result.message}`);
             if (result.error) {
               console.log(`     ${result.error.message}`);
@@ -230,9 +236,9 @@
     }
 
     getTestSummary() {
-      const passed = this.testResults.filter(r => r.success).length;
+      const passed = this.testResults.filter((r) => r.success).length;
       const total = this.testResults.length;
-      
+
       return {
         passed,
         failed: total - passed,
@@ -243,7 +249,7 @@
     }
 
     async wait(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     enableDebug() {
@@ -277,5 +283,4 @@
       }
     });
   }
-
 })();

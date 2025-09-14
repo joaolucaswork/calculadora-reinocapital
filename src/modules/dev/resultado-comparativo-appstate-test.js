@@ -52,7 +52,7 @@
       }
 
       const debugInfo = window.ReinoResultadoComparativoCalculator.getDebugInfo();
-      
+
       if (!debugInfo.hasAppState) {
         throw new Error('ResultadoComparativo not connected to AppState');
       }
@@ -75,7 +75,7 @@
 
       // Verifica se o calculator obtém o valor correto
       const patrimony = calculator.getMainPatrimony();
-      
+
       if (patrimony !== testValue) {
         throw new Error(`Patrimony integration failed. Expected: ${testValue}, Got: ${patrimony}`);
       }
@@ -100,7 +100,7 @@
 
       // Verifica se o calculator obtém as alocações corretas
       const assets = calculator.getSelectedAssetsWithValues();
-      
+
       if (assets.length !== 2) {
         throw new Error(`Asset count mismatch. Expected: 2, Got: ${assets.length}`);
       }
@@ -135,7 +135,10 @@
         this.log('⚠️ Warning: Reino cost is higher than traditional - check test data');
       }
 
-      this.addResult(true, `Calculations working - Reino: ${reinoValue.formatted.annual}, Traditional: ${traditionalValue.formatted.total}`);
+      this.addResult(
+        true,
+        `Calculations working - Reino: ${reinoValue.formatted.annual}, Traditional: ${traditionalValue.formatted.total}`
+      );
     }
 
     async testEventIntegration() {
@@ -172,13 +175,13 @@
       this.log('⚡ Testing performance optimization...');
 
       const calculator = window.ReinoResultadoComparativoCalculator;
-      
+
       // Habilita debug para ver logs de otimização
       calculator.enableDebug();
 
       // Executa cálculo inicial
       calculator.calculateAndUpdate();
-      
+
       // Executa novamente sem mudanças - deve ser otimizado
       const startTime = performance.now();
       calculator.calculateAndUpdate();
@@ -188,11 +191,17 @@
 
       // Verifica se foi rápido (indicando cache/otimização)
       const executionTime = endTime - startTime;
-      if (executionTime > 10) { // 10ms é um limite generoso
-        this.log(`⚠️ Warning: Calculation took ${executionTime.toFixed(2)}ms - may not be optimized`);
+      if (executionTime > 10) {
+        // 10ms é um limite generoso
+        this.log(
+          `⚠️ Warning: Calculation took ${executionTime.toFixed(2)}ms - may not be optimized`
+        );
       }
 
-      this.addResult(true, `Performance optimization working - execution time: ${executionTime.toFixed(2)}ms`);
+      this.addResult(
+        true,
+        `Performance optimization working - execution time: ${executionTime.toFixed(2)}ms`
+      );
     }
 
     // ==================== UTILITY METHODS ====================
@@ -207,14 +216,14 @@
 
       const icon = success ? '✅' : '❌';
       this.log(`${icon} ${message}`);
-      
+
       if (error) {
         this.log(`   Error details:`, error);
       }
     }
 
     printResults() {
-      const passed = this.testResults.filter(r => r.success).length;
+      const passed = this.testResults.filter((r) => r.success).length;
       const total = this.testResults.length;
       const failed = total - passed;
 
@@ -226,8 +235,8 @@
       if (failed > 0) {
         console.log('\n❌ Failed Tests:');
         this.testResults
-          .filter(r => !r.success)
-          .forEach(result => {
+          .filter((r) => !r.success)
+          .forEach((result) => {
             console.log(`   • ${result.message}`);
             if (result.error) {
               console.log(`     ${result.error.message}`);
@@ -237,9 +246,9 @@
     }
 
     getTestSummary() {
-      const passed = this.testResults.filter(r => r.success).length;
+      const passed = this.testResults.filter((r) => r.success).length;
       const total = this.testResults.length;
-      
+
       return {
         passed,
         failed: total - passed,
@@ -250,7 +259,7 @@
     }
 
     async wait(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     enableDebug() {
@@ -284,5 +293,4 @@
       }
     });
   }
-
 })();

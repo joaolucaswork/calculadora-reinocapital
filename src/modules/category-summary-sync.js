@@ -47,7 +47,9 @@
 
       this.categoryElements.clear();
 
-      const categoryContainers = listContainer.querySelectorAll('.categoria-porcentagem[ativo-category]');
+      const categoryContainers = listContainer.querySelectorAll(
+        '.categoria-porcentagem[ativo-category]'
+      );
 
       categoryContainers.forEach((container) => {
         const category = container.getAttribute('ativo-category');
@@ -55,7 +57,7 @@
 
         const percentageElement = container.querySelector('.porcentagem-categoria');
         let valueElement = container.querySelector('.valor-categoria-esquerda');
-        
+
         if (!valueElement && category === 'Renda Fixa') {
           valueElement = container.querySelector('.valor-categoria > div:not(.brl_tag)');
         }
@@ -130,7 +132,9 @@
     calculateCategoryTotals() {
       this.categoryTotals.clear();
 
-      const patrimonioItems = document.querySelectorAll('.patrimonio_interactive_item[ativo-category]');
+      const patrimonioItems = document.querySelectorAll(
+        '.patrimonio_interactive_item[ativo-category]'
+      );
 
       patrimonioItems.forEach((item) => {
         const category = item.getAttribute('ativo-category');
@@ -159,7 +163,9 @@
       this.updatePercentageElement(categoryData.percentageElement, percentage);
 
       if (this.config.enableLogging) {
-        console.log(`📊 Updated ${category}: R$ ${this.formatCurrency(categoryTotal)} (${percentage.toFixed(1)}%)`);
+        console.log(
+          `📊 Updated ${category}: R$ ${this.formatCurrency(categoryTotal)} (${percentage.toFixed(1)}%)`
+        );
       }
     }
 
@@ -239,5 +245,4 @@
   } else {
     window.ReinoCategorySummarySync.init();
   }
-
 })();

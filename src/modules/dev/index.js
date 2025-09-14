@@ -16,7 +16,6 @@ import './separator-fix-analysis.js';
 import './separator-consistency-test.js';
 import './taxas-debug-test.js';
 import './keyboard-navigation-test.js';
-
 // Módulos opcionais de debug e teste
 import './rotation-debug-test.js';
 import './rotation-fix-test.js';

@@ -38,10 +38,10 @@
         'assetSelectionChanged',
         'appStateChanged',
         'simpleResultadoSyncReady',
-        'rotationIndexChanged'
+        'rotationIndexChanged',
       ];
 
-      events.forEach(eventName => {
+      events.forEach((eventName) => {
         document.addEventListener(eventName, (e) => {
           if (this.isMonitoring) {
             this.logEvent(eventName, e.detail);
@@ -57,14 +57,14 @@
         event: eventName,
         detail: detail || {},
         domState: this.captureDOMState(),
-        appStateSnapshot: this.captureAppStateSnapshot()
+        appStateSnapshot: this.captureAppStateSnapshot(),
       };
 
       this.eventLog.push(logEntry);
       this.log(`📡 [${eventName}]`, {
         detail: detail,
         domTradicional: logEntry.domState.tradicional,
-        supabaseLastCommission: logEntry.appStateSnapshot.supabaseLastCommission
+        supabaseLastCommission: logEntry.appStateSnapshot.supabaseLastCommission,
       });
 
       // Special analysis for commission events
@@ -78,19 +78,21 @@
         eventTotal: detail.total,
         eventSource: detail.source,
         domBefore: logEntry.domState.tradicional,
-        supabaseBefore: logEntry.appStateSnapshot.supabaseLastCommission
+        supabaseBefore: logEntry.appStateSnapshot.supabaseLastCommission,
       });
 
       // Check if DOM will be updated
       setTimeout(() => {
         const domAfter = this.captureDOMState();
         const supabaseAfter = this.captureAppStateSnapshot();
-        
+
         this.log('💰 Commission Event Results:', {
           domAfter: domAfter.tradicional,
           supabaseAfter: supabaseAfter.supabaseLastCommission,
           domUpdated: domAfter.tradicional !== logEntry.domState.tradicional,
-          supabaseUpdated: supabaseAfter.supabaseLastCommission !== logEntry.appStateSnapshot.supabaseLastCommission
+          supabaseUpdated:
+            supabaseAfter.supabaseLastCommission !==
+            logEntry.appStateSnapshot.supabaseLastCommission,
         });
       }, 100);
     }
@@ -98,10 +100,10 @@
     captureDOMState() {
       const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
       const totalComissaoElement = document.querySelector('.total-comissao-valor');
-      
+
       return {
         tradicional: tradicionalElement ? tradicionalElement.textContent : 'NOT_FOUND',
-        totalComissao: totalComissaoElement ? totalComissaoElement.textContent : 'NOT_FOUND'
+        totalComissao: totalComissaoElement ? totalComissaoElement.textContent : 'NOT_FOUND',
       };
     }
 
@@ -110,18 +112,21 @@
         appStateCommission: null,
         supabaseLastCommission: null,
         allocations: null,
-        selectedAssets: null
+        selectedAssets: null,
       };
 
       if (window.ReinoAppState) {
         const appSnapshot = window.ReinoAppState.getStateSnapshot();
         snapshot.appStateCommission = appSnapshot.commission;
         snapshot.allocations = Object.keys(appSnapshot.allocations || {}).length;
-        snapshot.selectedAssets = appSnapshot.selectedAssets ? appSnapshot.selectedAssets.length : 0;
+        snapshot.selectedAssets = appSnapshot.selectedAssets
+          ? appSnapshot.selectedAssets.length
+          : 0;
       }
 
       if (window.ReinoSupabaseIntegration) {
-        snapshot.supabaseLastCommission = window.ReinoSupabaseIntegration.lastCommissionData?.total || null;
+        snapshot.supabaseLastCommission =
+          window.ReinoSupabaseIntegration.lastCommissionData?.total || null;
       }
 
       return snapshot;
@@ -129,13 +134,13 @@
 
     analyzeCurrentState() {
       this.log('🔍 Current State Analysis:');
-      
+
       // Check modules
       const modules = {
-        'ReinoAppState': !!window.ReinoAppState,
-        'ReinoSupabaseIntegration': !!window.ReinoSupabaseIntegration,
-        'ReinoSimpleResultadoSync': !!window.ReinoSimpleResultadoSync,
-        'ReinoResultadoComparativoCalculator': !!window.ReinoResultadoComparativoCalculator
+        ReinoAppState: !!window.ReinoAppState,
+        ReinoSupabaseIntegration: !!window.ReinoSupabaseIntegration,
+        ReinoSimpleResultadoSync: !!window.ReinoSimpleResultadoSync,
+        ReinoResultadoComparativoCalculator: !!window.ReinoResultadoComparativoCalculator,
       };
 
       this.log('📋 Modules:', modules);
@@ -153,7 +158,7 @@
         this.log('🔄 ResultadoSync State:', {
           isInitialized: sync.isInitialized,
           hasAppState: !!sync.appState,
-          selectedAssetsCount: sync.selectedAssets ? sync.selectedAssets.size : 0
+          selectedAssetsCount: sync.selectedAssets ? sync.selectedAssets.size : 0,
         });
       }
 
@@ -167,28 +172,28 @@
       // Simulate normal user flow
       if (window.ReinoAppState) {
         const appState = window.ReinoAppState;
-        
+
         // 1. Set patrimony
         this.log('1️⃣ Setting patrimony...');
         appState.setPatrimonio(1000000, 'flow-test');
-        
+
         setTimeout(() => {
           // 2. Add asset selection
           this.log('2️⃣ Adding asset selection...');
           appState.addSelectedAsset('Renda Fixa', 'CDB', 'flow-test');
-          
+
           setTimeout(() => {
             // 3. Set allocation
             this.log('3️⃣ Setting allocation...');
             appState.setAllocation('Renda Fixa', 'CDB', 500000, 'flow-test');
-            
+
             setTimeout(() => {
               // 4. Force resultado-sync update
               this.log('4️⃣ Forcing resultado-sync update...');
               if (window.ReinoSimpleResultadoSync) {
                 window.ReinoSimpleResultadoSync.forceSync();
               }
-              
+
               setTimeout(() => {
                 this.log('✅ Test flow completed - check results above');
               }, 200);
@@ -200,22 +205,27 @@
 
     analyzeEventSequence() {
       this.log('📈 Event Sequence Analysis:');
-      
-      const commissionEvents = this.eventLog.filter(e => e.event === 'totalComissaoChanged');
-      const allocationEvents = this.eventLog.filter(e => e.event === 'allocationChanged');
-      
-      this.log(`📊 Found ${commissionEvents.length} commission events and ${allocationEvents.length} allocation events`);
-      
+
+      const commissionEvents = this.eventLog.filter((e) => e.event === 'totalComissaoChanged');
+      const allocationEvents = this.eventLog.filter((e) => e.event === 'allocationChanged');
+
+      this.log(
+        `📊 Found ${commissionEvents.length} commission events and ${allocationEvents.length} allocation events`
+      );
+
       if (commissionEvents.length === 0) {
         this.log('❌ NO COMMISSION EVENTS FOUND - This is the problem!');
         this.log('🔍 Checking why resultado-sync is not triggering events...');
         this.diagnoseResultadoSync();
       } else {
-        this.log('✅ Commission events found:', commissionEvents.map(e => ({
-          timestamp: e.timestamp,
-          total: e.detail.total,
-          source: e.detail.source
-        })));
+        this.log(
+          '✅ Commission events found:',
+          commissionEvents.map((e) => ({
+            timestamp: e.timestamp,
+            total: e.detail.total,
+            source: e.detail.source,
+          }))
+        );
       }
     }
 
@@ -226,13 +236,13 @@
       }
 
       const sync = window.ReinoSimpleResultadoSync;
-      
+
       this.log('🔍 ResultadoSync Diagnosis:', {
         isInitialized: sync.isInitialized,
         hasAppState: !!sync.appState,
         selectedAssets: Array.from(sync.selectedAssets || []),
         hasUpdateTotalComissaoMethod: typeof sync.updateTotalComissao === 'function',
-        hasCalculateCommissionMethod: typeof sync.calculateCommissionForValue === 'function'
+        hasCalculateCommissionMethod: typeof sync.calculateCommissionForValue === 'function',
       });
 
       // Test if it can calculate
@@ -260,7 +270,7 @@
         console.log(`${index + 1}. [${entry.timestamp}] ${entry.event}:`, {
           detail: entry.detail,
           domState: entry.domState,
-          appState: entry.appStateSnapshot
+          appState: entry.appStateSnapshot,
         });
       });
     }
@@ -280,13 +290,13 @@
 
     runCompleteAnalysis() {
       this.log('🚀 Running complete commission flow analysis...');
-      
+
       this.startMonitoring();
-      
+
       setTimeout(() => {
         this.analyzeEventSequence();
       }, 2000);
-      
+
       setTimeout(() => {
         this.printEventLog();
         this.stopMonitoring();
@@ -307,6 +317,7 @@
     });
   }
 
-  console.log('🔧 Commission Flow Analyzer loaded. Run with: window.ReinoCommissionFlowAnalyzer.runCompleteAnalysis()');
-
+  console.log(
+    '🔧 Commission Flow Analyzer loaded. Run with: window.ReinoCommissionFlowAnalyzer.runCompleteAnalysis()'
+  );
 })();

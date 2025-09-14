@@ -187,11 +187,16 @@
       const allocations = state.allocations || {};
 
       // Calculate total allocated
-      const totalAllocated = Object.values(allocations).reduce((sum, value) => sum + (value || 0), 0);
+      const totalAllocated = Object.values(allocations).reduce(
+        (sum, value) => sum + (value || 0),
+        0
+      );
 
       // Total allocation cannot exceed patrimony
       if (totalAllocated > patrimonio) {
-        errors.push(`Total alocado (${this.formatCurrency(totalAllocated)}) excede patrimônio (${this.formatCurrency(patrimonio)})`);
+        errors.push(
+          `Total alocado (${this.formatCurrency(totalAllocated)}) excede patrimônio (${this.formatCurrency(patrimonio)})`
+        );
       }
 
       // Check for negative allocations
@@ -284,7 +289,10 @@
       const patrimonio = state.patrimonio?.value || 0;
 
       // Commission should be positive if there are allocations
-      const totalAllocated = Object.values(state.allocations || {}).reduce((sum, value) => sum + (value || 0), 0);
+      const totalAllocated = Object.values(state.allocations || {}).reduce(
+        (sum, value) => sum + (value || 0),
+        0
+      );
 
       if (totalAllocated > 0 && commission <= 0) {
         warnings.push('Comissão zero com alocações existentes');
@@ -293,7 +301,7 @@
       // Commission should not exceed reasonable percentage of patrimony
       if (patrimonio > 0) {
         const commissionPercentage = (commission / patrimonio) * 100;
-        
+
         if (commissionPercentage > 10) {
           warnings.push(`Comissão muito alta: ${commissionPercentage.toFixed(2)}% do patrimônio`);
         }

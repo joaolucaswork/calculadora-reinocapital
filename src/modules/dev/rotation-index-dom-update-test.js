@@ -4,14 +4,18 @@
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   function testRotationIndexDOMUpdate() {
     console.log('🔄 Testing Rotation Index DOM Update...');
     console.log('=====================================');
 
-    if (!window.ReinoAppState || !window.ReinoSimpleResultadoSync || !window.ReinoRotationIndexController) {
+    if (
+      !window.ReinoAppState ||
+      !window.ReinoSimpleResultadoSync ||
+      !window.ReinoRotationIndexController
+    ) {
       console.error('❌ Required modules not available');
       return;
     }
@@ -29,7 +33,7 @@
     // Wait for initial calculation
     setTimeout(() => {
       console.log('\n2. 📊 Initial state check...');
-      
+
       // Check initial DOM value
       const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
       const initialValue = tradicionalElement ? tradicionalElement.textContent : 'NOT_FOUND';
@@ -49,7 +53,7 @@
         console.log('   📡 Commission event received:', {
           total: e.detail.total,
           formatted: e.detail.formatted,
-          source: e.detail.source
+          source: e.detail.source,
         });
       };
 
@@ -58,7 +62,7 @@
         console.log('   🔄 Rotation event received:', {
           index: e.detail.index,
           oldIndex: e.detail.oldIndex,
-          source: e.detail.source
+          source: e.detail.source,
         });
       };
 
@@ -69,7 +73,7 @@
       console.log('\n3. 🔄 Changing rotation index...');
       const newIndex = initialIndex === 2 ? 3 : 2;
       console.log(`   Changing from ${initialIndex} to ${newIndex}`);
-      
+
       rotationController.setIndex(newIndex);
 
       // Check results after delay
@@ -97,7 +101,7 @@
           rotationChanged: finalIndex === newIndex,
           domValueChanged: finalDOMValue !== initialValue && finalDOMValue !== 'NOT_FOUND',
           eventsReceived: rotationEventReceived && commissionEventReceived,
-          domElementExists: tradicionalElement !== null
+          domElementExists: tradicionalElement !== null,
         };
 
         console.log('\n5. ✅ Success Assessment:');
@@ -107,8 +111,8 @@
           console.log(`   ${icon} ${key}: ${value}`);
         });
 
-        const allSuccess = Object.values(success).every(v => v);
-        
+        const allSuccess = Object.values(success).every((v) => v);
+
         if (allSuccess) {
           console.log('\n🎉 ALL TESTS PASSED! Rotation index DOM update is working correctly.');
         } else {
@@ -124,15 +128,14 @@
         console.log('\n6. 🧹 Cleaning up...');
         appState.removeSelectedAsset('Renda Fixa', 'CDB', 'rotation-test-cleanup');
         rotationController.setIndex(initialIndex); // Reset to original
-
       }, 1000); // Wait 1 second for all calculations
-
     }, 500); // Wait 500ms for initial setup
   }
 
   // Make function globally available
   window.testRotationIndexDOMUpdate = testRotationIndexDOMUpdate;
 
-  console.log('✅ Rotation Index DOM Update Test loaded. Call testRotationIndexDOMUpdate() to run.');
-
+  console.log(
+    '✅ Rotation Index DOM Update Test loaded. Call testRotationIndexDOMUpdate() to run.'
+  );
 })();

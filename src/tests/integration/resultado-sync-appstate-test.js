@@ -204,7 +204,8 @@
         },
         {
           name: 'Commission results updated in AppState',
-          test: () => appStateSnapshot.commission && typeof appStateSnapshot.commission.value === 'number',
+          test: () =>
+            appStateSnapshot.commission && typeof appStateSnapshot.commission.value === 'number',
         },
       ];
 
@@ -279,12 +280,16 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Wait a bit for other modules to initialize
       setTimeout(() => {
-        console.log('🧪 Resultado Sync AppState Test ready. Run: window.ReinoResultadoSyncAppStateTest.runAllTests()');
+        console.log(
+          '🧪 Resultado Sync AppState Test ready. Run: window.ReinoResultadoSyncAppStateTest.runAllTests()'
+        );
       }, 1000);
     });
   } else {
     setTimeout(() => {
-      console.log('🧪 Resultado Sync AppState Test ready. Run: window.ReinoResultadoSyncAppStateTest.runAllTests()');
+      console.log(
+        '🧪 Resultado Sync AppState Test ready. Run: window.ReinoResultadoSyncAppStateTest.runAllTests()'
+      );
     }, 1000);
   }
 })();
