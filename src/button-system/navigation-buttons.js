@@ -12,7 +12,7 @@ window.ReinoNavigationButtons = (function () {
     this.debugMode = window.location.search.includes('debug=true');
 
     // Simple debounced update
-    var self = this;
+    const self = this;
     this.updateButtons = this.debounce(function () {
       return self._updateAllButtons();
     }, 100);
@@ -27,7 +27,7 @@ window.ReinoNavigationButtons = (function () {
   };
 
   NavigationButtons.prototype.setupButtons = function () {
-    var self = this;
+    const self = this;
 
     // Setup next buttons
     document.querySelectorAll('[element-function="next"]').forEach(function (button) {
@@ -41,15 +41,17 @@ window.ReinoNavigationButtons = (function () {
   };
 
   NavigationButtons.prototype.setupNextButton = function (button) {
-    var self = this;
-    var newButton = button.cloneNode(true);
+    const self = this;
+    const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
 
     newButton.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
 
-      if (newButton.disabled) return;
+      if (newButton.disabled) {
+        return;
+      }
 
       self.log('Next button clicked');
       self.handleNext();
@@ -57,8 +59,8 @@ window.ReinoNavigationButtons = (function () {
   };
 
   NavigationButtons.prototype.setupPrevButton = function (button) {
-    var self = this;
-    var newButton = button.cloneNode(true);
+    const self = this;
+    const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
 
     newButton.addEventListener('click', function (e) {
@@ -95,7 +97,7 @@ window.ReinoNavigationButtons = (function () {
   };
 
   NavigationButtons.prototype.setupListeners = function () {
-    var self = this;
+    const self = this;
 
     // Listen for validation changes
     document.addEventListener('stepValidationChanged', function () {
@@ -130,14 +132,14 @@ window.ReinoNavigationButtons = (function () {
   };
 
   NavigationButtons.prototype.updateNextButtons = function () {
-    var canProceed = this.stepNavigationSystem.canProceedToNext();
+    const canProceed = this.stepNavigationSystem.canProceedToNext();
     document.querySelectorAll('[element-function="next"]').forEach(function (button) {
       button.disabled = !canProceed;
     });
   };
 
   NavigationButtons.prototype.updatePrevButtons = function () {
-    var isFirstStep = this.stepNavigationSystem.currentStep === 0;
+    const isFirstStep = this.stepNavigationSystem.currentStep === 0;
     document
       .querySelectorAll('.step-btn.prev-btn, .step-btn.prevbtn, [element-function="prev"]')
       .forEach(function (button) {
@@ -161,10 +163,10 @@ window.ReinoNavigationButtons = (function () {
   };
 
   NavigationButtons.prototype.debounce = function (func, wait) {
-    var timeout;
-    var self = this;
+    let timeout;
+    const self = this;
     return function () {
-      var args = arguments;
+      const args = arguments;
       clearTimeout(timeout);
       timeout = setTimeout(function () {
         func.apply(self, args);
@@ -179,7 +181,7 @@ window.ReinoNavigationButtons = (function () {
   };
 
   // Cria instância global
-  var instance = new NavigationButtons();
+  const instance = new NavigationButtons();
   window.ReinoNavigationButtons = instance;
 
   return instance;

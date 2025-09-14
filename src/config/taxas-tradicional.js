@@ -45,44 +45,74 @@
   };
 
   const MAPEAMENTO_ATRIBUTOS = {
-    // Renda Fixa
+    // Renda Fixa - Case sensitive e lowercase
     'Renda Fixa:CDB': 'Renda Fixa.CDB',
+    'renda fixa:cdb': 'Renda Fixa.CDB',
     'Renda Fixa:CRI': 'Renda Fixa.CRI',
+    'renda fixa:cri': 'Renda Fixa.CRI',
     'Renda Fixa:Títulos Públicos': 'Renda Fixa.Títulos Públicos',
+    'renda fixa:títulos públicos': 'Renda Fixa.Títulos Públicos',
 
     // Fundo de Investimento
     'Fundo de Investimento:Ações': 'Fundo de Investimento.Ações',
+    'fundo de investimento:ações': 'Fundo de Investimento.Ações',
     'Fundo de Investimento:Ações FIA': 'Fundo de Investimento.Ações',
+    'fundo de investimento:ações fia': 'Fundo de Investimento.Ações',
     'Fundo de Investimento:Liquidez': 'Fundo de Investimento.Liquidez',
+    'fundo de investimento:liquidez': 'Fundo de Investimento.Liquidez',
     'Fundo de Investimento:Renda Fixa': 'Fundo de Investimento.Renda Fixa',
+    'fundo de investimento:renda fixa': 'Fundo de Investimento.Renda Fixa',
     'Fundo de Investimento:Multimercado': 'Fundo de Investimento.Multimercado',
+    'fundo de investimento:multimercado': 'Fundo de Investimento.Multimercado',
     'Fundo de Investimento:Imobiliários Cetipados': 'Fundo de Investimento.Imobiliários',
+    'fundo de investimento:imobiliários cetipados': 'Fundo de Investimento.Imobiliários',
     'Fundo de Investimento:Private Equity': 'Fundo de Investimento.Private Equity',
+    'fundo de investimento:private equity': 'Fundo de Investimento.Private Equity',
 
     // Renda Variável
+    'Renda Variável:Ações': 'Renda Variável.Ações',
+    'renda variável:ações': 'Renda Variável.Ações',
     'Renda Variável:Ações e Ativos': 'Renda Variável.Ações',
+    'renda variável:ações e ativos': 'Renda Variável.Ações',
     'Renda Variável:Operação Estruturada': 'Renda Variável.Estruturada',
+    'renda variável:operação estruturada': 'Renda Variável.Estruturada',
     'Renda Variável:Carteira administrada': 'Renda Variável.Carteira administrada',
+    'renda variável:carteira administrada': 'Renda Variável.Carteira administrada',
 
     // Internacional
     'Internacional:Dólar': 'Internacional.Dólar',
+    'internacional:dólar': 'Internacional.Dólar',
     'Internacional:Inter Produtos': 'Internacional.ETF',
+    'internacional:inter produtos': 'Internacional.ETF',
 
     // COE
     'COE:COE': 'COE.COE',
+    'coe:coe': 'COE.COE',
 
     // Previdência
     'Previdência:Ações': 'Previdência.Ações',
+    'previdência:ações': 'Previdência.Ações',
     'Previdência:Multimercado': 'Previdência.Multimercado',
+    'previdência:multimercado': 'Previdência.Multimercado',
     'Previdência:Renda Fixa': 'Previdência.Renda Fixa',
+    'previdência:renda fixa': 'Previdência.Renda Fixa',
 
     // Outros
     'Outros:Poupança': 'Outros.Poupança',
+    'outros:poupança': 'Outros.Poupança',
     'Outros:Operação compromissada': 'Outros.Operação compromissada',
+    'outros:operação compromissada': 'Outros.Operação compromissada',
   };
 
   function obterTaxaPorAtributos(category, product) {
-    const chave = `${category}:${product}`;
+    // Se product não foi fornecido, assume que category é a chave completa
+    let chave;
+    if (product === undefined && category.includes(':')) {
+      chave = category;
+    } else {
+      chave = `${category}:${product}`;
+    }
+
     const caminho = MAPEAMENTO_ATRIBUTOS[chave];
 
     if (!caminho) {
@@ -157,7 +187,9 @@
   const ComissoesUtils = {
     getComissaoData: function (category, product) {
       const taxaConfig = obterTaxaPorAtributos(category, product);
-      if (!taxaConfig) return null;
+      if (!taxaConfig) {
+        return null;
+      }
 
       return {
         min: taxaConfig.min,

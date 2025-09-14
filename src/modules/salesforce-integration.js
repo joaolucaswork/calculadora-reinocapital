@@ -14,7 +14,13 @@
   function waitForDependencies() {
     return new Promise((resolve) => {
       const check = () => {
-        if (window.ReinoSalesforceSyncSystem && window.ReinoSupabase && window.ReinoSalesforce) {
+        if (
+          window.ReinoSalesforceSyncSystem &&
+          window.ReinoSupabase &&
+          window.ReinoSalesforce &&
+          window.ReinoAppState &&
+          window.ReinoAppState.isInitialized
+        ) {
           resolve();
         } else {
           setTimeout(check, 100);
@@ -173,7 +179,9 @@
     // Update status periodically
     const updateStatus = async () => {
       const statusElement = document.getElementById('salesforce-status');
-      if (!statusElement) return;
+      if (!statusElement) {
+        return;
+      }
 
       try {
         const status = syncSystem ? syncSystem.getStatus() : { isInitialized: false };

@@ -32,10 +32,26 @@
     "lint:fix": "eslint ./src --fix",
     "check": "tsc --noEmit",
     "format": "prettier --write ./src",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:playwright": "playwright test",
+    "test:playwright:ui": "playwright test --ui",
+    "test:integration": "playwright test --project=chromium",
+    "test:isolation": "playwright test tests/database-isolation.test.js --project=chromium",
+    "db:cleanup:testing": "node scripts/cleanup-test-data.js testing",
+    "db:cleanup:testing:dry": "node scripts/cleanup-test-data.js testing --dry-run --verbose",
+    "db:cleanup:development": "node scripts/cleanup-test-data.js development",
+    "db:cleanup:production": "node scripts/production-cleanup.js --dry-run --verbose",
+    "db:status": "node scripts/cleanup-test-data.js testing --dry-run",
+    "db:setup": "node scripts/setup-test-environments.js",
+    "validate:env": "node scripts/validate-environment.js",
+    "validate:env:testing": "node scripts/validate-environment.js testing",
+    "validate:env:production": "node scripts/validate-environment.js production",
     "release": "changeset publish",
-    "update": "pnpm update -i -L -r"
+    "update": "pnpm update -i -L -r",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/changelog-git": "^0.2.0",
@@ -44,18 +60,27 @@
     "@finsweet/eslint-config": "^3.0.3",
     "@finsweet/tsconfig": "^1.4.2",
     "@playwright/test": "^1.50.1",
+    "@types/node": "^24.4.0",
+    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/ui": "^3.2.4",
     "cross-env": "^7.0.3",
     "esbuild": "^0.24.2",
     "eslint": "^9.19.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-simple-import-sort": "^12.1.1",
+    "globals": "^16.4.0",
+    "husky": "^9.1.7",
+    "jsdom": "^27.0.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.23.0"
+    "typescript-eslint": "^8.23.0",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@finsweet/ts-utils": "^0.40.0"
+    "@finsweet/ts-utils": "^0.40.0",
+    "@supabase/supabase-js": "^2.57.4",
+    "dotenv": "^17.2.2"
   },
   "engines": {
     "pnpm": ">=10"

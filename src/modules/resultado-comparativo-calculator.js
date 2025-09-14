@@ -1,7 +1,7 @@
 /**
- * Resultado Comparativo Calculator - Versão Webflow TXT CORRIGIDA
+ * Resultado Comparativo Calculator - AppState Integration
  * Sistema para calcular e sincronizar valores Reino vs Tradicional
- * Versão sem imports/exports e sem elementos DOM obrigatórios
+ * Versão sem imports/exports integrada com AppState centralizado
  */
 
 (function () {
@@ -10,14 +10,16 @@
   class ResultadoComparativoCalculator {
     constructor() {
       this.isInitialized = false;
-      this.patrimonySystem = null;
-      this.resultadoSyncSystem = null;
+      this.appState = null;
+      this.debugMode = false;
 
+      // Cache para otimização de performance
       this.cache = {
         lastPatrimony: 0,
         lastSelectedAssets: new Set(),
         lastTradicionalValue: 0,
         lastReinoValue: 0,
+        lastCalculationHash: null,
       };
 
       this.reinoConfig = {
@@ -27,25 +29,37 @@
       this.elements = {}; // Inicializa vazio para evitar erros
     }
 
-    async init(patrimonySystem = null, resultadoSyncSystem = null) {
-      if (this.isInitialized) return;
-
-      if (patrimonySystem) {
-        this.patrimonySystem = patrimonySystem;
-      }
-      if (resultadoSyncSystem) {
-        this.resultadoSyncSystem = resultadoSyncSystem;
+    async init() {
+      if (this.isInitialized) {
+        return;
       }
 
-      if (!this.patrimonySystem || !this.resultadoSyncSystem) {
-        await this.waitForSystems();
-      }
+      // Aguarda AppState estar disponível
+      await this.waitForAppState();
 
       this.setupEventListeners();
       this.checkDOMElements(); // Não falha se elementos não existirem
       this.calculateAndUpdate();
 
       this.isInitialized = true;
+      this.log('✅ ResultadoComparativoCalculator initialized with AppState');
+    }
+
+    async waitForAppState() {
+      let attempts = 0;
+      const maxAttempts = 50;
+
+      while (!window.ReinoAppState && attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (window.ReinoAppState) {
+        this.appState = window.ReinoAppState;
+        this.log('✅ AppState connected successfully');
+      } else {
+        this.log('⚠️ AppState not available, falling back to legacy mode');
+      }
     }
 
     async waitForSystems() {
@@ -90,6 +104,13 @@
       document.addEventListener('totalComissaoChanged', (e) => {
         this.onTradicionalValueChange(e.detail.total);
       });
+
+      // Escuta mudanças no índice de giro
+      document.addEventListener('rotationIndexChanged', (e) => {
+        this.onRotationIndexChange(e.detail);
+      });
+
+      this.log('🎧 Event listeners configured');
     }
 
     checkDOMElements() {
@@ -115,11 +136,14 @@
       if (this.cache.lastPatrimony !== patrimony) {
         this.cache.lastPatrimony = patrimony;
         this.calculateAndUpdate();
+        this.log(`💰 Patrimony changed: ${this.formatCurrency(patrimony)}`);
       }
     }
 
     onAllocationChange(detail) {
+      // Força recálculo quando alocações mudam
       this.calculateAndUpdate();
+      this.log(`💼 Allocation changed, recalculating...`);
     }
 
     onAssetSelectionChange(selectedAssets) {
@@ -127,14 +151,35 @@
       if (!this.setsEqual(this.cache.lastSelectedAssets, newAssetsSet)) {
         this.cache.lastSelectedAssets = newAssetsSet;
         this.calculateAndUpdate();
+        this.log(`🎯 Asset selection changed: ${selectedAssets.length} assets`);
       }
+    }
+
+    onRotationIndexChange(detail) {
+      // Mudanças no índice de giro afetam cálculos tradicionais
+      // Mas não recalculamos aqui - aguardamos o totalComissaoChanged do resultado-sync
+      // que já considera o índice de giro corretamente
+      this.log(`🔄 Rotation index changed: ${detail.index} - awaiting commission recalculation`);
+
+      // Apenas recalcula o valor Reino (que não depende do índice de giro)
+      const reinoValues = this.calculateReinoValue();
+      this.updateReinoDOMElement(reinoValues.annual);
     }
 
     onTradicionalValueChange(value) {
       if (this.cache.lastTradicionalValue !== value) {
         this.cache.lastTradicionalValue = value;
-        // Força recálculo completo quando valor tradicional muda
-        this.calculateAndUpdate();
+
+        // Atualiza DOM diretamente com o valor recebido, sem recalcular
+        this.updateTradicionalDOMElement(value);
+
+        // Calcula apenas o valor Reino (que não depende do tradicional)
+        const reinoValues = this.calculateReinoValue();
+        this.updateReinoDOMElement(reinoValues.annual);
+
+        // AppState não precisa ser atualizado aqui - o DOM é suficiente
+
+        this.log(`📊 Traditional value updated directly: ${this.formatCurrency(value)}`);
       }
     }
 
@@ -146,50 +191,89 @@
 
     calculateAndUpdate() {
       try {
-        if (!this.hasValidData()) return;
+        if (!this.hasValidData()) {
+          return;
+        }
 
-        // Calcula valores Reino e Tradicional
+        // Gera hash para evitar recálculos desnecessários
+        const currentHash = this.generateCalculationHash();
+        if (currentHash === this.cache.lastCalculationHash) {
+          this.log('⚡ Skipping calculation - no changes detected');
+          return;
+        }
+
+        // Sempre calcula valores Reino
         const reinoValues = this.calculateReinoValue();
-        const traditionalValues = this.calculateTradicionalValue();
+        this.updateReinoDOMElement(reinoValues.annual);
 
-        // Atualiza elementos DOM
-        this.updateDOMElements(reinoValues, traditionalValues);
+        // Para o valor tradicional, verifica se há um sistema de resultado-sync ativo
+        if (window.ReinoSimpleResultadoSync && window.ReinoSimpleResultadoSync.isInitialized) {
+          // Se há resultado-sync ativo, não recalcula o tradicional aqui
+          // O resultado-sync já considera o índice de giro corretamente
+          this.log('📊 Reino calculated, traditional value managed by resultado-sync');
+        } else {
+          // Fallback: calcula tradicional apenas se não há resultado-sync
+          const traditionalValues = this.calculateTradicionalValue();
+          this.updateTradicionalDOMElement(traditionalValues.total);
+
+          this.cache.lastTradicionalValue = traditionalValues.total;
+
+          // Dispatch event para outros sistemas
+          this.dispatchCalculationUpdate(
+            traditionalValues,
+            reinoValues.annual,
+            reinoValues.patrimony
+          );
+
+          this.log(
+            `📊 Calculation completed - Reino: ${reinoValues.formatted.annual}, Traditional: ${traditionalValues.formatted.total}`
+          );
+        }
 
         // Atualiza cache
         this.cache.lastReinoValue = reinoValues.annual;
-        this.cache.lastTradicionalValue = traditionalValues.total;
-
-        // Dispatch event para outros sistemas
-        this.dispatchCalculationUpdate(
-          traditionalValues,
-          reinoValues.annual,
-          reinoValues.patrimony
-        );
+        this.cache.lastCalculationHash = currentHash;
       } catch (error) {
         console.error('❌ [ResultadoComparativo] Error in calculation:', error);
       }
     }
 
+    generateCalculationHash() {
+      const patrimony = this.getMainPatrimony();
+      const allocations = this.getSelectedAssetsWithValues();
+      const rotationIndex = this.appState ? this.appState.getRotationIndex() : 2;
+
+      return JSON.stringify({
+        patrimony,
+        allocations: allocations.map((a) => ({
+          category: a.category,
+          product: a.product,
+          value: a.value,
+        })),
+        rotationIndex,
+      });
+    }
+
     updateDOMElements(reinoValues, traditionalValues) {
-      // Atualiza valor Reino (data-resultado="reino")
+      this.updateReinoDOMElement(reinoValues.annual);
+      this.updateTradicionalDOMElement(traditionalValues.total);
+    }
+
+    updateReinoDOMElement(value) {
       const reinoElement = document.querySelector('[data-resultado="reino"]');
       if (reinoElement) {
-        const formattedValue = this.formatCurrencyForDisplay(reinoValues.annual);
+        const formattedValue = this.formatCurrencyForDisplay(value);
         reinoElement.textContent = formattedValue;
+        this.log(`🏛️ Reino DOM updated: ${formattedValue}`);
       }
+    }
 
-      // Atualiza valor Tradicional (data-resultado="tradicional")
+    updateTradicionalDOMElement(value) {
       const tradicionalElement = document.querySelector('[data-resultado="tradicional"]');
       if (tradicionalElement) {
-        const formattedValue = this.formatCurrencyForDisplay(traditionalValues.total);
+        const formattedValue = this.formatCurrencyForDisplay(value);
         tradicionalElement.textContent = formattedValue;
-      }
-
-      // Atualiza valor do patrimônio total usando o sistema existente (data-patrimonio-total="true")
-      const patrimonioTotalElement = document.querySelector('[data-patrimonio-total="true"]');
-      if (patrimonioTotalElement) {
-        const formattedPatrimony = this.formatCurrency(reinoValues.patrimony);
-        patrimonioTotalElement.textContent = formattedPatrimony;
+        this.log(`🏦 Traditional DOM updated: ${formattedValue}`);
       }
     }
 
@@ -199,6 +283,28 @@
 
     getSelectedAssetsWithValues() {
       const assets = [];
+
+      // Prioriza AppState se disponível
+      if (this.appState) {
+        const allocations = this.appState.getAllAllocations();
+        const selectedAssetsArray = this.appState.getSelectedAssets();
+        const selectedAssetsSet = new Set(selectedAssetsArray);
+
+        Object.entries(allocations).forEach(([key, value]) => {
+          if (value > 0 && selectedAssetsSet.has(key)) {
+            const [category, product] = key.split(':');
+            assets.push({
+              category: category.trim(),
+              product: product.trim(),
+              value: value,
+              key: key,
+              percentage: 0, // Será calculado se necessário
+            });
+          }
+        });
+
+        return assets;
+      }
 
       // Se temos sistema de resultado, usa ele
       if (this.resultadoSyncSystem) {
@@ -346,6 +452,13 @@
     }
 
     getMainPatrimony() {
+      // Prioriza AppState se disponível
+      if (this.appState) {
+        const patrimony = this.appState.getPatrimonio();
+        return patrimony.value;
+      }
+
+      // Fallback para sistemas legados
       if (this.patrimonySystem) {
         return this.patrimonySystem.getMainValue() || 0;
       }
@@ -391,7 +504,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     }
@@ -444,6 +559,53 @@
       if (tradicionalElement) {
         tradicionalElement.textContent = this.formatCurrencyForDisplay(0);
       }
+    }
+
+    // ==================== DEBUG METHODS ====================
+
+    enableDebug() {
+      this.debugMode = true;
+      this.log('🐛 Debug mode enabled for ResultadoComparativoCalculator');
+    }
+
+    disableDebug() {
+      this.debugMode = false;
+    }
+
+    log(message, data = null) {
+      if (this.debugMode) {
+        if (data) {
+          console.log(`[ResultadoComparativo] ${message}`, data);
+        } else {
+          console.log(`[ResultadoComparativo] ${message}`);
+        }
+      }
+    }
+
+    getDebugInfo() {
+      return {
+        isInitialized: this.isInitialized,
+        hasAppState: !!this.appState,
+        cache: this.cache,
+        patrimony: this.getMainPatrimony(),
+        selectedAssets: this.getSelectedAssetsWithValues(),
+        debugMode: this.debugMode,
+      };
+    }
+
+    // ==================== APPSTATE INTEGRATION METHODS ====================
+
+    getAppStateSnapshot() {
+      if (!this.appState) {
+        return null;
+      }
+
+      return {
+        patrimony: this.appState.getPatrimonio(),
+        allocations: this.appState.getAllAllocations(),
+        selectedAssets: Array.from(this.appState.getSelectedAssets()),
+        commissionResults: this.appState.getCommissionResults(),
+      };
     }
   }
 

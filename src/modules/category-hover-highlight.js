@@ -25,7 +25,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         this.cacheCategoryTriggers();
@@ -164,7 +166,9 @@
     }
 
     handleCategoryHoverEnd() {
-      if (!this.isHovering) return;
+      if (!this.isHovering) {
+        return;
+      }
 
       this.isHovering = false;
       const previousCategory = this.currentCategory;

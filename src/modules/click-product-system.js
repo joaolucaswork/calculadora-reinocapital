@@ -90,7 +90,9 @@
         }
 
         init(animate, config) {
-          if (!this.activeDiv || !this.disabledDiv) return;
+          if (!this.activeDiv || !this.disabledDiv) {
+            return;
+          }
 
           // Start in active mode by default
           this.disabledDiv.style.display = 'none';
@@ -253,7 +255,9 @@
         }
 
         async activate(animate, config) {
-          if (this.state.active || this.state.animating) return;
+          if (this.state.active || this.state.animating) {
+            return;
+          }
 
           clearTimeout(this.deactivateTimer);
 
@@ -336,7 +340,9 @@
         */
 
         async deactivate(animate, config) {
-          if (!this.state.active || this.state.animating || this.state.sliderDragging) return;
+          if (!this.state.active || this.state.animating || this.state.sliderDragging) {
+            return;
+          }
 
           this.state.active = false;
           this.state.animating = true;

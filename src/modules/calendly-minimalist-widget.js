@@ -30,7 +30,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         await this.waitForCalendlyScript();
@@ -44,7 +46,9 @@
     }
 
     async waitForCalendlyScript() {
-      if (window.Calendly) return;
+      if (window.Calendly) {
+        return;
+      }
 
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
@@ -135,8 +139,12 @@
       const prefill = {};
 
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('name')) prefill.name = urlParams.get('name');
-      if (urlParams.get('email')) prefill.email = urlParams.get('email');
+      if (urlParams.get('name')) {
+        prefill.name = urlParams.get('name');
+      }
+      if (urlParams.get('email')) {
+        prefill.email = urlParams.get('email');
+      }
 
       return prefill;
     }
@@ -180,7 +188,7 @@
         this.container.style.height = `${adjustedHeight}px`;
 
         // Também ajusta o container pai se necessário
-        const parentElement = this.container.parentElement;
+        const { parentElement } = this.container;
         if (parentElement && parentElement.style.height !== 'auto') {
           parentElement.style.height = `${adjustedHeight}px`;
         }

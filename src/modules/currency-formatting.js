@@ -1,10 +1,10 @@
 /**
- * Currency Formatting System - Versão Webflow TXT
- * Handles currency input formatting and validation
+ * Currency Formatting System - AppState Integration
+ * Handles currency input formatting and validation with centralized state
  * Versão sem imports/exports para uso direto no Webflow
  */
 
-(function() {
+(function () {
   'use strict';
 
   class CurrencyFormattingSystem {
@@ -13,12 +13,21 @@
       this.domObserver = null;
       this.boundHandlers = new Map();
       this.isDestroyed = false;
+      this.appState = null;
+      this.debugMode = false;
+
+      // Cache para evitar recálculos desnecessários
+      this.lastMainValue = null;
+      this.lastTotalAllocation = null;
     }
 
-    init() {
+    async init() {
       if (this.isInitialized || this.isDestroyed) {
         return;
       }
+
+      // Aguarda AppState estar disponível
+      await this.waitForAppState();
 
       document.addEventListener('DOMContentLoaded', () => {
         this.initializeCurrencySystem();
@@ -29,8 +38,128 @@
       this.isInitialized = true;
     }
 
+    async waitForAppState() {
+      let attempts = 0;
+      const maxAttempts = 50;
+
+      while (!window.ReinoAppState && attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (window.ReinoAppState) {
+        this.appState = window.ReinoAppState;
+        this.setupAppStateListeners();
+        this.log('✅ AppState connected successfully');
+      } else {
+        this.log('⚠️ AppState not available, falling back to legacy mode');
+      }
+    }
+
+    setupAppStateListeners() {
+      if (!this.appState) {
+        return;
+      }
+
+      // Escuta mudanças no patrimônio principal
+      document.addEventListener('patrimonyMainValueChanged', (e) => {
+        this.handlePatrimonyChange(e.detail);
+      });
+
+      // Escuta mudanças nas alocações
+      document.addEventListener('allocationChanged', (e) => {
+        this.handleAllocationChange(e.detail);
+      });
+
+      this.log('🎧 AppState event listeners configured');
+    }
+
+    handlePatrimonyChange(detail) {
+      if (this.isDestroyed || !detail) {
+        return;
+      }
+
+      const { value, formatted } = detail;
+
+      // Evita processamento desnecessário
+      if (this.lastMainValue === value) {
+        return;
+      }
+      this.lastMainValue = value;
+
+      // Atualiza displays do patrimônio principal
+      this.updatePatrimonyDisplays(value, formatted);
+
+      this.log(`💰 Patrimony updated from AppState: ${formatted}`);
+    }
+
+    handleAllocationChange(detail) {
+      if (this.isDestroyed || !detail) {
+        return;
+      }
+
+      const { totalAllocated, remainingPatrimony } = detail;
+
+      // Evita processamento desnecessário
+      if (this.lastTotalAllocation === totalAllocated) {
+        return;
+      }
+      this.lastTotalAllocation = totalAllocated;
+
+      // Atualiza displays de alocação
+      this.updateAllocationDisplays(totalAllocated, remainingPatrimony);
+
+      this.log(`💼 Allocation updated from AppState: ${this.formatCurrency(totalAllocated)}`);
+    }
+
+    updatePatrimonyDisplays(value, formatted) {
+      // Atualiza input principal se existir
+      const mainInput = document.querySelector('[is-main="true"]');
+      if (mainInput && mainInput.value !== formatted) {
+        mainInput.value = this.formatInputValue(value);
+      }
+
+      // Atualiza elementos de display
+      const displays = [
+        '.patrimonio-total-value',
+        '[data-patrimonio-total="true"]',
+        '.patrimonio_money_wrapper .patrimonio-total-value',
+      ];
+
+      displays.forEach((selector) => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((el) => {
+          if (el.textContent !== formatted) {
+            el.textContent = formatted;
+          }
+        });
+      });
+    }
+
+    updateAllocationDisplays(totalAllocated, remainingPatrimony) {
+      // Atualiza display do patrimônio restante
+      const restanteEl = document.querySelector('.patrimonio_money_wrapper .patrimonio-restante');
+      if (restanteEl) {
+        restanteEl.textContent = this.formatCurrency(remainingPatrimony);
+      }
+
+      // Dispara evento para compatibilidade com código legado
+      document.dispatchEvent(
+        new CustomEvent('totalAllocationChange', {
+          detail: {
+            total: totalAllocated,
+            formatted: this.formatCurrency(totalAllocated),
+            remaining: remainingPatrimony,
+            remainingFormatted: this.formatCurrency(remainingPatrimony),
+          },
+        })
+      );
+    }
+
     initializeCurrencySystem() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       if (window.Webflow) {
         window.Webflow.push(() => {
@@ -42,7 +171,9 @@
     }
 
     setupCurrencyFormatting() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const formatBRL = (value) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -52,7 +183,7 @@
       };
 
       const formatCurrencyInput = (input) => {
-        let value = input.value.replace(/\D/g, '');
+        const value = input.value.replace(/\D/g, '');
         if (value === '') {
           input.value = '';
           return 0;
@@ -78,9 +209,11 @@
       const mainInput = document.querySelector('[is-main="true"]');
 
       currencyInputs.forEach((input) => {
-        if (!input || input.hasAttribute('is-main') || this.isDestroyed) return;
+        if (!input || input.hasAttribute('is-main') || this.isDestroyed) {
+          return;
+        }
 
-        const inputId = input.id || `currency-${Math.random().toString(36).substr(2, 9)}`;
+        const inputId = input.id || `currency-${Math.random().toString(36).substring(2, 11)}`;
 
         if (!this.boundHandlers.has(inputId)) {
           const handlers = {
@@ -151,23 +284,47 @@
     }
 
     handleCurrencyInput(event, formatCurrencyInput) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const numericValue = formatCurrencyInput(event.target);
+      const isMainInput = event.target.hasAttribute('is-main');
 
+      // Se é o input principal e temos AppState, atualiza o estado centralizado
+      if (isMainInput && this.appState) {
+        this.appState.setPatrimonio(numericValue, 'user-input');
+      }
+
+      // Se é um input individual de alocação, atualiza a alocação específica
+      if (!isMainInput && this.appState) {
+        const item = event.target.closest('[ativo-category][ativo-product]');
+        if (item) {
+          const category = item.getAttribute('ativo-category');
+          const product = item.getAttribute('ativo-product');
+          if (category && product) {
+            this.appState.setAllocation(category, product, numericValue, 'user-input');
+          }
+        }
+      }
+
+      // Mantém evento legado para compatibilidade
       event.target.dispatchEvent(
         new CustomEvent('currencyChange', {
           detail: {
             value: numericValue,
             currencyValue: window.currency ? window.currency(numericValue) : numericValue,
-            formatted: window.formatCurrency ? window.formatCurrency(numericValue) : numericValue,
+            formatted: this.formatCurrency(numericValue),
+            isMainInput,
           },
         })
       );
     }
 
     handleCurrencyFocus(event, getCurrencyValue) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const value = getCurrencyValue(event.target);
       if (value > 0) {
@@ -176,19 +333,25 @@
     }
 
     handleCurrencyBlur(event, formatCurrencyInput) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
       formatCurrencyInput(event.target);
     }
 
     setupAllocationInputs(getCurrencyValue) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const individualInputs = document.querySelectorAll(
         '.currency-input.individual, [input-settings="receive"]'
       );
 
       individualInputs.forEach((input) => {
-        if (!input || this.isDestroyed) return;
+        if (!input || this.isDestroyed) {
+          return;
+        }
 
         const existingHandler = input._currencyChangeHandler;
         if (existingHandler) {
@@ -203,7 +366,35 @@
     }
 
     updateTotalAllocation(getCurrencyValue) {
-      if (this.isDestroyed || !window.currency) return;
+      if (this.isDestroyed) {
+        return;
+      }
+
+      // Se temos AppState, usa os dados centralizados
+      if (this.appState) {
+        const allocations = this.appState.getAllAllocations();
+        const totalAllocated = Object.values(allocations).reduce((sum, value) => sum + value, 0);
+        const patrimony = this.appState.getPatrimonio();
+        const remaining = patrimony.value - totalAllocated;
+
+        // Dispara evento para compatibilidade
+        document.dispatchEvent(
+          new CustomEvent('totalAllocationChange', {
+            detail: {
+              total: totalAllocated,
+              formatted: this.formatCurrency(totalAllocated),
+              remaining,
+              remainingFormatted: this.formatCurrency(remaining),
+            },
+          })
+        );
+        return;
+      }
+
+      // Fallback para modo legado
+      if (!window.currency) {
+        return;
+      }
 
       let total = window.currency(0);
       document
@@ -220,7 +411,7 @@
           new CustomEvent('totalAllocationChange', {
             detail: {
               total: total.value,
-              formatted: window.formatCurrency ? window.formatCurrency(total.value) : total.value,
+              formatted: this.formatCurrency(total.value),
             },
           })
         );
@@ -228,11 +419,15 @@
     }
 
     setupDOMObserver() {
-      if (this.isDestroyed || this.domObserver) return;
+      if (this.isDestroyed || this.domObserver) {
+        return;
+      }
 
       let observerTimeout;
       const throttledReinit = () => {
-        if (observerTimeout) clearTimeout(observerTimeout);
+        if (observerTimeout) {
+          clearTimeout(observerTimeout);
+        }
         observerTimeout = setTimeout(() => {
           if (!this.isDestroyed) {
             this.initializeCurrencySystem();
@@ -242,10 +437,14 @@
 
       if (window.Webflow) {
         window.Webflow.push(() => {
-          if (this.isDestroyed) return;
+          if (this.isDestroyed) {
+            return;
+          }
 
           this.domObserver = new MutationObserver((mutations) => {
-            if (this.isDestroyed) return;
+            if (this.isDestroyed) {
+              return;
+            }
 
             let shouldReinit = false;
             mutations.forEach((mutation) => {
@@ -285,7 +484,7 @@
         this.domObserver = null;
       }
 
-      for (const [inputId, { input, handlers }] of this.boundHandlers.entries()) {
+      for (const [, { input, handlers }] of this.boundHandlers.entries()) {
         if (input) {
           input.removeEventListener('input', handlers.input);
           input.removeEventListener('focus', handlers.focus);
@@ -319,6 +518,69 @@
       this.isDestroyed = false;
       this.init();
     }
+
+    // ==================== UTILITY METHODS ====================
+
+    formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(value);
+    }
+
+    formatInputValue(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+    }
+
+    parseCurrencyValue(value) {
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (!value) {
+        return 0;
+      }
+      const cleanValue = value
+        .toString()
+        .replace(/[^\d,]/g, '')
+        .replace(',', '.');
+      return parseFloat(cleanValue) || 0;
+    }
+
+    // ==================== DEBUG METHODS ====================
+
+    enableDebug() {
+      this.debugMode = true;
+      this.log('🐛 Debug mode enabled for CurrencyFormattingSystem');
+    }
+
+    disableDebug() {
+      this.debugMode = false;
+    }
+
+    log(message, data = null) {
+      if (this.debugMode) {
+        if (data) {
+          console.log(`[CurrencyFormatting] ${message}`, data);
+        } else {
+          console.log(`[CurrencyFormatting] ${message}`);
+        }
+      }
+    }
+
+    getDebugInfo() {
+      return {
+        isInitialized: this.isInitialized,
+        isDestroyed: this.isDestroyed,
+        hasAppState: !!this.appState,
+        boundHandlersCount: this.boundHandlers.size,
+        lastMainValue: this.lastMainValue,
+        lastTotalAllocation: this.lastTotalAllocation,
+        debugMode: this.debugMode,
+      };
+    }
   }
 
   // Cria instância global
@@ -339,5 +601,4 @@
       window.ReinoCurrencyFormatting.cleanup();
     }
   });
-
 })();

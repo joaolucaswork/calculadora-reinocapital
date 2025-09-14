@@ -148,7 +148,9 @@
         this.state.activeTooltip = this.createTooltip(className);
       }
 
-      if (!this.state.activeTooltip) return;
+      if (!this.state.activeTooltip) {
+        return;
+      }
 
       const content = contentFunction(data);
       this.state.activeTooltip.html(content);
@@ -219,7 +221,9 @@
     }
 
     updateTooltipPosition(event) {
-      if (!this.state.activeTooltip || !this.state.isVisible) return;
+      if (!this.state.activeTooltip || !this.state.isVisible) {
+        return;
+      }
 
       const mouseX = event.clientX;
       const mouseY = event.clientY;

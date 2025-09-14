@@ -6,11 +6,13 @@
       this.isInitialized = false;
       this.rotationController = null;
       this.originalCalcFunction = null;
-      this.debugMode = window.location.search.includes('debug=true');
+      this.debugMode = false; // Debug desabilitado para produção
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this.setup());
@@ -23,7 +25,7 @@
       try {
         this.waitForDependencies();
       } catch (error) {
-        console.error('❌ Rotation Index Integration initialization failed:', error);
+        // Initialization failed silently
       }
     }
 
@@ -43,7 +45,7 @@
       }
 
       if (attempts >= maxAttempts) {
-        console.warn('⚠️ Rotation Index Integration: Dependencies not found');
+        // Dependencies not found - fail silently
       }
     }
 
@@ -54,9 +56,7 @@
       this.setupEventListeners();
       this.isInitialized = true;
 
-      if (this.debugMode) {
-        console.log('✅ Rotation Index Integration initialized');
-      }
+      // Rotation Index Integration initialized silently
     }
 
     setupEventListeners() {
@@ -75,25 +75,8 @@
       const productKey = `${category}:${product}`;
       const rotationCalc = this.rotationController.getProductCalculation(productKey);
 
-      if (this.debugMode) {
-        console.log(`🔄 Rotation calc for ${productKey}:`, {
-          found: !!rotationCalc,
-          rotationCalc,
-          currentIndex: this.rotationController.getCurrentIndex(),
-        });
-      }
-
       if (rotationCalc) {
         const rotationBasedCost = valorAlocado * rotationCalc.comissaoRate;
-
-        if (this.debugMode) {
-          console.log(`💰 Cost calculation:`, {
-            valorAlocado,
-            comissaoRate: rotationCalc.comissaoRate,
-            rotationBasedCost,
-            originalCost: originalResult.custoMedio,
-          });
-        }
 
         return {
           ...originalResult,
@@ -111,10 +94,6 @@
     }
 
     handleRotationIndexChange(detail) {
-      if (this.debugMode) {
-        console.log('🔄 Rotation index changed, triggering recalculation:', detail);
-      }
-
       this.triggerSystemRecalculation();
     }
 
@@ -140,7 +119,9 @@
     }
 
     getRotationIndexData() {
-      if (!this.rotationController) return null;
+      if (!this.rotationController) {
+        return null;
+      }
 
       return {
         currentIndex: this.rotationController.getCurrentIndex(),
@@ -163,11 +144,34 @@
     }
   }
 
-  if (typeof window !== 'undefined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeRotationIndexIntegration);
-    } else {
+  // Multiple initialization attempts to ensure dependencies are loaded
+  function tryInitialization() {
+    if (window.ReinoRotationIndexController && window.calcularCustoProduto) {
       initializeRotationIndexIntegration();
+      return true;
+    }
+    return false;
+  }
+
+  if (typeof window !== 'undefined') {
+    // Try immediate initialization
+    if (!tryInitialization()) {
+      // If not ready, try on DOMContentLoaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          if (!tryInitialization()) {
+            // If still not ready, try with delays
+            setTimeout(() => tryInitialization(), 500);
+            setTimeout(() => tryInitialization(), 1000);
+            setTimeout(() => tryInitialization(), 2000);
+          }
+        });
+      } else {
+        // Document already loaded, try with delays
+        setTimeout(() => tryInitialization(), 100);
+        setTimeout(() => tryInitialization(), 500);
+        setTimeout(() => tryInitialization(), 1000);
+      }
     }
   }
 })();

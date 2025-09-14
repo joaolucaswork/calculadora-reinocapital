@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Reino Capital Calculator - Commit Message Hook
+# Validates commit message format and content
+
+commit_regex='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,50}'
+
+error_msg="❌ Invalid commit message format!
+
+📋 Commit message should follow the format:
+   <type>[optional scope]: <description>
+
+🏷️  Valid types:
+   feat:     A new feature
+   fix:      A bug fix
+   docs:     Documentation only changes
+   style:    Changes that do not affect the meaning of the code
+   refactor: A code change that neither fixes a bug nor adds a feature
+   test:     Adding missing tests or correcting existing tests
+   chore:    Changes to the build process or auxiliary tools
+   perf:     A code change that improves performance
+   ci:       Changes to CI configuration files and scripts
+   build:    Changes that affect the build system or external dependencies
+   revert:   Reverts a previous commit
+
+📝 Examples:
+   ✅ feat: add database isolation tests
+   ✅ fix(auth): resolve login timeout issue
+   ✅ docs: update API documentation
+   ✅ test: add unit tests for calculator
+   ✅ chore: update dependencies
+
+❌ Invalid examples:
+   ❌ updated files
+   ❌ fix bug
+   ❌ WIP: working on feature
+
+💡 Your commit message: $(cat $1)"
+
+if ! grep -qE "$commit_regex" "$1"; then
+    echo "$error_msg"
+    exit 1
+fi
+
+echo "✅ Commit message format is valid!"

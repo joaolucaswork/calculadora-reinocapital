@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Reino Capital Calculator - Pre-push Hook
+# Executes database isolation tests before pushing to master/main branch
+
+# Get the current branch name
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Only run tests when pushing to master or main
+if [ "$branch" = "master" ] || [ "$branch" = "main" ]; then
+    echo "🔍 Running database isolation tests before push to $branch..."
+    
+    # Validate environment configuration
+    echo "📋 Step 1/3: Validating environment configuration..."
+    pnpm validate:env:testing
+    if [ $? -ne 0 ]; then
+        echo "❌ Environment validation failed. Push rejected."
+        echo "💡 Run 'pnpm validate:env:testing' to see detailed errors."
+        exit 1
+    fi
+    echo "✅ Environment validation passed."
+    
+    # Run database isolation tests
+    echo "🧪 Step 2/3: Running database isolation tests..."
+    pnpm test:isolation
+    if [ $? -ne 0 ]; then
+        echo "❌ Database isolation tests failed. Push rejected."
+        echo "💡 Run 'pnpm test:isolation' locally to debug issues."
+        exit 1
+    fi
+    echo "✅ Database isolation tests passed."
+    
+    # Verify cleanup functionality
+    echo "🧹 Step 3/3: Verifying database cleanup functionality..."
+    pnpm db:cleanup:testing
+    if [ $? -ne 0 ]; then
+        echo "❌ Database cleanup verification failed. Push rejected."
+        echo "💡 Run 'pnpm db:cleanup:testing' to verify cleanup works."
+        exit 1
+    fi
+    echo "✅ Database cleanup verification passed."
+    
+    echo "🎉 All database isolation checks passed! Push allowed to $branch."
+else
+    echo "ℹ️  Pushing to $branch - skipping database isolation tests (only required for master/main)."
+fi

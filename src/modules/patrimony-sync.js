@@ -16,13 +16,17 @@
     },
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     },
 
     calculatePercentage(value, total) {
-      if (!total || total === 0) return 0;
+      if (!total || total === 0) {
+        return 0;
+      }
       return (value / total) * 100;
     },
 
@@ -44,8 +48,56 @@
   };
 
   const PatrimonySync = {
-    mainValue: 0,
     isInitialized: false,
+    appState: null,
+
+    init() {
+      // Aguarda o AppState estar disponível
+      this.waitForAppState();
+    },
+
+    async waitForAppState() {
+      const maxAttempts = 50;
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+          this.appState = window.ReinoAppState;
+          this.setupPatrimonySync();
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        console.warn('⚠️ PatrimonySync: AppState not found, falling back to legacy mode');
+        this.setupPatrimonySync();
+      }
+    },
+
+    setupPatrimonySync() {
+      this.isInitialized = true;
+      console.log('✅ PatrimonySync initialized with AppState integration');
+    },
+
+    // Getter que usa AppState se disponível, senão fallback
+    get mainValue() {
+      if (this.appState) {
+        return this.appState.getPatrimonio().value;
+      }
+      return this._legacyMainValue || 0;
+    },
+
+    // Setter que usa AppState se disponível
+    set mainValue(value) {
+      if (this.appState) {
+        this.appState.setPatrimonio(value, 'patrimony-sync');
+      } else {
+        this._legacyMainValue = value;
+      }
+    },
   };
 
   const MainInputSync = {
@@ -83,26 +135,10 @@
     },
 
     handleValueChange(value) {
+      // O AppState já dispara os eventos automaticamente
       PatrimonySync.mainValue = value;
 
-      document.dispatchEvent(
-        new CustomEvent('patrimonyMainValueChanged', {
-          detail: {
-            value,
-            formatted: Utils.formatCurrency(value),
-          },
-        })
-      );
-
-      document.dispatchEvent(
-        new CustomEvent('totalPatrimonyChanged', {
-          detail: {
-            value,
-            formatted: Utils.formatCurrency(value),
-          },
-        })
-      );
-
+      // Atualiza alocações (mantém lógica existente)
       AllocationSync.updateAllAllocations();
       AllocationSync.validateAllAllocations();
     },
@@ -130,7 +166,9 @@
         const activeItem = container.querySelector('.active-produto-item');
         const disabledItem = container.querySelector('.disabled-produto-item');
 
-        if (!activeItem || !disabledItem) return;
+        if (!activeItem || !disabledItem) {
+          return;
+        }
 
         const input = activeItem.querySelector('[input-settings="receive"]');
         const slider = activeItem.querySelector('range-slider');
@@ -391,6 +429,11 @@
       const category = item.container.getAttribute('ativo-category');
       const product = item.container.getAttribute('ativo-product');
 
+      // ✅ ATUALIZAR APPSTATE PRIMEIRO
+      if (PatrimonySync.appState && category && product) {
+        PatrimonySync.appState.setAllocation(category, product, item.value, 'patrimony-sync');
+      }
+
       document.dispatchEvent(
         new CustomEvent('allocationChanged', {
           detail: {
@@ -486,11 +529,13 @@
     }
 
     initializeComponents() {
+      // Inicializa PatrimonySync primeiro (com AppState)
+      PatrimonySync.init();
+
       MainInputSync.init();
 
       setTimeout(() => {
         AllocationSync.init();
-        PatrimonySync.isInitialized = true;
 
         AllocationSync.checkTotalAllocationStatus();
 

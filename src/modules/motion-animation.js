@@ -102,12 +102,16 @@
 
       if (window.ReinoEventCoordinator) {
         window.ReinoEventCoordinator.registerListener('motion-animation', 'input', () => {
-          if (!isArrowVisible) showArrow();
+          if (!isArrowVisible) {
+            showArrow();
+          }
           scheduleHide();
         });
 
         window.ReinoEventCoordinator.registerListener('motion-animation', 'focus', () => {
-          if (!isArrowVisible) showArrow();
+          if (!isArrowVisible) {
+            showArrow();
+          }
           clearTimeout(hideTimeout);
         });
 
@@ -120,7 +124,9 @@
       buttonEffects.forEach((button) => {
         button.addEventListener('mouseenter', () => {
           isButtonInteraction = true;
-          if (!isArrowVisible) showArrow();
+          if (!isArrowVisible) {
+            showArrow();
+          }
           clearTimeout(hideTimeout);
         });
 
@@ -193,7 +199,9 @@
       };
 
       hover(increaseBtn, (element) => {
-        if (element.classList.contains('disabled')) return;
+        if (element.classList.contains('disabled')) {
+          return;
+        }
 
         isButtonInteraction = true;
         animate(
@@ -256,7 +264,9 @@
       });
 
       hover(decreaseBtn, (element) => {
-        if (element.classList.contains('disabled')) return;
+        if (element.classList.contains('disabled')) {
+          return;
+        }
 
         isButtonInteraction = true;
         animate(
@@ -319,7 +329,9 @@
       });
 
       press(increaseBtn, (element) => {
-        if (element.classList.contains('disabled')) return;
+        if (element.classList.contains('disabled')) {
+          return;
+        }
 
         isButtonInteraction = true;
         animate(
@@ -357,7 +369,9 @@
       });
 
       press(decreaseBtn, (element) => {
-        if (element.classList.contains('disabled')) return;
+        if (element.classList.contains('disabled')) {
+          return;
+        }
 
         isButtonInteraction = true;
         animate(

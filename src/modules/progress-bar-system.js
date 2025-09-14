@@ -43,12 +43,6 @@
           validator: () => this.validateAllocationStep(),
         },
         {
-          id: '_4-section-resultado',
-          name: 'pre-results',
-          title: 'Pré-Resultados',
-          validator: () => true,
-        },
-        {
           id: '_5-section-resultado',
           name: 'results',
           title: 'Resultados',
@@ -211,7 +205,9 @@
             event.preventDefault();
 
             const sectionMainElement = indicatorContainer.querySelector('[section-main]');
-            if (!sectionMainElement) return;
+            if (!sectionMainElement) {
+              return;
+            }
 
             const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
 
@@ -246,6 +242,20 @@
 
       document.addEventListener('allocationChanged', () => {
         this.debouncedValidation();
+      });
+
+      // Escuta mudanças no AppState para revalidar botões
+      document.addEventListener('patrimonyMainValueChanged', () => {
+        this.debouncedValidation();
+      });
+
+      document.addEventListener('appStateChanged', () => {
+        this.debouncedValidation();
+      });
+
+      // Escuta mudanças de validação específicas
+      document.addEventListener('stepValidationChanged', () => {
+        this.notifyWebflowButtonSystem();
       });
     }
 
@@ -285,7 +295,9 @@
      * @param {number} stepIndex - Índice do step atual (0-based)
      */
     updateProgressBarState(stepIndex) {
-      if (!this.progressBar) return;
+      if (!this.progressBar) {
+        return;
+      }
 
       const previousStep = this.currentStep;
       this.currentStep = stepIndex;
@@ -350,7 +362,9 @@
         const sectionIndicator = indicator.querySelector('.section-indicator');
         const numberIndicator = indicator.querySelector('.number-indicator');
 
-        if (!sectionMain) return;
+        if (!sectionMain) {
+          return;
+        }
 
         const sectionNumber = parseInt(sectionMain.getAttribute('section-main')) || index + 1;
 
@@ -406,10 +420,14 @@
     updateSectionIndicatorPointers(activeStepIndex) {
       this.sectionIndicators.forEach((indicatorContainer) => {
         const indicator = indicatorContainer.querySelector('.section-indicator');
-        if (!indicator) return;
+        if (!indicator) {
+          return;
+        }
 
         const sectionMainElement = indicatorContainer.querySelector('[section-main]');
-        if (!sectionMainElement) return;
+        if (!sectionMainElement) {
+          return;
+        }
 
         const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
 
@@ -510,7 +528,9 @@
      * Aplica ou remove uma classe condicionalmente
      */
     setConditionalClass(element, className, condition) {
-      if (!element) return;
+      if (!element) {
+        return;
+      }
 
       if (condition) {
         element.classList.add(className);
@@ -627,7 +647,9 @@
     }
 
     async showStep(stepIndex) {
-      if (stepIndex < 0 || stepIndex >= this.steps.length) return;
+      if (stepIndex < 0 || stepIndex >= this.steps.length) {
+        return;
+      }
 
       const previousStep = this.currentStep;
       this.currentStep = stepIndex;
@@ -662,7 +684,9 @@
     showStepSimple(stepIndex) {
       this.steps.forEach((step, index) => {
         const section = this.sectionCache.get(step.id);
-        if (!section) return;
+        if (!section) {
+          return;
+        }
 
         if (index === stepIndex) {
           section.style.display = 'block';
@@ -715,11 +739,6 @@
     }
 
     isNavigationBlocked(sectionNumber) {
-      // Block access to step 4 (section-step="4") - always blocked
-      if (sectionNumber === 4) {
-        return true;
-      }
-
       // Block all navigation when on step 0
       if (this.currentStep === 0) {
         return true;
@@ -731,10 +750,14 @@
     updateNavigationRestrictions() {
       this.sectionIndicators.forEach((indicatorContainer) => {
         const indicator = indicatorContainer.querySelector('.section-indicator');
-        if (!indicator) return;
+        if (!indicator) {
+          return;
+        }
 
         const sectionMainElement = indicatorContainer.querySelector('[section-main]');
-        if (!sectionMainElement) return;
+        if (!sectionMainElement) {
+          return;
+        }
 
         const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
         const isBlocked = this.isNavigationBlocked(sectionNumber);
@@ -752,7 +775,7 @@
       // Seção 1 = Step 1 (_1-section-calc-money)
       // Seção 2 = Step 2 (_2-section-calc-ativos)
       // Seção 3 = Step 3 (_3-section-patrimonio-alocation)
-      // Seção 4 = Step 4 (não existe ainda, seria resultado)
+      // Seção 5 = Step 4 (_5-section-resultado)
 
       const targetStep = sectionNumber;
 
@@ -829,6 +852,21 @@
     }
 
     validateMoneyStep() {
+      // Prioriza AppState se disponível
+      if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+        const patrimonio = window.ReinoAppState.getPatrimonio();
+        const isValid = patrimonio.value > 0;
+
+        if (this.config.enableLogging) {
+          console.warn(
+            `💰 Validação money step (AppState): valor=${patrimonio.value}, válido=${isValid}`
+          );
+        }
+
+        return isValid;
+      }
+
+      // Fallback para validação DOM
       const input = document.querySelector('[is-main="true"]');
       if (!input) {
         if (this.config.enableLogging) {
@@ -841,7 +879,7 @@
       const isValid = value > 0;
 
       if (this.config.enableLogging) {
-        console.warn(`💰 Validação money step: valor=${value}, válido=${isValid}`);
+        console.warn(`💰 Validação money step (DOM): valor=${value}, válido=${isValid}`);
       }
 
       return isValid;
@@ -940,7 +978,9 @@
     }
 
     parseInputValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     }
@@ -966,10 +1006,14 @@
 
     collectStepData(stepIndex) {
       const step = this.steps[stepIndex];
-      if (!step) return null;
+      if (!step) {
+        return null;
+      }
 
       const section = this.sectionCache.get(step.id);
-      if (!section) return null;
+      if (!section) {
+        return null;
+      }
 
       const inputs = section.querySelectorAll('input, select, textarea');
       const data = {};

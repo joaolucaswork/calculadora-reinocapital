@@ -25,8 +25,8 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.waitForSupabaseIntegration = function () {
-    var self = this;
-    var checkSupabaseIntegration = function () {
+    const self = this;
+    const checkSupabaseIntegration = function () {
       if (window.ReinoSupabaseIntegration && window.ReinoSupabaseIntegration.isReady) {
         self.supabaseIntegration = window.ReinoSupabaseIntegration;
         self.log('✅ Supabase integration available');
@@ -38,10 +38,10 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.setupTypebotCallback = function () {
-    var self = this;
+    const self = this;
 
     // Wait for Typebot integration to be available
-    var checkTypebot = function () {
+    const checkTypebot = function () {
       if (window.ReinoTypebotIntegrationSystem) {
         // Register callback for when Typebot completes
         window.ReinoTypebotIntegrationSystem.onCompletion(function (enhancedFormData) {
@@ -57,11 +57,13 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.setupSendButton = function () {
-    var self = this;
-    var sendButton = document.querySelector('[element-function="send"]');
-    if (!sendButton) return;
+    const self = this;
+    const sendButton = document.querySelector('[element-function="send"]');
+    if (!sendButton) {
+      return;
+    }
 
-    var newButton = sendButton.cloneNode(true);
+    const newButton = sendButton.cloneNode(true);
     sendButton.parentNode.replaceChild(newButton, sendButton);
 
     newButton.addEventListener('click', function (e) {
@@ -74,26 +76,28 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.handleDataSubmission = function (button) {
-    var self = this;
+    const self = this;
 
     // Check if debug mode is active
-    var isDebugActive = window.ReinoDebugModule && window.ReinoDebugModule.isDebugActive();
+    const isDebugActive = window.ReinoDebugModule && window.ReinoDebugModule.isDebugActive();
     if (isDebugActive) {
       this.log('🐛 Debug mode active - form submission bypassed');
       return; // Let debug module handle navigation
     }
 
     // Update button state
-    var buttonText = button.querySelector('div');
-    if (buttonText) buttonText.textContent = 'Processando...';
+    const buttonText = button.querySelector('div');
+    if (buttonText) {
+      buttonText.textContent = 'Processando...';
+    }
     button.disabled = true;
 
     try {
       // Collect and validate form data
-      var formData = this.collectFormData();
+      const formData = this.collectFormData();
 
       // Use Supabase integration validation if available, otherwise fallback
-      var validation;
+      let validation;
       if (this.supabaseIntegration) {
         validation = this.supabaseIntegration.validateFormData(formData);
       } else {
@@ -122,7 +126,7 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.collectFormData = function () {
-    var data = {
+    const data = {
       timestamp: new Date().toISOString(),
       patrimonio: null,
       ativosEscolhidos: [],
@@ -136,25 +140,25 @@ window.ReinoFormSubmission = (function () {
     };
 
     // Coleta valor do patrimônio
-    var patrimonioInput = document.querySelector('[is-main="true"]');
+    const patrimonioInput = document.querySelector('[is-main="true"]');
     if (patrimonioInput) {
       data.patrimonio = this.parseCurrencyValue(patrimonioInput.value);
     }
 
     // Coleta informações de contato se disponíveis
-    var nameInput = document.querySelector(
+    const nameInput = document.querySelector(
       'input[name*="nome"], input[placeholder*="nome"], #nome'
     );
     if (nameInput && nameInput.value) {
       data.nome = nameInput.value.trim();
     }
 
-    var emailInput = document.querySelector('input[type="email"], input[name*="email"], #email');
+    const emailInput = document.querySelector('input[type="email"], input[name*="email"], #email');
     if (emailInput && emailInput.value) {
       data.email = emailInput.value.trim();
     }
 
-    var phoneInput = document.querySelector(
+    const phoneInput = document.querySelector(
       'input[type="tel"], input[name*="telefone"], input[name*="phone"], #telefone'
     );
     if (phoneInput && phoneInput.value) {
@@ -162,40 +166,40 @@ window.ReinoFormSubmission = (function () {
     }
 
     // Coleta ativos selecionados - busca por elementos ativos
-    var activeItems = document.querySelectorAll(
+    const activeItems = document.querySelectorAll(
       '.patrimonio_interactive_item .active-produto-item'
     );
-    for (var i = 0; i < activeItems.length; i++) {
-      var item = activeItems[i].closest('.patrimonio_interactive_item');
-      var product = item.getAttribute('ativo-product');
-      var category = item.getAttribute('ativo-category');
+    for (let i = 0; i < activeItems.length; i++) {
+      const item = activeItems[i].closest('.patrimonio_interactive_item');
+      const product = item.getAttribute('ativo-product');
+      const category = item.getAttribute('ativo-category');
       if (product && category) {
         data.ativosEscolhidos.push({ product: product, category: category });
       }
     }
 
     // Coleta alocações com cálculos
-    var totalAlocado = 0;
-    var allocationItems = document.querySelectorAll(
+    let totalAlocado = 0;
+    const allocationItems = document.querySelectorAll(
       '.patrimonio_interactive_item .active-produto-item'
     );
 
-    for (var i = 0; i < allocationItems.length; i++) {
-      var item = allocationItems[i].closest('.patrimonio_interactive_item');
-      var product = item.getAttribute('ativo-product');
-      var category = item.getAttribute('ativo-category');
-      var input = item.querySelector('.currency-input');
-      var slider = item.querySelector('.slider');
+    for (let j = 0; j < allocationItems.length; j++) {
+      const allocationItem = allocationItems[j].closest('.patrimonio_interactive_item');
+      const allocationProduct = allocationItem.getAttribute('ativo-product');
+      const allocationCategory = allocationItem.getAttribute('ativo-category');
+      const input = allocationItem.querySelector('.currency-input');
+      const slider = allocationItem.querySelector('.slider');
 
-      if (product && category && (input || slider)) {
-        var value = input ? this.parseCurrencyValue(input.value) : 0;
-        var percentage = slider ? parseFloat(slider.value) * 100 : 0;
+      if (allocationProduct && allocationCategory && (input || slider)) {
+        const value = input ? this.parseCurrencyValue(input.value) : 0;
+        const percentage = slider ? parseFloat(slider.value) * 100 : 0;
 
-        data.alocacao[category + '-' + product] = {
+        data.alocacao[allocationCategory + '-' + allocationProduct] = {
           value: value,
           percentage: percentage,
-          category: category,
-          product: product,
+          category: allocationCategory,
+          product: allocationProduct,
         };
 
         totalAlocado += value;
@@ -211,7 +215,7 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.validateFormData = function (data) {
-    var errors = [];
+    const errors = [];
 
     // Validate patrimonio
     if (!data.patrimonio || data.patrimonio <= 0) {
@@ -230,14 +234,16 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.startTypebotFlow = function (formData, button) {
-    var self = this;
-    var buttonText = button.querySelector('div');
+    const self = this;
+    const buttonText = button.querySelector('div');
 
     try {
-      if (buttonText) buttonText.textContent = 'Iniciando conversa...';
+      if (buttonText) {
+        buttonText.textContent = 'Iniciando conversa...';
+      }
 
       // Callback for when Typebot completes
-      var onTypebotCompletion = function (typebotData) {
+      const onTypebotCompletion = function (typebotData) {
         try {
           // Usar o novo módulo de integração Supabase
           if (self.supabaseIntegration) {
@@ -246,7 +252,7 @@ window.ReinoFormSubmission = (function () {
               .then(function (result) {
                 if (result.success) {
                   // Criar dados para Salesforce com informações do Typebot
-                  var enhancedFormData = {
+                  const enhancedFormData = {
                     timestamp: formData.timestamp,
                     patrimonio: formData.patrimonio,
                     ativosEscolhidos: formData.ativosEscolhidos,
@@ -292,11 +298,13 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.handleDirectSubmission = function (formData, button) {
-    var self = this;
-    var buttonText = button.querySelector('div');
+    const self = this;
+    const buttonText = button.querySelector('div');
 
     try {
-      if (buttonText) buttonText.textContent = 'Enviando...';
+      if (buttonText) {
+        buttonText.textContent = 'Enviando...';
+      }
 
       // Usar o novo módulo de integração Supabase
       if (self.supabaseIntegration) {
@@ -314,7 +322,9 @@ window.ReinoFormSubmission = (function () {
             }
 
             // Reset button
-            if (buttonText) buttonText.textContent = 'Enviar';
+            if (buttonText) {
+              buttonText.textContent = 'Enviar';
+            }
             button.disabled = false;
           })
           .catch(function (error) {
@@ -322,7 +332,9 @@ window.ReinoFormSubmission = (function () {
             self.showValidationError(error.message);
 
             // Reset button
-            if (buttonText) buttonText.textContent = 'Enviar';
+            if (buttonText) {
+              buttonText.textContent = 'Enviar';
+            }
             button.disabled = false;
           });
       } else {
@@ -330,7 +342,9 @@ window.ReinoFormSubmission = (function () {
         self.showValidationError('Sistema de armazenamento não disponível');
 
         // Reset button
-        if (buttonText) buttonText.textContent = 'Enviar';
+        if (buttonText) {
+          buttonText.textContent = 'Enviar';
+        }
         button.disabled = false;
       }
     } catch (error) {
@@ -338,13 +352,15 @@ window.ReinoFormSubmission = (function () {
       self.showValidationError(error.message);
 
       // Reset button
-      if (buttonText) buttonText.textContent = 'Enviar';
+      if (buttonText) {
+        buttonText.textContent = 'Enviar';
+      }
       button.disabled = false;
     }
   };
 
   FormSubmission.prototype.handleTypebotCompletion = function (enhancedFormData) {
-    var self = this;
+    const self = this;
 
     try {
       // Prevent duplicate processing
@@ -366,7 +382,7 @@ window.ReinoFormSubmission = (function () {
       // Use Supabase integration to save data
       if (self.supabaseIntegration) {
         // Extract Typebot data for Supabase
-        var typebotDataForSupabase = {
+        const typebotDataForSupabase = {
           nome: enhancedFormData.nome,
           email: enhancedFormData.email,
           telefone: enhancedFormData.telefone,
@@ -414,7 +430,7 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.sendToSalesforce = function (data) {
-    var self = this;
+    const self = this;
 
     try {
       // Verificar se Salesforce está disponível
@@ -424,7 +440,7 @@ window.ReinoFormSubmission = (function () {
       }
 
       // Transformar dados para formato Salesforce Lead
-      var salesforceData = {
+      const salesforceData = {
         // Campos obrigatórios do Lead
         LastName: self.extractLastName(data.nome || data.typebot_results?.nome),
         FirstName: self.extractFirstName(data.nome || data.typebot_results?.nome),
@@ -474,20 +490,26 @@ window.ReinoFormSubmission = (function () {
 
   // Métodos auxiliares para processar nomes
   FormSubmission.prototype.extractFirstName = function (fullName) {
-    if (!fullName) return 'Prospect';
-    var parts = fullName.trim().split(' ');
+    if (!fullName) {
+      return 'Prospect';
+    }
+    const parts = fullName.trim().split(' ');
     return parts[0] || 'Prospect';
   };
 
   FormSubmission.prototype.extractLastName = function (fullName) {
-    if (!fullName) return 'Calculator';
-    var parts = fullName.trim().split(' ');
+    if (!fullName) {
+      return 'Calculator';
+    }
+    const parts = fullName.trim().split(' ');
     return parts.length > 1 ? parts.slice(1).join(' ') : 'Calculator';
   };
 
   // Utility methods
   FormSubmission.prototype.parseCurrencyValue = function (value) {
-    if (!value) return 0;
+    if (!value) {
+      return 0;
+    }
     return parseFloat(value.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
   };
 
@@ -506,11 +528,14 @@ window.ReinoFormSubmission = (function () {
   FormSubmission.prototype.showToast = function (message, type) {
     type = type || 'info';
 
-    var toast = document.createElement('div');
-    var backgroundColor = '#007bff';
+    const toast = document.createElement('div');
+    let backgroundColor = '#007bff';
 
-    if (type === 'error') backgroundColor = '#dc3545';
-    else if (type === 'success') backgroundColor = '#28a745';
+    if (type === 'error') {
+      backgroundColor = '#dc3545';
+    } else if (type === 'success') {
+      backgroundColor = '#28a745';
+    }
 
     toast.style.cssText =
       'position: fixed;' +
@@ -536,10 +561,10 @@ window.ReinoFormSubmission = (function () {
   };
 
   FormSubmission.prototype.debounce = function (func, wait) {
-    var timeout;
-    var self = this;
+    let timeout;
+    const self = this;
     return function () {
-      var args = arguments;
+      const args = arguments;
       clearTimeout(timeout);
       timeout = setTimeout(function () {
         func.apply(self, args);
@@ -565,7 +590,9 @@ window.ReinoFormSubmission = (function () {
   };
 
   // Cria instância global
-  window.ReinoFormSubmission = new FormSubmission();
+  const formSubmissionInstance = new FormSubmission();
+  window.ReinoFormSubmission = FormSubmission;
+  window.ReinoFormSubmissionInstance = formSubmissionInstance;
 
   return FormSubmission;
 })();

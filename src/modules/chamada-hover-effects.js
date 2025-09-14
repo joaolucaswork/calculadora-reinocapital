@@ -14,7 +14,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       this.waitForGSAP();
     }
@@ -35,7 +37,9 @@
       containers.forEach((container) => {
         const buttons = container.querySelectorAll('.cta-link');
 
-        if (buttons.length !== 2) return;
+        if (buttons.length !== 2) {
+          return;
+        }
 
         const [firstButton, secondButton] = buttons;
 
