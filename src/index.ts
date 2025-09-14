@@ -78,27 +78,7 @@ import './modules/lottie-lifecycle-manager.js';
 import './modules/calendly-minimalist-widget.js';
 // ==================== 12. DEBUG & TESTING ====================
 // Módulos de debug e teste (carregam por último)
-import './modules/reino-debug-module.js';
-import './modules/appstate-integration-test.js';
-import './modules/integration-appstate-test.js';
-import './modules/resultado-sync-appstate-test.js';
-import './modules/validators-test.js';
-import './modules/currency-formatting-appstate-test.js';
-import './modules/resultado-comparativo-appstate-test.js';
-import './modules/currency-control-appstate-test.js';
-import './modules/commission-flow-debug.js';
-import './modules/commission-integration-test.js';
-import './modules/commission-quick-test.js';
-import './modules/commission-flow-analyzer.js';
-import './modules/commission-flow-fix-test.js';
-import './modules/commission-simple-test.js';
-import './modules/commission-debug-test.js';
-import './modules/commission-final-test.js';
-import './modules/commission-final-fix-test.js';
-import './modules/separator-fix-analysis.js';
-import './modules/separator-consistency-test.js';
-import './modules/taxas-debug-test.js';
-import './modules/keyboard-navigation-test.js';
+import './modules/dev/index.js';
 // import './modules/swiper-resultado.js'; // DESATIVADO - mantido para uso futuro
 // Import CSS files
 import './css/tippy-custom.css';
