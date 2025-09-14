@@ -565,7 +565,9 @@ window.ReinoFormSubmission = (function () {
   };
 
   // Cria instância global
-  window.ReinoFormSubmission = new FormSubmission();
+  const formSubmissionInstance = new FormSubmission();
+  window.ReinoFormSubmission = FormSubmission;
+  window.ReinoFormSubmissionInstance = formSubmissionInstance;
 
   return FormSubmission;
 })();

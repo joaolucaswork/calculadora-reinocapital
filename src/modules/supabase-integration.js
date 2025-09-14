@@ -385,18 +385,8 @@
 
   const supabaseIntegration = new SupabaseIntegration();
 
-  // Expose methods for testing
-  window.ReinoSupabaseIntegration = {
-    ...supabaseIntegration,
-    // Expose conversion methods for testing
-    convertSelectedAssetsFormat: (assets) =>
-      supabaseIntegration.convertSelectedAssetsFormat(assets),
-    convertAllocationFormat: (allocations, patrimonio) =>
-      supabaseIntegration.convertAllocationFormat(allocations, patrimonio),
-    getAppStateSnapshot: () => supabaseIntegration.getAppStateSnapshot(),
-    mapFormDataToSupabase: (formData, typebotData) =>
-      supabaseIntegration.mapFormDataToSupabase(formData, typebotData),
-  };
+  // Expose the complete instance for testing and form submission
+  window.ReinoSupabaseIntegration = supabaseIntegration;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
