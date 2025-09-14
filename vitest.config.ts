@@ -38,6 +38,7 @@ export default defineConfig({
       'dist/**',
       'src/modules/dev/**',
       'src/tests/**',
+      'tests/**', // Exclude all Playwright tests from Vitest (tests/ directory is for Playwright)
       '**/*live*.test.js', // Exclude Playwright tests from Vitest
       '**/typebot*.test.js', // Exclude Typebot Playwright tests from Vitest
       '**/database-isolation*.test.js', // Exclude database isolation Playwright tests from Vitest

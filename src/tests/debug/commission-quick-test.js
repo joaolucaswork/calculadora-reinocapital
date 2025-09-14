@@ -53,7 +53,7 @@
     console.log('\n📡 Testing Event Flow:');
 
     let supabaseCaptured = false;
-    let domUpdated = false;
+    const domUpdated = false;
     const testTotal = 12345;
 
     // Monitor Supabase

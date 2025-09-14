@@ -38,7 +38,9 @@ class ReinoTypebotIntegrationSystem {
   }
 
   async init() {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {
+      return;
+    }
 
     try {
       // Initialize AppState integration
@@ -517,11 +519,15 @@ class ReinoTypebotIntegrationSystem {
       // Method 2: Check for alternative property names
       if (!nome) {
         nome = typebotData.name || typebotData.nome_usuario || typebotData.userName || null;
-        if (nome && this.isEncryptedValue(nome)) nome = null;
+        if (nome && this.isEncryptedValue(nome)) {
+          nome = null;
+        }
       }
       if (!email) {
         email = typebotData.e_mail || typebotData.userEmail || typebotData.email_usuario || null;
-        if (email && this.isEncryptedValue(email)) email = null;
+        if (email && this.isEncryptedValue(email)) {
+          email = null;
+        }
       }
       if (!telefone) {
         telefone =
@@ -531,7 +537,9 @@ class ReinoTypebotIntegrationSystem {
           typebotData.celular ||
           typebotData.whatsapp ||
           null;
-        if (telefone && this.isEncryptedValue(telefone)) telefone = null;
+        if (telefone && this.isEncryptedValue(telefone)) {
+          telefone = null;
+        }
       }
 
       // Method 3: Check variables property
@@ -680,7 +688,9 @@ class ReinoTypebotIntegrationSystem {
   }
 
   applyNomeToElements(nome) {
-    if (!nome) return;
+    if (!nome) {
+      return;
+    }
 
     try {
       // Find all elements with nome-definido="typebot" (matching old module behavior)
@@ -713,7 +723,9 @@ class ReinoTypebotIntegrationSystem {
    * Helper function to detect encrypted/placeholder values from Typebot
    */
   isEncryptedValue(value) {
-    if (!value || typeof value !== 'string') return false;
+    if (!value || typeof value !== 'string') {
+      return false;
+    }
 
     // Check for typical encrypted patterns
     const encryptedPatterns = [
@@ -844,7 +856,9 @@ class ReinoTypebotIntegrationSystem {
   }
 
   parseCurrencyValue(value) {
-    if (!value) return 0;
+    if (!value) {
+      return 0;
+    }
     const cleaned = value
       .toString()
       .replace(/[^\d,]/g, '')
@@ -853,7 +867,9 @@ class ReinoTypebotIntegrationSystem {
   }
 
   formatCurrency(value) {
-    if (!value || value === 0) return 'R$ 0';
+    if (!value || value === 0) {
+      return 'R$ 0';
+    }
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',

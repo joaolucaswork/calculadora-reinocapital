@@ -16,13 +16,17 @@
     },
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     },
 
     calculatePercentage(value, total) {
-      if (!total || total === 0) return 0;
+      if (!total || total === 0) {
+        return 0;
+      }
       return (value / total) * 100;
     },
 
@@ -162,7 +166,9 @@
         const activeItem = container.querySelector('.active-produto-item');
         const disabledItem = container.querySelector('.disabled-produto-item');
 
-        if (!activeItem || !disabledItem) return;
+        if (!activeItem || !disabledItem) {
+          return;
+        }
 
         const input = activeItem.querySelector('[input-settings="receive"]');
         const slider = activeItem.querySelector('range-slider');

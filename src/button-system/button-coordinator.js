@@ -18,7 +18,9 @@
     }
 
     async init(stepNavigationSystem) {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       await this.waitForDOM();
 
@@ -327,7 +329,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value) return 0;
+      if (!value) {
+        return 0;
+      }
       const cleaned = value
         .toString()
         .replace(/[^\d,]/g, '')

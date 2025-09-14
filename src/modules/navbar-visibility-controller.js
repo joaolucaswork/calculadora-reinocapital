@@ -18,7 +18,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       this.cacheElements();
       this.setupEventListeners();
@@ -70,7 +72,9 @@
     }
 
     handleSectionChange(sectionName) {
-      if (!this.navbar || this.currentSection === sectionName) return;
+      if (!this.navbar || this.currentSection === sectionName) {
+        return;
+      }
 
       this.currentSection = sectionName;
       this.updateNavbarVisibility();
@@ -79,7 +83,9 @@
     }
 
     handleStepChange(stepIndex) {
-      if (!this.navbar) return;
+      if (!this.navbar) {
+        return;
+      }
 
       if (stepIndex === 4) {
         this.hideNavbar();
@@ -91,7 +97,9 @@
     }
 
     updateNavbarVisibility() {
-      if (!this.navbar || !this.currentSection) return;
+      if (!this.navbar || !this.currentSection) {
+        return;
+      }
 
       if (this.hiddenSections.has(this.currentSection)) {
         this.hideNavbar();
@@ -101,7 +109,9 @@
     }
 
     hideNavbar() {
-      if (!this.navbar) return;
+      if (!this.navbar) {
+        return;
+      }
 
       // Force hide with multiple properties to override Webflow CSS
       this.navbar.style.display = 'none';
@@ -114,7 +124,9 @@
     }
 
     showNavbar() {
-      if (!this.navbar) return;
+      if (!this.navbar) {
+        return;
+      }
 
       // Clear all hiding properties
       this.navbar.style.display = '';

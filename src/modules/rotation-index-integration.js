@@ -10,7 +10,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this.setup());
@@ -117,7 +119,9 @@
     }
 
     getRotationIndexData() {
-      if (!this.rotationController) return null;
+      if (!this.rotationController) {
+        return null;
+      }
 
       return {
         currentIndex: this.rotationController.getCurrentIndex(),

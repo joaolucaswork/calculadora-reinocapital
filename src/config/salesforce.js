@@ -40,7 +40,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return true;
+      if (this.isInitialized) {
+        return true;
+      }
 
       try {
         // Check for existing session
@@ -95,7 +97,9 @@
         window.addEventListener(
           'message',
           (event) => {
-            if (event.origin !== window.location.origin) return;
+            if (event.origin !== window.location.origin) {
+              return;
+            }
 
             if (event.data.type === 'salesforce_auth_success') {
               clearInterval(checkClosed);
@@ -134,7 +138,9 @@
     }
 
     async validateToken() {
-      if (!this.accessToken || !this.instanceUrl) return false;
+      if (!this.accessToken || !this.instanceUrl) {
+        return false;
+      }
 
       try {
         const response = await this.makeRequest('GET', '/services/data');

@@ -66,8 +66,8 @@
       console.log(`   Rotation index: ${initialIndex}`);
 
       // Setup event listeners with detailed logging
-      let totalComissaoEvents = [];
-      let rotationIndexEvents = [];
+      const totalComissaoEvents = [];
+      const rotationIndexEvents = [];
 
       const totalComissaoHandler = (e) => {
         const event = {

@@ -16,7 +16,9 @@
     },
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     },
@@ -31,7 +33,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       await this.waitForAppState();
       this.setupEventListeners();
@@ -94,7 +98,9 @@
     }
 
     handleAppStateChange(detail) {
-      if (!detail.snapshot) return;
+      if (!detail.snapshot) {
+        return;
+      }
 
       const { snapshot } = detail;
 
@@ -148,7 +154,9 @@
 
     hasValue(patrimonioItem) {
       const inputElement = patrimonioItem.querySelector('.currency-input.individual');
-      if (!inputElement) return false;
+      if (!inputElement) {
+        return false;
+      }
 
       const value = Utils.parseCurrencyValue(inputElement.value);
       return value > 0;
@@ -226,7 +234,9 @@
     }
 
     shouldShowProduct(category, product) {
-      if (!this.isAssetSelected(category, product)) return false;
+      if (!this.isAssetSelected(category, product)) {
+        return false;
+      }
 
       // If we have AppState data, check allocation there first
       if (this.appState) {
@@ -264,17 +274,23 @@
         `.patrimonio_interactive_item[ativo-category="${category}"][ativo-product="${product}"]`
       );
 
-      if (!patrimonioItem) return 0;
+      if (!patrimonioItem) {
+        return 0;
+      }
 
       const inputElement = patrimonioItem.querySelector('.currency-input.individual');
-      if (!inputElement) return 0;
+      if (!inputElement) {
+        return 0;
+      }
 
       const allocatedValue = Utils.parseCurrencyValue(inputElement.value);
       return this.calculateCommissionForValue(allocatedValue, category, product);
     }
 
     calculateCommissionForValue(allocatedValue, category, product) {
-      if (allocatedValue <= 0) return 0;
+      if (allocatedValue <= 0) {
+        return 0;
+      }
 
       if (window.calcularCustoProduto) {
         const resultado = window.calcularCustoProduto(allocatedValue, category, product);
@@ -423,10 +439,14 @@
         `.patrimonio_interactive_item[ativo-category="${category}"][ativo-product="${product}"]`
       );
 
-      if (!patrimonioItem) return 0;
+      if (!patrimonioItem) {
+        return 0;
+      }
 
       const inputElement = patrimonioItem.querySelector('.currency-input.individual');
-      if (!inputElement) return 0;
+      if (!inputElement) {
+        return 0;
+      }
 
       return Utils.parseCurrencyValue(inputElement.value);
     }

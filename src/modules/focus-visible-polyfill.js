@@ -10,7 +10,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       if (this.supportsFocusVisible()) {
         return;

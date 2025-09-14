@@ -165,10 +165,14 @@
     }
 
     updateNiveisOpacity() {
-      if (!this.tooltipInstance || !this.tooltipInstance.state.isVisible) return;
+      if (!this.tooltipInstance || !this.tooltipInstance.state.isVisible) {
+        return;
+      }
 
       const container = document.querySelector('#niveis-container');
-      if (!container) return;
+      if (!container) {
+        return;
+      }
 
       const niveisItems = container.querySelectorAll('.nivel-item');
       const currentLevel = this.currentIndex;

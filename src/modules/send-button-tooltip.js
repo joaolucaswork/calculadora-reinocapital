@@ -24,7 +24,9 @@
     }
 
     async init() {
-      if (this.isInitialized || this.isDestroyed) return;
+      if (this.isInitialized || this.isDestroyed) {
+        return;
+      }
 
       try {
         await this.waitForDependencies();
@@ -50,7 +52,9 @@
     }
 
     setupTooltips() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
@@ -62,7 +66,9 @@
     }
 
     initializeTooltips() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       this.setupSendButtonTooltip();
       this.observeNewElements();
@@ -172,7 +178,9 @@
     }
 
     observeNewElements() {
-      if (this.isDestroyed || !window.MutationObserver) return;
+      if (this.isDestroyed || !window.MutationObserver) {
+        return;
+      }
 
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -207,13 +215,17 @@
     }
 
     setupSingleTooltip(button) {
-      if (this.isDestroyed || this.instances.has(button)) return;
+      if (this.isDestroyed || this.instances.has(button)) {
+        return;
+      }
 
       this.createTooltipWrapper(button);
     }
 
     updateTooltipContent(selector, newContent) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const elements =
         typeof selector === 'string' ? document.querySelectorAll(selector) : [selector];
@@ -227,7 +239,9 @@
     }
 
     destroyTooltip(selector) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const elements =
         typeof selector === 'string' ? document.querySelectorAll(selector) : [selector];
@@ -242,7 +256,9 @@
     }
 
     destroy() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       this.instances.forEach((instance) => {
         instance.destroy();

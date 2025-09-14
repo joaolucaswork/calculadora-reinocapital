@@ -57,7 +57,9 @@
     }
 
     setupAppStateListeners() {
-      if (!this.appState) return;
+      if (!this.appState) {
+        return;
+      }
 
       // Escuta mudanças no patrimônio principal
       document.addEventListener('patrimonyMainValueChanged', (e) => {
@@ -73,12 +75,16 @@
     }
 
     handlePatrimonyChange(detail) {
-      if (this.isDestroyed || !detail) return;
+      if (this.isDestroyed || !detail) {
+        return;
+      }
 
       const { value, formatted } = detail;
 
       // Evita processamento desnecessário
-      if (this.lastMainValue === value) return;
+      if (this.lastMainValue === value) {
+        return;
+      }
       this.lastMainValue = value;
 
       // Atualiza displays do patrimônio principal
@@ -88,12 +94,16 @@
     }
 
     handleAllocationChange(detail) {
-      if (this.isDestroyed || !detail) return;
+      if (this.isDestroyed || !detail) {
+        return;
+      }
 
       const { totalAllocated, remainingPatrimony } = detail;
 
       // Evita processamento desnecessário
-      if (this.lastTotalAllocation === totalAllocated) return;
+      if (this.lastTotalAllocation === totalAllocated) {
+        return;
+      }
       this.lastTotalAllocation = totalAllocated;
 
       // Atualiza displays de alocação
@@ -147,7 +157,9 @@
     }
 
     initializeCurrencySystem() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       if (window.Webflow) {
         window.Webflow.push(() => {
@@ -159,7 +171,9 @@
     }
 
     setupCurrencyFormatting() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const formatBRL = (value) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -169,7 +183,7 @@
       };
 
       const formatCurrencyInput = (input) => {
-        let value = input.value.replace(/\D/g, '');
+        const value = input.value.replace(/\D/g, '');
         if (value === '') {
           input.value = '';
           return 0;
@@ -195,7 +209,9 @@
       const mainInput = document.querySelector('[is-main="true"]');
 
       currencyInputs.forEach((input) => {
-        if (!input || input.hasAttribute('is-main') || this.isDestroyed) return;
+        if (!input || input.hasAttribute('is-main') || this.isDestroyed) {
+          return;
+        }
 
         const inputId = input.id || `currency-${Math.random().toString(36).substring(2, 11)}`;
 
@@ -268,7 +284,9 @@
     }
 
     handleCurrencyInput(event, formatCurrencyInput) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const numericValue = formatCurrencyInput(event.target);
       const isMainInput = event.target.hasAttribute('is-main');
@@ -304,7 +322,9 @@
     }
 
     handleCurrencyFocus(event, getCurrencyValue) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const value = getCurrencyValue(event.target);
       if (value > 0) {
@@ -313,19 +333,25 @@
     }
 
     handleCurrencyBlur(event, formatCurrencyInput) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
       formatCurrencyInput(event.target);
     }
 
     setupAllocationInputs(getCurrencyValue) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       const individualInputs = document.querySelectorAll(
         '.currency-input.individual, [input-settings="receive"]'
       );
 
       individualInputs.forEach((input) => {
-        if (!input || this.isDestroyed) return;
+        if (!input || this.isDestroyed) {
+          return;
+        }
 
         const existingHandler = input._currencyChangeHandler;
         if (existingHandler) {
@@ -340,7 +366,9 @@
     }
 
     updateTotalAllocation(getCurrencyValue) {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed) {
+        return;
+      }
 
       // Se temos AppState, usa os dados centralizados
       if (this.appState) {
@@ -364,7 +392,9 @@
       }
 
       // Fallback para modo legado
-      if (!window.currency) return;
+      if (!window.currency) {
+        return;
+      }
 
       let total = window.currency(0);
       document
@@ -389,11 +419,15 @@
     }
 
     setupDOMObserver() {
-      if (this.isDestroyed || this.domObserver) return;
+      if (this.isDestroyed || this.domObserver) {
+        return;
+      }
 
       let observerTimeout;
       const throttledReinit = () => {
-        if (observerTimeout) clearTimeout(observerTimeout);
+        if (observerTimeout) {
+          clearTimeout(observerTimeout);
+        }
         observerTimeout = setTimeout(() => {
           if (!this.isDestroyed) {
             this.initializeCurrencySystem();
@@ -403,10 +437,14 @@
 
       if (window.Webflow) {
         window.Webflow.push(() => {
-          if (this.isDestroyed) return;
+          if (this.isDestroyed) {
+            return;
+          }
 
           this.domObserver = new MutationObserver((mutations) => {
-            if (this.isDestroyed) return;
+            if (this.isDestroyed) {
+              return;
+            }
 
             let shouldReinit = false;
             mutations.forEach((mutation) => {
@@ -498,8 +536,12 @@
     }
 
     parseCurrencyValue(value) {
-      if (typeof value === 'number') return value;
-      if (!value) return 0;
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (!value) {
+        return 0;
+      }
       const cleanValue = value
         .toString()
         .replace(/[^\d,]/g, '')

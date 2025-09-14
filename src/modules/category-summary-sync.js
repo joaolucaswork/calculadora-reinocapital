@@ -21,7 +21,9 @@
     }
 
     init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         this.cacheCategoryElements();
@@ -53,7 +55,9 @@
 
       categoryContainers.forEach((container) => {
         const category = container.getAttribute('ativo-category');
-        if (!category) return;
+        if (!category) {
+          return;
+        }
 
         const percentageElement = container.querySelector('.porcentagem-categoria');
         let valueElement = container.querySelector('.valor-categoria-esquerda');
@@ -104,7 +108,9 @@
     }
 
     handleAllocationChange(detail) {
-      if (!detail.category) return;
+      if (!detail.category) {
+        return;
+      }
 
       setTimeout(() => {
         this.calculateCategoryTotals();
@@ -140,7 +146,9 @@
         const category = item.getAttribute('ativo-category');
         const input = item.querySelector('.currency-input.individual, [input-settings="receive"]');
 
-        if (!category || !input) return;
+        if (!category || !input) {
+          return;
+        }
 
         const value = this.parseCurrencyValue(input.value);
         const currentTotal = this.categoryTotals.get(category) || 0;
@@ -154,7 +162,9 @@
 
     updateCategoryDisplay(category) {
       const categoryData = this.categoryElements.get(category);
-      if (!categoryData) return;
+      if (!categoryData) {
+        return;
+      }
 
       const categoryTotal = this.categoryTotals.get(category) || 0;
       const percentage = this.calculatePercentage(categoryTotal, this.totalPatrimony);
@@ -186,17 +196,23 @@
     }
 
     updateValueElement(element, value) {
-      if (!element) return;
+      if (!element) {
+        return;
+      }
       element.textContent = this.formatCurrency(value);
     }
 
     updatePercentageElement(element, percentage) {
-      if (!element) return;
+      if (!element) {
+        return;
+      }
       element.textContent = `${percentage.toFixed(1)}%`;
     }
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     }
@@ -209,7 +225,9 @@
     }
 
     calculatePercentage(value, total) {
-      if (!total || total === 0) return 0;
+      if (!total || total === 0) {
+        return 0;
+      }
       return (value / total) * 100;
     }
 

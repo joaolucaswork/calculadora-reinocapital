@@ -29,7 +29,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         await this.loadD3();
@@ -200,7 +202,9 @@
       const isTraditional = chartType === 'tradicional';
 
       const categoryData = this.getCategoryData(chartType).find((cat) => cat.name === category);
-      if (!categoryData || !categoryData.details) return;
+      if (!categoryData || !categoryData.details) {
+        return;
+      }
 
       this.createProductModal(categoryData.details, category, isTraditional);
     }
@@ -253,7 +257,7 @@
     generateModalContent(products, categoryName, isTraditional) {
       const categoryColor = this.categoryColors[categoryName] || '#c0c0c0';
 
-      let productsHtml = products
+      const productsHtml = products
         .map((product, index) => {
           const commissionValue = isTraditional
             ? product.cost
@@ -330,7 +334,9 @@
       const scrollContainer = document.getElementById(scrollContainerId);
       const scrollIndicator = document.getElementById(scrollIndicatorId);
 
-      if (!scrollContainer || !scrollIndicator) return;
+      if (!scrollContainer || !scrollIndicator) {
+        return;
+      }
 
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5;
@@ -349,7 +355,9 @@
     }
 
     async loadD3() {
-      if (window.d3) return;
+      if (window.d3) {
+        return;
+      }
 
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
@@ -436,7 +444,9 @@
     }
 
     createChart(container, type) {
-      if (!container || !window.d3) return;
+      if (!container || !window.d3) {
+        return;
+      }
 
       container.innerHTML = '';
 
@@ -531,7 +541,9 @@
 
     updateChart(type) {
       const chart = this.charts.get(type);
-      if (!chart) return;
+      if (!chart) {
+        return;
+      }
 
       const data = this.getCategoryData(type);
 
@@ -552,7 +564,9 @@
       }
 
       const validData = data.filter((d) => d.value > 0 && isFinite(d.value));
-      if (validData.length === 0) return;
+      if (validData.length === 0) {
+        return;
+      }
 
       const arcs = g.selectAll('.arc').data(pie(validData), (d) => d.data.category);
 
@@ -799,10 +813,14 @@
         const product = item.getAttribute('ativo-product');
         const input = item.querySelector('[input-settings="receive"]');
 
-        if (!input || !category || !product) return;
+        if (!input || !category || !product) {
+          return;
+        }
 
         const value = this.parseCurrencyValue(input.value);
-        if (value <= 0) return;
+        if (value <= 0) {
+          return;
+        }
 
         let cost = 0;
         let taxaInfo = null;
@@ -873,7 +891,7 @@
 
       let detailsHtml = '';
 
-      let mainSection = `
+      const mainSection = `
         <div style="display: flex; align-items: center; margin: 8px 0;">
           <div style="width: 4px; height: 40px; background-color: ${categoryColor}; border-radius: 2px; margin-right: 12px;"></div>
           <div style="flex: 1;">
@@ -1071,7 +1089,9 @@
       chart.g.selectAll('.arc').remove();
 
       const existing = container.querySelector('.no-data-message');
-      if (existing) existing.remove();
+      if (existing) {
+        existing.remove();
+      }
 
       const message = document.createElement('div');
       message.className = 'no-data-message';
@@ -1164,7 +1184,9 @@
     }
 
     parseCurrencyValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     }
@@ -1224,7 +1246,9 @@
     }
 
     triggerCategoryHover(category) {
-      if (!category) return;
+      if (!category) {
+        return;
+      }
 
       document.dispatchEvent(
         new CustomEvent('donutCategoryHover', {
@@ -1260,7 +1284,9 @@
       const centerValue = chart.g.select('.center-value');
       const centerCategory = chart.g.select('.center-category');
 
-      if (centerValue.empty() || centerCategory.empty()) return;
+      if (centerValue.empty() || centerCategory.empty()) {
+        return;
+      }
 
       const formattedValue = this.formatCurrency(data.value);
       const categoryName = data.category || data.name;
@@ -1274,7 +1300,9 @@
       const centerValue = chart.g.select('.center-value');
       const centerCategory = chart.g.select('.center-category');
 
-      if (centerValue.empty() || centerCategory.empty()) return;
+      if (centerValue.empty() || centerCategory.empty()) {
+        return;
+      }
 
       centerValue.transition().duration(80).style('opacity', 0);
 
@@ -1356,7 +1384,9 @@
     }
 
     explodeSlice(element, sliceData) {
-      if (!this.currentChart || !sliceData) return;
+      if (!this.currentChart || !sliceData) {
+        return;
+      }
 
       const explodeDistance = 12;
 
@@ -1374,7 +1404,9 @@
     }
 
     updateIntelligentTooltipPosition(event) {
-      if (!this.hoverModule.state.activeTooltip || !this.hoverModule.state.isVisible) return;
+      if (!this.hoverModule.state.activeTooltip || !this.hoverModule.state.isVisible) {
+        return;
+      }
 
       const mouseX = event.clientX;
       const mouseY = event.clientY;
@@ -1432,7 +1464,9 @@
       const donutContainer = document.querySelector(
         '[chart-content="tradicional"][chart-type="donut"]'
       );
-      if (!donutContainer) return null;
+      if (!donutContainer) {
+        return null;
+      }
 
       const rect = donutContainer.getBoundingClientRect();
       return {

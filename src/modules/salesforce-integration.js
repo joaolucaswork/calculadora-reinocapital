@@ -179,7 +179,9 @@
     // Update status periodically
     const updateStatus = async () => {
       const statusElement = document.getElementById('salesforce-status');
-      if (!statusElement) return;
+      if (!statusElement) {
+        return;
+      }
 
       try {
         const status = syncSystem ? syncSystem.getStatus() : { isInitialized: false };

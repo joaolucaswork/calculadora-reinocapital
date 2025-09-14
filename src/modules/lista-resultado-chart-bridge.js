@@ -10,7 +10,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       try {
         await this.waitForChartSystem();
@@ -48,18 +50,24 @@
     }
 
     setupListaResultadoClickHandlers() {
-      if (!this.chartSystem) return;
+      if (!this.chartSystem) {
+        return;
+      }
 
       const listaItems = document.querySelectorAll('.lista-resultado-item');
 
       listaItems.forEach((item) => {
         const existingHandlers = this.eventHandlers.get(item);
         if (existingHandlers) {
-          if (existingHandlers.click) item.removeEventListener('click', existingHandlers.click);
-          if (existingHandlers.hover)
+          if (existingHandlers.click) {
+            item.removeEventListener('click', existingHandlers.click);
+          }
+          if (existingHandlers.hover) {
             item.removeEventListener('mouseenter', existingHandlers.hover);
-          if (existingHandlers.hoverOut)
+          }
+          if (existingHandlers.hoverOut) {
             item.removeEventListener('mouseleave', existingHandlers.hoverOut);
+          }
         }
 
         const clickHandler = (event) => {
@@ -89,7 +97,9 @@
       event.stopPropagation();
 
       const category = listaItem.getAttribute('ativo-category');
-      if (!category || !this.chartSystem) return;
+      if (!category || !this.chartSystem) {
+        return;
+      }
 
       if (this.activeListaItem === listaItem) {
         this.clearActiveListaItem();
@@ -100,7 +110,9 @@
       }
 
       const sliceInfo = this.findSliceByCategory(category);
-      if (!sliceInfo) return;
+      if (!sliceInfo) {
+        return;
+      }
 
       const syntheticEvent = {
         ...event,
@@ -118,20 +130,28 @@
 
     handleListaResultadoHover(event, listaItem) {
       const category = listaItem.getAttribute('ativo-category');
-      if (!category || !this.chartSystem) return;
+      if (!category || !this.chartSystem) {
+        return;
+      }
 
       const sliceInfo = this.findSliceByCategory(category);
-      if (!sliceInfo) return;
+      if (!sliceInfo) {
+        return;
+      }
 
       this.applySliceHoverEffect(sliceInfo.element, sliceInfo.data);
     }
 
     handleListaResultadoHoverOut(event, listaItem) {
       const category = listaItem.getAttribute('ativo-category');
-      if (!category || !this.chartSystem) return;
+      if (!category || !this.chartSystem) {
+        return;
+      }
 
       const sliceInfo = this.findSliceByCategory(category);
-      if (!sliceInfo) return;
+      if (!sliceInfo) {
+        return;
+      }
 
       this.removeSliceHoverEffect(sliceInfo.element, sliceInfo.data);
     }
@@ -159,7 +179,9 @@
     }
 
     applySliceHoverEffect(sliceElement, sliceData) {
-      if (!this.chartSystem || !window.d3) return;
+      if (!this.chartSystem || !window.d3) {
+        return;
+      }
 
       if (this.chartSystem.hoverModule && this.chartSystem.hoverModule.state.isPinned) {
         return;
@@ -187,7 +209,9 @@
     }
 
     removeSliceHoverEffect(sliceElement, sliceData) {
-      if (!this.chartSystem || !window.d3) return;
+      if (!this.chartSystem || !window.d3) {
+        return;
+      }
 
       if (this.chartSystem.hoverModule && this.chartSystem.hoverModule.state.isPinned) {
         return;
@@ -251,9 +275,15 @@
         if (typeof handlers === 'function') {
           item.removeEventListener('click', handlers);
         } else if (handlers && typeof handlers === 'object') {
-          if (handlers.click) item.removeEventListener('click', handlers.click);
-          if (handlers.hover) item.removeEventListener('mouseenter', handlers.hover);
-          if (handlers.hoverOut) item.removeEventListener('mouseleave', handlers.hoverOut);
+          if (handlers.click) {
+            item.removeEventListener('click', handlers.click);
+          }
+          if (handlers.hover) {
+            item.removeEventListener('mouseenter', handlers.hover);
+          }
+          if (handlers.hoverOut) {
+            item.removeEventListener('mouseleave', handlers.hoverOut);
+          }
         }
       });
       this.eventHandlers.clear();

@@ -205,7 +205,9 @@
             event.preventDefault();
 
             const sectionMainElement = indicatorContainer.querySelector('[section-main]');
-            if (!sectionMainElement) return;
+            if (!sectionMainElement) {
+              return;
+            }
 
             const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
 
@@ -293,7 +295,9 @@
      * @param {number} stepIndex - Índice do step atual (0-based)
      */
     updateProgressBarState(stepIndex) {
-      if (!this.progressBar) return;
+      if (!this.progressBar) {
+        return;
+      }
 
       const previousStep = this.currentStep;
       this.currentStep = stepIndex;
@@ -358,7 +362,9 @@
         const sectionIndicator = indicator.querySelector('.section-indicator');
         const numberIndicator = indicator.querySelector('.number-indicator');
 
-        if (!sectionMain) return;
+        if (!sectionMain) {
+          return;
+        }
 
         const sectionNumber = parseInt(sectionMain.getAttribute('section-main')) || index + 1;
 
@@ -414,10 +420,14 @@
     updateSectionIndicatorPointers(activeStepIndex) {
       this.sectionIndicators.forEach((indicatorContainer) => {
         const indicator = indicatorContainer.querySelector('.section-indicator');
-        if (!indicator) return;
+        if (!indicator) {
+          return;
+        }
 
         const sectionMainElement = indicatorContainer.querySelector('[section-main]');
-        if (!sectionMainElement) return;
+        if (!sectionMainElement) {
+          return;
+        }
 
         const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
 
@@ -518,7 +528,9 @@
      * Aplica ou remove uma classe condicionalmente
      */
     setConditionalClass(element, className, condition) {
-      if (!element) return;
+      if (!element) {
+        return;
+      }
 
       if (condition) {
         element.classList.add(className);
@@ -635,7 +647,9 @@
     }
 
     async showStep(stepIndex) {
-      if (stepIndex < 0 || stepIndex >= this.steps.length) return;
+      if (stepIndex < 0 || stepIndex >= this.steps.length) {
+        return;
+      }
 
       const previousStep = this.currentStep;
       this.currentStep = stepIndex;
@@ -670,7 +684,9 @@
     showStepSimple(stepIndex) {
       this.steps.forEach((step, index) => {
         const section = this.sectionCache.get(step.id);
-        if (!section) return;
+        if (!section) {
+          return;
+        }
 
         if (index === stepIndex) {
           section.style.display = 'block';
@@ -734,10 +750,14 @@
     updateNavigationRestrictions() {
       this.sectionIndicators.forEach((indicatorContainer) => {
         const indicator = indicatorContainer.querySelector('.section-indicator');
-        if (!indicator) return;
+        if (!indicator) {
+          return;
+        }
 
         const sectionMainElement = indicatorContainer.querySelector('[section-main]');
-        if (!sectionMainElement) return;
+        if (!sectionMainElement) {
+          return;
+        }
 
         const sectionNumber = parseInt(sectionMainElement.getAttribute('section-main'));
         const isBlocked = this.isNavigationBlocked(sectionNumber);
@@ -958,7 +978,9 @@
     }
 
     parseInputValue(value) {
-      if (!value || typeof value !== 'string') return 0;
+      if (!value || typeof value !== 'string') {
+        return 0;
+      }
       const cleanValue = value.replace(/[^\d,]/g, '').replace(',', '.');
       return parseFloat(cleanValue) || 0;
     }
@@ -984,10 +1006,14 @@
 
     collectStepData(stepIndex) {
       const step = this.steps[stepIndex];
-      if (!step) return null;
+      if (!step) {
+        return null;
+      }
 
       const section = this.sectionCache.get(step.id);
-      if (!section) return null;
+      if (!section) {
+        return null;
+      }
 
       const inputs = section.querySelectorAll('input, select, textarea');
       const data = {};

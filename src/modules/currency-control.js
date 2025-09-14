@@ -59,10 +59,18 @@
       }
 
       const getIncrement = (value) => {
-        if (value < 1000) return 100;
-        if (value < 10000) return 1000;
-        if (value < 100000) return 10000;
-        if (value < 1000000) return 50000;
+        if (value < 1000) {
+          return 100;
+        }
+        if (value < 10000) {
+          return 1000;
+        }
+        if (value < 100000) {
+          return 10000;
+        }
+        if (value < 1000000) {
+          return 50000;
+        }
         return 100000;
       };
 

@@ -26,7 +26,9 @@
     }
 
     async init() {
-      if (this.isInitialized) return;
+      if (this.isInitialized) {
+        return;
+      }
 
       await this.waitForMotion();
       this.findTutorialElements();
@@ -79,8 +81,9 @@
         !this.tutorialElements.hoverItem ||
         !this.tutorialElements.clickItem ||
         !this.tutorialElements.indiceGiroItem
-      )
+      ) {
         return;
+      }
 
       this.addCheckboxToElement(this.tutorialElements.hoverItem, 'hover');
       this.addCheckboxToElement(this.tutorialElements.clickItem, 'click');
@@ -135,7 +138,9 @@
     }
 
     markHoverCompleted() {
-      if (this.checkboxStates.hover) return;
+      if (this.checkboxStates.hover) {
+        return;
+      }
 
       if (this.debugMode) {
         console.log('🎯 Tutorial: Hover completed');
@@ -147,7 +152,9 @@
     }
 
     markClickCompleted() {
-      if (this.checkboxStates.click) return;
+      if (this.checkboxStates.click) {
+        return;
+      }
 
       if (this.debugMode) {
         console.log('🎯 Tutorial: Click completed');
@@ -159,7 +166,9 @@
     }
 
     markIndiceGiroCompleted() {
-      if (this.checkboxStates.indiceGiro) return;
+      if (this.checkboxStates.indiceGiro) {
+        return;
+      }
 
       if (this.debugMode) {
         console.log('🎯 Tutorial: Indice Giro completed');
@@ -219,7 +228,9 @@
 
     animateCheckbox(type) {
       const checkbox = document.querySelector(`.tutorial-checkbox-${type}`);
-      if (!checkbox || !this.Motion) return;
+      if (!checkbox || !this.Motion) {
+        return;
+      }
 
       const { animate } = this.Motion;
       const checkboxBox = checkbox.querySelector('.checkbox-box');
@@ -280,8 +291,9 @@
         !this.tutorialElements.hoverItem ||
         !this.tutorialElements.clickItem ||
         !this.tutorialElements.indiceGiroItem
-      )
+      ) {
         return;
+      }
 
       const { animate } = this.Motion;
 
