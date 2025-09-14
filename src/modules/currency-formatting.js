@@ -344,7 +344,7 @@
 
       // Se temos AppState, usa os dados centralizados
       if (this.appState) {
-        const allocations = this.appState.getAllocations();
+        const allocations = this.appState.getAllAllocations();
         const totalAllocated = Object.values(allocations).reduce((sum, value) => sum + value, 0);
         const patrimony = this.appState.getPatrimonio();
         const remaining = patrimony.value - totalAllocated;
