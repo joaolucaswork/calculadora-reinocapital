@@ -14,10 +14,52 @@
       this.isReady = false;
       this.debugMode = window.location.search.includes('debug=true');
 
+      // Environment detection and isolation
+      this.environment = this.detectEnvironment();
+      this.testRunId = this.generateTestRunId();
+
       this.lastCommissionData = null;
       this.lastAppStateSnapshot = null;
 
       this.init();
+    }
+
+    detectEnvironment() {
+      // Check for explicit environment setting
+      if (window.REINO_ENVIRONMENT) {
+        return window.REINO_ENVIRONMENT;
+      }
+
+      // Check URL patterns
+      const { hostname } = window.location;
+      const { search } = window.location;
+
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return search.includes('test=true') ? 'testing' : 'development';
+      }
+
+      if (hostname.includes('test') || hostname.includes('staging')) {
+        return 'testing';
+      }
+
+      if (search.includes('test=true') || search.includes('playwright=true')) {
+        return 'testing';
+      }
+
+      // Check for test user agents (Playwright, etc.)
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.includes('playwright') || userAgent.includes('headless')) {
+        return 'testing';
+      }
+
+      return 'production';
+    }
+
+    generateTestRunId() {
+      if (this.environment === 'testing') {
+        return `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      }
+      return null;
     }
 
     async init() {
@@ -146,6 +188,11 @@
         percentual_alocado: this.calculatePercentualAlocado(snapshot),
         patrimonio_restante: this.calculatePatrimonioRestante(snapshot),
         submitted_at: new Date().toISOString(),
+
+        // Environment isolation fields
+        environment: this.environment,
+        test_run_id: this.testRunId,
+        created_by: this.getCreatedByValue(),
       };
 
       baseData.comissao_total_calculada = this.lastCommissionData
@@ -157,18 +204,51 @@
         : snapshot.commission?.details || [];
 
       if (typebotData) {
-        baseData.nome = typebotData.nome || formData.nome;
-        baseData.email = typebotData.email || formData.email;
-        baseData.telefone = typebotData.telefone || formData.telefone;
+        baseData.nome = this.sanitizeTestData(typebotData.nome || formData.nome);
+        baseData.email = this.sanitizeTestData(typebotData.email || formData.email);
+        baseData.telefone = this.sanitizeTestData(typebotData.telefone || formData.telefone);
         baseData.typebot_session_id = typebotData.sessionId;
         baseData.typebot_result_id = typebotData.resultId;
       } else {
-        baseData.nome = formData.nome;
-        baseData.email = formData.email;
-        baseData.telefone = formData.telefone;
+        baseData.nome = this.sanitizeTestData(formData.nome);
+        baseData.email = this.sanitizeTestData(formData.email);
+        baseData.telefone = this.sanitizeTestData(formData.telefone);
       }
 
       return baseData;
+    }
+
+    getCreatedByValue() {
+      if (this.environment === 'testing') {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.includes('playwright')) {
+          return 'playwright-test';
+        }
+        if (userAgent.includes('headless')) {
+          return 'headless-test';
+        }
+        return 'automated-test';
+      }
+      return 'user';
+    }
+
+    sanitizeTestData(value) {
+      if (!value) return value;
+
+      // Add test prefix for testing environment
+      if (this.environment === 'testing' && typeof value === 'string') {
+        // Only add prefix if not already present
+        if (!value.toLowerCase().includes('test') && !value.toLowerCase().includes('playwright')) {
+          if (value.includes('@')) {
+            // Email: add test prefix to local part
+            return value.replace('@', '+test@');
+          }
+          // Name or phone: add test prefix
+          return `Test ${value}`;
+        }
+      }
+
+      return value;
     }
 
     async getSubmissionHistory(sessionId) {
@@ -411,7 +491,62 @@
         hasClient: !!this.client,
         tableName: this.tableName,
         debugMode: this.debugMode,
+        environment: this.environment,
+        testRunId: this.testRunId,
+        isTestEnvironment: this.environment !== 'production',
       };
+    }
+
+    async cleanupTestData() {
+      if (this.environment === 'production') {
+        throw new Error('Cannot cleanup test data in production environment');
+      }
+
+      if (!this.isReady || !this.client) {
+        throw new Error('Supabase not ready');
+      }
+
+      try {
+        const { data, error } = await this.client
+          .from(this.tableName)
+          .delete()
+          .eq('environment', this.environment);
+
+        if (error) {
+          throw error;
+        }
+
+        return { success: true, deletedCount: data?.length || 0 };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    }
+
+    async cleanupTestRunData(testRunId = null) {
+      const runId = testRunId || this.testRunId;
+
+      if (!runId) {
+        throw new Error('No test run ID provided');
+      }
+
+      if (!this.isReady || !this.client) {
+        throw new Error('Supabase not ready');
+      }
+
+      try {
+        const { data, error } = await this.client
+          .from(this.tableName)
+          .delete()
+          .eq('test_run_id', runId);
+
+        if (error) {
+          throw error;
+        }
+
+        return { success: true, deletedCount: data?.length || 0 };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
     }
 
     log(message) {

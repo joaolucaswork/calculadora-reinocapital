@@ -67,27 +67,45 @@
       };
 
       const updateValue = (newValue) => {
-        // Prioriza AppState se disponível
-        if (this.appState) {
-          this.appState.setPatrimonio(newValue, 'currency-control');
-          this.log(`💰 Value updated via AppState: ${this.formatCurrency(newValue)}`);
-          return;
-        }
-
-        // Fallback para sistemas legados
         const formattedValue = new Intl.NumberFormat('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         }).format(newValue);
 
-        if (window.ReinoEventCoordinator) {
-          window.ReinoEventCoordinator.setValue(formattedValue, 'currency-control');
-        } else {
-          input.value = formattedValue;
-          input.dispatchEvent(new Event('input', { bubbles: true }));
+        // Prioriza AppState se disponível
+        if (this.appState) {
+          this.appState.setPatrimonio(newValue, 'currency-control');
+          this.log(`💰 Value updated via AppState: ${this.formatCurrency(newValue)}`);
         }
 
-        this.log(`💰 Value updated via legacy mode: ${formattedValue}`);
+        // SEMPRE atualiza o DOM input para garantir que a validação funcione
+        input.value = formattedValue;
+
+        // Dispara eventos necessários para validação do botão "next"
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Dispara evento customizado para sistemas que dependem dele
+        input.dispatchEvent(
+          new CustomEvent('currencyChange', {
+            detail: { value: newValue, formatted: formattedValue },
+            bubbles: true,
+          })
+        );
+
+        // Fallback para ReinoEventCoordinator se disponível
+        if (window.ReinoEventCoordinator) {
+          window.ReinoEventCoordinator.setValue(formattedValue, 'currency-control');
+        }
+
+        // Força atualização dos botões de navegação
+        document.dispatchEvent(
+          new CustomEvent('stepValidationChanged', {
+            detail: { source: 'currency-control', value: newValue },
+          })
+        );
+
+        this.log(`💰 Value updated: ${formattedValue} (AppState: ${!!this.appState})`);
       };
 
       const decreaseButtons = document.querySelectorAll('[currency-control="decrease"]');

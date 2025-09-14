@@ -241,6 +241,20 @@
       document.addEventListener('allocationChanged', () => {
         this.debouncedValidation();
       });
+
+      // Escuta mudanças no AppState para revalidar botões
+      document.addEventListener('patrimonyMainValueChanged', () => {
+        this.debouncedValidation();
+      });
+
+      document.addEventListener('appStateChanged', () => {
+        this.debouncedValidation();
+      });
+
+      // Escuta mudanças de validação específicas
+      document.addEventListener('stepValidationChanged', () => {
+        this.notifyWebflowButtonSystem();
+      });
     }
 
     cacheElements() {
@@ -818,6 +832,21 @@
     }
 
     validateMoneyStep() {
+      // Prioriza AppState se disponível
+      if (window.ReinoAppState && window.ReinoAppState.isInitialized) {
+        const patrimonio = window.ReinoAppState.getPatrimonio();
+        const isValid = patrimonio.value > 0;
+
+        if (this.config.enableLogging) {
+          console.warn(
+            `💰 Validação money step (AppState): valor=${patrimonio.value}, válido=${isValid}`
+          );
+        }
+
+        return isValid;
+      }
+
+      // Fallback para validação DOM
       const input = document.querySelector('[is-main="true"]');
       if (!input) {
         if (this.config.enableLogging) {
@@ -830,7 +859,7 @@
       const isValid = value > 0;
 
       if (this.config.enableLogging) {
-        console.warn(`💰 Validação money step: valor=${value}, válido=${isValid}`);
+        console.warn(`💰 Validação money step (DOM): valor=${value}, válido=${isValid}`);
       }
 
       return isValid;
