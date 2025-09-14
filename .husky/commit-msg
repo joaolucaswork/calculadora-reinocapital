@@ -3,6 +3,22 @@
 # Reino Capital Calculator - Commit Message Hook
 # Validates commit message format and content
 
+# Get the commit message
+commit_message=$(cat "$1")
+
+# Allow changesets automated commits
+if echo "$commit_message" | grep -qE "^Version Packages$"; then
+    echo "✅ Changesets automated commit - bypassing validation"
+    exit 0
+fi
+
+# Allow merge commits
+if echo "$commit_message" | grep -qE "^Merge (branch|pull request)"; then
+    echo "✅ Merge commit - bypassing validation"
+    exit 0
+fi
+
+# Standard commit message validation
 commit_regex='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,50}'
 
 error_msg="❌ Invalid commit message format!
@@ -35,9 +51,9 @@ error_msg="❌ Invalid commit message format!
    ❌ fix bug
    ❌ WIP: working on feature
 
-💡 Your commit message: $(cat $1)"
+💡 Your commit message: $commit_message"
 
-if ! grep -qE "$commit_regex" "$1"; then
+if ! echo "$commit_message" | grep -qE "$commit_regex"; then
     echo "$error_msg"
     exit 1
 fi
