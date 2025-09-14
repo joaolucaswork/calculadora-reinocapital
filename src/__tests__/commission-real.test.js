@@ -6,12 +6,10 @@ import { beforeEach, describe, expect, test } from 'vitest';
 
 describe('Reino Capital Calculator - Real Commission Tests', () => {
   beforeEach(() => {
-    // Setup clean global environment
-    global.window = {
-      calcularCustoProduto: null,
-      TAXAS_TRADICIONAL: null,
-      obterTaxaPorAtributos: null,
-    };
+    // Ensure window object exists but don't reset IIFE-loaded functions
+    if (!global.window) {
+      global.window = {};
+    }
   });
 
   describe('Real Commission Calculation', () => {
@@ -55,12 +53,12 @@ describe('Reino Capital Calculator - Real Commission Tests', () => {
       expect(result.produto).toBe('CDB,LCI,LCA');
     });
 
-    test('should calculate commission for Renda Variável Ações', async () => {
+    test('should calculate commission for Renda Variável Ações e Ativos', async () => {
       await import('../config/taxas-tradicional.js');
 
       const valorAlocado = 50000;
       const category = 'Renda Variável';
-      const product = 'Ações';
+      const product = 'Ações e Ativos';
 
       const result = window.calcularCustoProduto(valorAlocado, category, product);
 
@@ -110,7 +108,7 @@ describe('Reino Capital Calculator - Real Commission Tests', () => {
         {
           valor: 100000,
           category: 'Renda Variável',
-          product: 'Ações',
+          product: 'Ações e Ativos',
           expectedTaxaMedia: 0.2,
         },
         {

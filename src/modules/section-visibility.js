@@ -37,8 +37,7 @@
         money: '._1-section-calc-money',
         ativos: '._2-section-calc-ativos',
         alocacao: '._3-section-patrimonio-alocation',
-        resultado: '._4-section-resultado',
-        resultado5: '._5-section-resultado',
+        resultado: '._5-section-resultado',
         chart: '.section',
       };
 

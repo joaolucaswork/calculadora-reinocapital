@@ -43,12 +43,6 @@
           validator: () => this.validateAllocationStep(),
         },
         {
-          id: '_4-section-resultado',
-          name: 'pre-results',
-          title: 'Pré-Resultados',
-          validator: () => true,
-        },
-        {
           id: '_5-section-resultado',
           name: 'results',
           title: 'Resultados',
@@ -715,11 +709,6 @@
     }
 
     isNavigationBlocked(sectionNumber) {
-      // Block access to step 4 (section-step="4") - always blocked
-      if (sectionNumber === 4) {
-        return true;
-      }
-
       // Block all navigation when on step 0
       if (this.currentStep === 0) {
         return true;
@@ -752,7 +741,7 @@
       // Seção 1 = Step 1 (_1-section-calc-money)
       // Seção 2 = Step 2 (_2-section-calc-ativos)
       // Seção 3 = Step 3 (_3-section-patrimonio-alocation)
-      // Seção 4 = Step 4 (não existe ainda, seria resultado)
+      // Seção 5 = Step 4 (_5-section-resultado)
 
       const targetStep = sectionNumber;
 

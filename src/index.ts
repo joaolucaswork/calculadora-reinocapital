@@ -87,6 +87,7 @@ import './modules/calendly-minimalist-widget.js';
 // import('./tests/debug/index.js');
 // import('./tests/integration/index.js');
 // import('./modules/dev/index.js');
+// import('./tests/utils/typebot-completion-simulator.js'); // Simulador de Typebot para testes
 // Módulos de debug de rotação (descomente se necessário):
 // import('./modules/rotation-index-integration.js');
 // import('./modules/final-rotation-fix.js');

@@ -70,6 +70,8 @@
     'fundo de investimento:private equity': 'Fundo de Investimento.Private Equity',
 
     // Renda Variável
+    'Renda Variável:Ações': 'Renda Variável.Ações',
+    'renda variável:ações': 'Renda Variável.Ações',
     'Renda Variável:Ações e Ativos': 'Renda Variável.Ações',
     'renda variável:ações e ativos': 'Renda Variável.Ações',
     'Renda Variável:Operação Estruturada': 'Renda Variável.Estruturada',

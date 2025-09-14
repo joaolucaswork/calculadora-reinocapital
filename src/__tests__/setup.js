@@ -81,8 +81,6 @@ expect.extend({
 beforeEach(() => {
   vi.clearAllMocks();
 
-  // Reset global window objects
-  Object.keys(global.window).forEach((key) => {
-    global.window[key] = null;
-  });
+  // Note: NOT resetting global.window here to allow IIFE modules to work
+  // Each test should manage its own window state if needed
 });

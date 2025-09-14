@@ -39,6 +39,7 @@ export default defineConfig({
       'src/modules/dev/**',
       'src/tests/**',
       '**/*live*.test.js', // Exclude Playwright tests from Vitest
+      '**/typebot*.test.js', // Exclude Typebot Playwright tests from Vitest
     ],
 
     // Clear mocks between tests
