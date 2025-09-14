@@ -6,6 +6,7 @@ import './modules/reino-event-contracts.js';
 // 1.1 APPSTATE TESTS - Testes de integração
 import './modules/appstate-integration-test.js';
 import './modules/integration-appstate-test.js';
+import './modules/resultado-sync-appstate-test.js';
 // 2. CONFIGS - Configurações base
 import './config/honorarios-reino-config.js';
 import './config/supabase.js';
