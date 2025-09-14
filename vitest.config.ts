@@ -2,8 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // Test environment
+    // Test environment (node for unit tests, jsdom for integration)
     environment: 'node',
+    environmentMatchGlobs: [['**/*integration*.test.js', 'jsdom']],
 
     // Test file patterns
     include: ['**/__tests__/**/*.test.js', '**/?(*.)+(spec|test).js'],
@@ -32,7 +33,13 @@ export default defineConfig({
     },
 
     // Ignore patterns
-    exclude: ['node_modules/**', 'dist/**', 'src/modules/dev/**', 'src/tests/**'],
+    exclude: [
+      'node_modules/**',
+      'dist/**',
+      'src/modules/dev/**',
+      'src/tests/**',
+      '**/*live*.test.js', // Exclude Playwright tests from Vitest
+    ],
 
     // Clear mocks between tests
     clearMocks: true,
