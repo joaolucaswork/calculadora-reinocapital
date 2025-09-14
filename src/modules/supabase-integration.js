@@ -326,6 +326,44 @@
 
     capitalizeWords(str) {
       if (!str) return '';
+
+      // Mapeamento para preservar formatação original de produtos e categorias
+      const originalFormatMap = {
+        // Produtos
+        cdb: 'CDB',
+        cri: 'CRI',
+        coe: 'COE',
+        'títulos públicos': 'Títulos Públicos',
+        ações: 'Ações',
+        liquidez: 'Liquidez',
+        multimercado: 'Multimercado',
+        'imobiliários cetipados': 'Imobiliários Cetipados',
+        'private equity': 'Private Equity',
+        'ações e ativos': 'Ações e Ativos',
+        'operação estruturada': 'Operação Estruturada',
+        'carteira administrada': 'Carteira administrada',
+        dólar: 'Dólar',
+        'inter produtos': 'Inter Produtos',
+        poupança: 'Poupança',
+        'operação compromissada': 'Operação compromissada',
+
+        // Categorias
+        'renda fixa': 'Renda Fixa',
+        'fundo de investimento': 'Fundo de Investimento',
+        'renda variável': 'Renda Variável',
+        internacional: 'Internacional',
+        previdência: 'Previdência',
+        outros: 'Outros',
+      };
+
+      const normalized = str.toLowerCase().trim();
+
+      // Verifica se existe mapeamento específico
+      if (originalFormatMap[normalized]) {
+        return originalFormatMap[normalized];
+      }
+
+      // Fallback para capitalização padrão
       return str
         .split(' ')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
